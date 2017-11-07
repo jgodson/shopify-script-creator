@@ -123,9 +123,8 @@ class App extends Component {
   }
 
   addCampaign(campaign) {
-    console.log(campaign);
     const newState = this.state;
-    if (campaign.id === undefined) {
+    if (campaign.id === null) {
       campaign.id = this.state.currentId;
       newState.currentId = ++campaign.id;
       newState.campaigns.unshift(campaign);

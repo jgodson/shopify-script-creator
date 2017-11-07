@@ -7,6 +7,7 @@ import {
   Checkbox,
   TextStyle,
   Select,
+  Subheading,
   Button,
   ButtonGroup
 } from '@shopify/polaris';
@@ -18,12 +19,12 @@ export default class Step2Form extends Component {
     super(props);
 
     this.blankInputState = {
-      campaign_select: {},
+      campaignSelect: {},
       select: {},
       text: {},
       number: {},
       array: {},
-      boolean: {}
+      boolean: {},
     }
 
     this.state = {
@@ -32,6 +33,7 @@ export default class Step2Form extends Component {
     }
 
     this.inputMap = {};
+    this.totalCampaigns = 0;
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.resetInputs = this.resetInputs.bind(this);
@@ -60,11 +62,11 @@ export default class Step2Form extends Component {
 
   handleInputChange(newVal, type, name) {
     const newState = this.state;
-    // Clear child inputs from state if a campaign_select was changed
-    if (type === 'campaign_select') {
+    // Clear child inputs from state if a campaignSelect was changed
+    if (type === 'campaignSelect') {
       Object.keys(newState.inputs).forEach((inputType) => {
         Object.keys(newState.inputs[inputType]).forEach((inputName) => {
-          if (inputName.indexOf(name) > -1) {
+          if (inputName.startsWith(name)) {
             delete newState.inputs[inputType][inputName];
           }
         });
@@ -92,9 +94,9 @@ export default class Step2Form extends Component {
     function setValuesForInputs(inputs) {
       inputs.forEach((input, index) => {
         if (initalUpdate) {
-          newState.inputs.campaign_select[`campaign_select_${index}`] = input.name;
+          newState.inputs.campaignSelect[`campaignSelect_${index}`] = input.name;
         } else {
-          const key = `campaign_select_${index}`;
+          const key = `campaignSelect_${index}`;
           if (Array.isArray(inputMap[key])) {
             inputMap[key].forEach((inputName, index) => {
               const type = inputName.split('-')[1].split('_')[0];
@@ -131,9 +133,12 @@ export default class Step2Form extends Component {
       )
     } else {
       return (
-        <Card.Section>
-          {this.generateInputsForCampaign(campaign, mapTo)}
-        </Card.Section>
+        <Card sectioned>
+          <FormLayout>
+            <Subheading>Conditions</Subheading>
+            {this.generateInputsForCampaign(campaign, mapTo)}
+          </FormLayout>
+        </Card>
       )
     }
   }
@@ -142,7 +147,7 @@ export default class Step2Form extends Component {
     const inputs = [];
     const fields = campaign.inputs;
     Object.keys(fields).forEach((key) => {
-      const inputType = fields[key].type || 'campaign_select';
+      const inputType = fields[key].type || 'campaignSelect';
       const inputId = inputs.length;
       const inputName = mapTo ? `${mapTo}-${inputType}_${inputId}` : `${inputType}_${inputId}`;
       const newInput = {
@@ -245,9 +250,10 @@ export default class Step2Form extends Component {
           )
         }
       },
-      campaign_select: {
+      campaignSelect: {
         generate: (input) => {
           const value = this.state.inputs[input.type][input.name];
+          this.totalCampaigns++;
           let descText = null;
           if (value === 'none') {
             descText = input.options.filter((option) => option.value === value)[0].description;
@@ -262,7 +268,7 @@ export default class Step2Form extends Component {
           }
           return [
             <Select
-              label={input.label}
+              label={<strong>{input.label}</strong>}
               options={input.options}
               placeholder="Pick one"
               key={input.name}
@@ -283,9 +289,12 @@ export default class Step2Form extends Component {
   buildAndAddCampaign() {
     const newCampaign = {
       name: this.props.currentCampaign.value,
+      id: this.props.existingInfo ? this.props.existingInfo.id : null,
       inputs: []
     }
+    console.log(newCampaign);
     Object.keys(this.inputMap).forEach((key) => {
+      console.log(key);
       const newInput = {
         name: this.getInputValue(key)
       }
@@ -299,16 +308,18 @@ export default class Step2Form extends Component {
           });
         }
       }
+
       newCampaign.inputs.push(newInput);
     });
 
+    // TODO: Find out why this has an id
     console.log(newCampaign);
 
     this.props.addCampaign(newCampaign);
   }
 
   getInputValue(inputName) {
-    const type = inputName.indexOf('-') > -1 ? inputName.split('-')[1].split('_')[0] : 'campaign_select';
+    const type = inputName.indexOf('-') > -1 ? inputName.split('-')[1].split('_')[0] : 'campaignSelect';
     let value = this.state.inputs[type][inputName];
     // Can modify values here (like make an array into an array)
     switch (type) {
@@ -345,7 +356,7 @@ export default class Step2Form extends Component {
     this.inputMap = {};
     const campaignSelector = (
       <Select
-        label="Select a campaign"
+        label={<strong>Select a campaign</strong>}
         options={this.props.availableCampaigns}
         value={this.props.currentCampaign && this.props.currentCampaign.value}
         placeholder="Select campaign"
@@ -355,12 +366,13 @@ export default class Step2Form extends Component {
     const description = this.props.currentCampaign && (
       <TextStyle variation="subdued"><strong>Details: </strong>{this.props.currentCampaign.description}</TextStyle>
     );
-    const inputCount = this.props.currentCampaign && Object.keys(this.props.currentCampaign.inputs).length;
-    const fieldsFilled = Object.keys(this.state.inputs.campaign_select).length;
+    const inputCount = this.props.currentCampaign ? Math.max(this.totalCampaigns, this.props.availableCampaigns.length) : this.totalCampaigns + 1;
+    const fieldsFilled = Object.keys(this.state.inputs.campaignSelect).length;
     const footerActions = {
       secondary: {
         content: "Save",
         primary: true,
+        disabled: inputCount !== fieldsFilled,
         onAction: this.buildAndAddCampaign
       },
       primary: {
@@ -368,21 +380,22 @@ export default class Step2Form extends Component {
         destructive: true,
         onAction: this.resetInputs
       }
-    }
+    };
+    this.totalCampaigns = 0;
 
     return (
-        <Card
-          title="Campaign details"
-          sectioned
-          primaryFooterAction={footerActions.primary}
-          secondaryFooterAction={inputCount === fieldsFilled && footerActions.secondary}
-        >
-          <FormLayout>
-            {campaignSelector}
-            {description}
-            {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign)}
-          </FormLayout>
-        </Card>
+      <Card
+        title="Campaign details"
+        sectioned
+        primaryFooterAction={footerActions.primary}
+        secondaryFooterAction={footerActions.secondary}
+      >
+        <FormLayout>
+          {campaignSelector}
+          {description}
+          {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign)}
+        </FormLayout>
+      </Card>
     )
   }
 }

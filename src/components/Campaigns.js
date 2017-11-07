@@ -11,7 +11,6 @@ export default class Campaigns extends Component {
   }
 
   createNew() {
-    console.log(this.props);
     if (this.props.isEditing) {
       alert("Save or discard changes to the current campaign first.");
       return;

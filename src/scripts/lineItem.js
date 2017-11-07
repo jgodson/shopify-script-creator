@@ -257,6 +257,7 @@ const LINE_ITEM_AND_SELECTOR = [
     inputs: {
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS],
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS]
     }
   }
 ]
