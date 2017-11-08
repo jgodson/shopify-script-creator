@@ -6,7 +6,7 @@ import Campaigns from './components/Campaigns';
 import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
 
-import LineItemCampaign from './scripts/lineItem';
+import LineItemScript from './scripts/lineItem';
 
 class App extends Component {
   constructor(props) {
@@ -19,7 +19,7 @@ class App extends Component {
       },
       currentCampaign: null,
       availableCampaigns: this.getCampagins('line_item'),
-      campaigns: [{name: "Add new campaign", skip: true}],
+      campaigns: [{name: "Create new campaign", skip: true}],
       currentId: 0,
       output: '',
       editCampaignInfo: null
@@ -46,8 +46,7 @@ class App extends Component {
   typeChange(newType) {
     if (this.state.campaigns.length > 1 || this.state.step2.shown) {
       const response = confirm("Changing the script type will clear your current campaigns. Are you sure?");
-      
-      if (!response) { return; };
+      if (!response) { return; }
     }
 
     const newState = JSON.parse(JSON.stringify(this.defaultState));
@@ -58,7 +57,6 @@ class App extends Component {
 
   reset() {
     const response = confirm("Are you sure you want to clear your work and start over?");
-    
     if (response) {
       this.setState(JSON.parse(JSON.stringify(this.defaultState)));
     }
@@ -67,7 +65,7 @@ class App extends Component {
   getCampagins(type) {
     switch(type) {
       case 'line_item':
-        return LineItemCampaign.campaigns;
+        return LineItemScript.campaigns;
         break;
       case 'shipping':
         break;
@@ -149,7 +147,7 @@ class App extends Component {
     let output = "";
     switch(this.state.scriptType) {
       case 'line_item':
-        output += LineItemCampaign.classes;
+        output += LineItemScript.classes;
         output += this.generateCampaignsOutput();
         break;
       case 'shipping':
@@ -172,7 +170,7 @@ class App extends Component {
         let campaigns = this.state.campaigns.map((campaign) => this.generateCampaignCode(campaign)).join();
         // remove the last `,` from the string (raises syntac)
         campaigns = campaigns.substring(campaigns.length -1, 0);
-        output = LineItemCampaign.defaultCode.replace('|', campaigns);
+        output = LineItemScript.defaultCode.replace('|', campaigns);
         break;
       case 'shipping':
         break;
@@ -189,22 +187,29 @@ class App extends Component {
     if (campaign.inputs) {
       const inputsCode = campaign.inputs.map((input) => this.generateCampaignInputCode(input)).join();
       return `
-  ${campaign.name}.new(
-    ${inputsCode}
-  )`;
+${campaign.name}.new(
+  ${inputsCode}
+)`;
     } else {
       return `  ${campaign.name}.new()\n`;
     }
   }
 
   generateCampaignInputCode(input) {
-    if (input.name === 'none') { return '\n      nil'; };
-    console.log(input);
+    if (input.name === 'none') { return '\n  nil'; };
+    let inputsCode = null;
+    if (Array.isArray(input.inputs)) {
+      inputsCode = input.inputs.map((value) => value).join();
+    } else {
+      inputsCode = input.inputs.map((input) => this.generateCampaignCode(input)).join();
+    }
     return `
-    ${input.name}.new(
-      ${input.inputs.map((value) => value).join()}
-    )`;
+  ${input.name}.new(
+    ${inputsCode}
+  )`;
   }
+
+
 
   download(data, filename, type) {
     const file = new Blob([data], {type: type});
@@ -328,7 +333,7 @@ class App extends Component {
           >
             <p>Select a script type, add some campaigns and then click <strong>Generate script</strong> to generate script code to paste into your code editor. Try adding a campaign first.</p>
           </EmptyState>
-        )
+        );
       } else {
         return (
           <EmptyState
@@ -338,7 +343,7 @@ class App extends Component {
           >
             <p>Add more campaigns to your script, or generate your script code now.</p>
           </EmptyState>
-        )
+        );
       }
     };
     

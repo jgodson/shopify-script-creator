@@ -40,6 +40,7 @@ export default class Step2Form extends Component {
     this.buildAndAddCampaign = this.buildAndAddCampaign.bind(this);
     this.getInputValue = this.getInputValue.bind(this);
     this.populateBasedOnExistingInfo = this.populateBasedOnExistingInfo.bind(this);
+    this.getInputsForCampaign = this.getInputsForCampaign.bind(this);
   }
 
   componentDidMount() {
@@ -130,7 +131,7 @@ export default class Step2Form extends Component {
         <FormLayout.Group>
           {this.generateInputsForCampaign(campaign, mapTo)}
         </FormLayout.Group>
-      )
+      );
     } else {
       return (
         <Card sectioned>
@@ -139,7 +140,7 @@ export default class Step2Form extends Component {
             {this.generateInputsForCampaign(campaign, mapTo)}
           </FormLayout>
         </Card>
-      )
+      );
     }
   }
 
@@ -157,7 +158,6 @@ export default class Step2Form extends Component {
         description: fields[key].description,
         name: inputName,
       };
-      console.log(inputName);
       inputs.push(this.inputGenerator(newInput));
       if (mapTo) {
         if (!this.inputMap[mapTo]) {
@@ -166,7 +166,6 @@ export default class Step2Form extends Component {
           this.inputMap[mapTo].push(inputName);
         }
       }
-      console.log(this.inputMap);
     });
     return inputs;
   }
@@ -184,7 +183,7 @@ export default class Step2Form extends Component {
               value={this.state.inputs[input.type][input.name]}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
-          )
+          );
         }
       },
       boolean: {
@@ -198,7 +197,7 @@ export default class Step2Form extends Component {
               checked={this.state.inputs[input.type][input.name] !== undefined ? this.state.inputs[input.type][input.name] : false}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
-          )
+          );
         }
       },
       number: {
@@ -213,7 +212,7 @@ export default class Step2Form extends Component {
               value={this.state.inputs[input.type][input.name]}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
-          )
+          );
         }
       },
       select: {
@@ -231,7 +230,7 @@ export default class Step2Form extends Component {
               />
               {helpText}
             </div>
-          )
+          );
         }
       },
       array: {
@@ -247,7 +246,7 @@ export default class Step2Form extends Component {
               value={this.state.inputs[input.type][input.name] || input.value}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
-          )
+          );
         }
       },
       campaignSelect: {
@@ -259,24 +258,25 @@ export default class Step2Form extends Component {
             descText = input.options.filter((option) => option.value === value)[0].description;
             this.inputMap[input.name] = 'none';
           }
-          let description = value === 'none' ? <TextStyle key={`${input.name}-text`} variation="subdued"><strong>Details: </strong>{descText}</TextStyle> : null;
+          let description = value === 'none' ? <TextStyle variation="subdued"><strong>Details: </strong>{descText}</TextStyle> : null;
           let additionalInputs = null;
           if (value && value !== 'none') {
             const campaign = input.options.filter((option) => option.value === value)[0];
-            description = <TextStyle key={`${input.name}-text`} variation="subdued"><strong>Details: </strong>{campaign.description}</TextStyle>;
+            description = <TextStyle variation="subdued"><strong>Details: </strong>{campaign.description}</TextStyle>;
             additionalInputs = this.generateAdditionalInputs(campaign, input.name);
           }
           return [
-            <Select
-              label={<strong>{input.label}</strong>}
-              options={input.options}
-              placeholder="Pick one"
-              key={input.name}
-              name={input.name}
-              value={value}
-              onChange={(val) => this.handleInputChange(val, input.type, input.name)}
-            />,
-            description,
+            <div key={input.name} className="select-wrapper">
+              <Select
+                label={<strong>{input.label}</strong>}
+                options={input.options}
+                placeholder="Pick one"
+                name={input.name}
+                value={value}
+                onChange={(val) => this.handleInputChange(val, input.type, input.name)}
+              />
+              {description}
+            </div>,
             additionalInputs
           ]
         }
@@ -292,34 +292,43 @@ export default class Step2Form extends Component {
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
       inputs: []
     }
-    console.log(newCampaign);
-    Object.keys(this.inputMap).forEach((key) => {
-      console.log(key);
-      const newInput = {
-        name: this.getInputValue(key)
+    Object.keys(this.inputMap).forEach((campaignSelect) => {
+      if (campaignSelect.split('-').length === 1) {
+        newCampaign.inputs.push(this.getInputsForCampaign(campaignSelect));
       }
-      if (newInput.className !== 'none') {
-        newInput.inputs = [];
-        if (this.inputMap[key] === 'none') {
-          newInput.inputs.push('none');
-        } else {
-          this.inputMap[key].forEach((input) => {
-            newInput.inputs.push(this.getInputValue(input));
-          });
-        }
-      }
-
-      newCampaign.inputs.push(newInput);
     });
-
-    // TODO: Find out why this has an id
-    console.log(newCampaign);
 
     this.props.addCampaign(newCampaign);
   }
 
+  getInputsForCampaign(campaignSelect) {
+    const newInput = {
+      name: this.getInputValue(campaignSelect)
+    }
+
+    if (newInput.name !== 'none') {
+      newInput.inputs = [];
+      this.inputMap[campaignSelect].forEach((campaignInput) => {
+        if (isCampaign(campaignInput)) {
+          newInput.inputs.push(this.getInputsForCampaign(campaignInput))
+        } else {
+          newInput.inputs.push(this.getInputValue(campaignInput));
+        }
+      });
+    }
+
+    return newInput;
+
+    function isCampaign(inputName) {
+      const split = inputName.split('-');
+      const compareTo = split[0].split('_')[0];
+      return split[split.length - 1].split('_')[0] === compareTo;
+    }
+  }
+
   getInputValue(inputName) {
-    const type = inputName.indexOf('-') > -1 ? inputName.split('-')[1].split('_')[0] : 'campaignSelect';
+    let type = inputName.split('-');
+    type = type[type.length - 1].split('_')[0];
     let value = this.state.inputs[type][inputName];
     // Can modify values here (like make an array into an array)
     switch (type) {
@@ -391,8 +400,10 @@ export default class Step2Form extends Component {
         secondaryFooterAction={footerActions.secondary}
       >
         <FormLayout>
-          {campaignSelector}
-          {description}
+          <div className="select-wrapper">
+            {campaignSelector}
+            {description}
+          </div>
           {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign)}
         </FormLayout>
       </Card>

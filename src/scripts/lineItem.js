@@ -58,13 +58,24 @@ class FixedDiscount
   end
 end
 
-class ProductsSelector
+class ProductIdSelector
   def initialize(product_ids)
     @product_ids = product_ids
   end
 
   def match?(line_item)
     @product_ids.include?(line_item.variant.product.id)
+  end
+end
+
+class ProductTagSelector
+  def initialize(tags)
+    @tags = tags.map(&:downcase)
+  end
+
+  def match?(line_item)
+    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
+    (@tags & product_tags).length > 0
   end
 end
 
@@ -118,8 +129,7 @@ class DiscountUsingSelector
       @discount.apply(item)
     end
   end
-end
-`;
+end`;
 
 const defaultCode = `
 CAMPAIGNS = [|].freeze
@@ -172,11 +182,11 @@ const CART_QUALIFIERS = [
   {
     value: "ExcludeDiscountCodes",
     label: "Exclude Discount Codes",
-    description: "Will only apply if no discount codes are used. Optionally can reject the discount code with a message",
+    description: "Set behavious for when a discount code is entered in checkout",
     inputs: {
       reject_discount_code: {
         type: "boolean",
-        description: "If checked, script will apply. If unchecked, script will not apply",
+        description: "Checked will apply script. Unchecked will apply discount code",
       },
       rejection_message: {
         type: "text",
@@ -249,36 +259,27 @@ const DISCOUNTS = [
   }
 ]
 
-const LINE_ITEM_AND_SELECTOR = [
-  {
+const LINE_ITEM_AND_SELECTOR = {
     value: "AndSelector",
     label: "And Selector",
-    description: "Only qualifies if all of the requirements are met",
+    description: "Qualifies if all of the requirements are met",
     inputs: {
-      line_item_qualifier: [...LINE_ITEM_QUALIFIERS],
-      line_item_qualifier: [...LINE_ITEM_QUALIFIERS],
-      line_item_qualifier: [...LINE_ITEM_QUALIFIERS]
+      line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
+      line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+      line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
     }
-  }
-]
+};
 
-const LINE_ITEM_OR_SELECTOR = [
-  {
-    value: "FixedDiscount",
-    label: "Fixed Discount",
-    description: "Splits the given amount between qualified items",
-    inputs: {
-      amount: {
-        type: "number",
-        description: "Total discount to apply"
-      },
-      message: {
-        type: "text",
-        description: "Message to display to customer"
-      }
-    }
+const LINE_ITEM_OR_SELECTOR = {
+  value: "OrSelector",
+  label: "Or Selector",
+  description: "Qualifies if any of the requirements are met",
+  inputs: {
+    line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
   }
-]
+};
 
 
 const campaigns = [
@@ -288,14 +289,14 @@ const campaigns = [
     description: "Applies a discount to each item that matches the selector if the cart qualifies",
     inputs: {
       cart_qualifier: [...CART_QUALIFIERS],
-      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, ...LINE_ITEM_AND_SELECTOR],
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discount_to_apply: [...DISCOUNTS]
     }
   }
-]
+];
 
 export default {
   classes,
   defaultCode,
   campaigns
-}
+};
