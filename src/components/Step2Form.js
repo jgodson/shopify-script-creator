@@ -145,9 +145,11 @@ export default class Step2Form extends Component {
   }
 
   generateInputsForCampaign(campaign, mapTo) {
+    //console.log(campaign, mapTo);
     const inputs = [];
     const fields = campaign.inputs;
     Object.keys(fields).forEach((key) => {
+      console.log(fields, key);
       const inputType = fields[key].type || 'campaignSelect';
       const inputId = inputs.length;
       const inputName = mapTo ? `${mapTo}-${inputType}_${inputId}` : `${inputType}_${inputId}`;
@@ -251,7 +253,11 @@ export default class Step2Form extends Component {
       },
       campaignSelect: {
         generate: (input) => {
-          const value = this.state.inputs[input.type][input.name];
+          let value = this.state.inputs[input.type][input.name];
+          if (value && typeof value !== 'string') {
+            value = value.name;
+          }
+
           this.totalCampaigns++;
           let descText = null;
           if (value === 'none') {
