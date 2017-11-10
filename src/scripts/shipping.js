@@ -45,6 +45,110 @@ class HideRateUnlessConditionsMet
       end
     end
   end
+end
+# --------------- Script Configuration --------------- #
+# ----- Qualifying Addresses ----- #
+# Example: {
+#   address1: ["150 Elgin St", "150 Elgin Street"],
+#   address2: "8th floor",
+#   phone: 123-456-7890,
+#   city: "Ottawa",
+#   province: "Ontario",
+#   country_code: "CA",
+#   zip: "K2P 1L4",
+#   match_type: :exact
+# }
+
+# Takes an array of rate names and matches a given rate
+class RateSelector
+  
+  def initialize(rate_names)
+    @rate_names = rate_names.map { |name| name.downcase! }
+  end
+  
+  def match?(rate)
+    @rate_names.include?(rate.name.downcase)
+  end
+end
+
+# Applies a percentage discount to a given rate
+class PercentageDiscount
+  
+  def initialize(percent, message)
+    @percent = Decimal.new(percent) / 100
+    @message = message
+  end
+  
+  def apply(rate)
+    rate.apply_discount(rate.price * @percent, { message: @message })
+  end
+  
+end
+
+# Matches a given address to an array of addresses given
+# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)
+# If no match type is specified, :partial will be the default
+# Only the given paramaters will be compared. Arrays can be used to match different options
+class AddressQualifier
+  
+  def initialize(addresses)
+    @addresses = addresses
+  end
+  
+  def match?(cart)
+    return false if cart.shipping_address.nil?
+    
+    @addresses.any? do |accepted_address|
+      match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial
+
+      cart.shipping_address.to_hash.all? do |key, value|
+        match = true
+        key = key.to_sym
+        value.downcase!
+        
+        unless accepted_address[key].nil?
+          if accepted_address[key].kind_of?(Array)
+            match = accepted_address[key].any? do |potential_address|
+              potential_address.downcase!
+              case match_type
+                when :partial
+                  value.include?(potential_address)
+                when :exact
+                  potential_address == value
+              end
+            end
+          else
+            accepted_address[key].downcase!
+            case match_type
+              when :partial
+                match = value.include?(accepted_address[key])
+              when :exact
+                match = accepted_address[key] == value
+            end
+          end
+        end
+        match
+      end
+    end
+  end
+  
+end
+
+# Accepts a qualifier, rate selector and a discount to apply to shipping rates
+class ShippingDiscount
+  def initialize(qualifier, rate_selector, discount)
+    @qualifier = qualifier
+    @rate_selector = rate_selector
+    @discount = discount
+  end
+  
+  def run(cart, rates)
+    return unless @qualifier.match?(cart)
+    rates.each do |rate|
+      next unless @rate_selector.match?(rate)
+      @discount.apply(rate)
+    end
+  end
 end`;
 
 const defaultCode = `

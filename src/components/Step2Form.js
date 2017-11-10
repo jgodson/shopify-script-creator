@@ -36,7 +36,7 @@ export default class Step2Form extends Component {
     this.updateCount = 0;
 
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.resetInputs = this.resetInputs.bind(this);
+    this.hideForm = this.hideForm.bind(this);
     this.buildAndAddCampaign = this.buildAndAddCampaign.bind(this);
     this.getInputValue = this.getInputValue.bind(this);
     this.populateBasedOnExistingInfo = this.populateBasedOnExistingInfo.bind(this);
@@ -387,7 +387,7 @@ export default class Step2Form extends Component {
     this.props.updateCurrentCampaign(val);
   }
 
-  resetInputs() {
+  hideForm() {
     this.setState({inputs: JSON.parse(JSON.stringify(this.blankInputState))});
     this.props.updateCurrentCampaign(null);
     this.props.showForm(false);
@@ -419,7 +419,7 @@ export default class Step2Form extends Component {
       primary: {
         content: "Cancel",
         destructive: true,
-        onAction: this.resetInputs
+        onAction: this.hideForm
       }
     };
     this.totalCampaigns = 0;

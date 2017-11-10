@@ -101,8 +101,13 @@ class App extends Component {
   }
 
   removeCampaign(campaignId) {
-    const response = confirm("Are you sure you want to remove this campaign?");
-    if (!response) { return; }
+    if (this.state.editCampaignInfo && this.state.editCampaignInfo.id === campaignId) {
+      alert("You are currently editing this campaign. Save or discard changes first.");
+      return;
+    } else {
+      const response = confirm("Are you sure you want to remove this campaign?");
+      if (!response) { return; }
+    }
 
     const newState = this.state;
     const index = this.state.campaigns.findIndex((campaign) => campaign.id === campaignId);
