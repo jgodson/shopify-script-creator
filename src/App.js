@@ -172,8 +172,8 @@ class App extends Component {
     let output;
     switch(this.state.scriptType) {
       case 'line_item':
-        let campaigns = this.state.campaigns.map((campaign) => this.generateCampaignCode(campaign)).join();
-        // remove the last `,` from the string (raises syntac)
+        let campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        // remove the last `,` from the string (raises syntax error)
         campaigns = campaigns.substring(campaigns.length -1, 0);
         output = LineItemScript.defaultCode.replace('|', campaigns);
         break;
@@ -187,34 +187,21 @@ class App extends Component {
     return output;
   }
 
-  generateCampaignCode(campaign) {
+  generateCode(campaign) {
     if (campaign.skip) { return; }
-    if (campaign.inputs) {
-      const inputsCode = campaign.inputs.map((input) => this.generateCampaignInputCode(input)).join();
-      return `
-${campaign.name}.new(
-  ${inputsCode}
-)`;
-    } else {
-      return `  ${campaign.name}.new()\n`;
-    }
-  }
-
-  generateCampaignInputCode(input) {
-    if (input.name === 'none') { return '\n  nil'; };
-    let inputsCode = null;
-    if (Array.isArray(input.inputs)) {
-      inputsCode = input.inputs.map((value) => value).join();
-    } else {
-      inputsCode = input.inputs.map((input) => this.generateCampaignCode(input)).join();
-    }
+    console.log(campaign);
+    const inputsCode = campaign.inputs.map((input, index) => {
+      if (input.inputs) {
+        return this.generateCode(input);
+      } else {
+        return input.name === "none" ? '\nnil' : `\n${input}`;
+      }
+    }).join();
     return `
-  ${input.name}.new(
-    ${inputsCode}
-  )`;
+${campaign.name}.new(
+${inputsCode}
+)`;
   }
-
-
 
   download(data, filename, type) {
     const file = new Blob([data], {type: type});
@@ -342,7 +329,7 @@ ${campaign.name}.new(
       } else {
         return (
           <EmptyState
-            heading="Add more campaigns or generate script"
+            heading="Add more campaigns or generate your script now"
             action={{content: 'Generate script', onAction: this.generateScript}}
             secondaryAction={{content: 'Add another campaign', onAction: () => this.showForm(true)}}
           >
@@ -356,28 +343,28 @@ ${campaign.name}.new(
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions}>
         <Layout>
           <Layout.Section>
-          <Step1Buttons changeType={this.typeChange} currentType={this.state.scriptType} />
-          {this.state.step2.shown && 
-            <Step2Form
-              currentCampaign={this.state.currentCampaign}
-              availableCampaigns={this.state.availableCampaigns}
-              updateCurrentCampaign={this.updateCurrentCampaign}
-              addCampaign={this.addCampaign}
-              showForm={this.showForm}
-              existingInfo={this.state.editCampaignInfo}
-            />
-          }
-          {this.state.output && <ScriptOutput output={this.state.output} />}
-          {(!this.state.step2.shown && !this.state.output) && instructions()}
+            <Step1Buttons changeType={this.typeChange} currentType={this.state.scriptType} />
+            {this.state.step2.shown && 
+              <Step2Form
+                currentCampaign={this.state.currentCampaign}
+                availableCampaigns={this.state.availableCampaigns}
+                updateCurrentCampaign={this.updateCurrentCampaign}
+                addCampaign={this.addCampaign}
+                showForm={this.showForm}
+                existingInfo={this.state.editCampaignInfo}
+              />
+            }
+            {this.state.output && <ScriptOutput output={this.state.output} />}
+            {(!this.state.step2.shown && !this.state.output) && instructions()}
           </Layout.Section>
           <Layout.Section secondary>
-          <Campaigns 
-            campaigns={this.state.campaigns}
-            editCampaign={this.editCampaign}
-            removeCampaign={this.removeCampaign}
-            showForm={this.showForm}
-            isEditing={!!this.state.editCampaignInfo}
-          />
+            <Campaigns 
+              campaigns={this.state.campaigns}
+              editCampaign={this.editCampaign}
+              removeCampaign={this.removeCampaign}
+              showForm={this.showForm}
+              isEditing={!!this.state.editCampaignInfo}
+            />
           </Layout.Section>
         </Layout>
         <PageActions

@@ -131,7 +131,18 @@ class AddressQualifier
       end
     end
   end
-  
+end
+
+# COUNTRY MAP = { "COUNTRY_CODE" => ["PROVINCE_CODE_1", "PROVINCE_CODE_2", etc] }
+class CountryAndProvinceSelector
+  def initialize(country_map)
+    @country_map = country_map
+  end
+
+  def match?(cart)
+    address = cart.shipping_address
+    address && @country_map.key?(address.country_code.upcase) && @country_map[address.country_code.upcase].include?(address.province_code.upcase)
+  end
 end
 
 # Accepts a qualifier, rate selector and a discount to apply to shipping rates

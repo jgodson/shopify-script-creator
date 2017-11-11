@@ -129,10 +129,69 @@ class DiscountUsingSelector
       @discount.apply(item)
     end
   end
+end
+
+# BOGO campaign
+class BuyOneGetOne
+  def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)
+    raise "buy_x must be greater than or equal to get_x" unless buy_x >= get_x
+    
+    @cart_qualifier = cart_qualifier
+    @buy_item_qualifier = buy_item_qualifier
+    @get_item_qualifier = get_item_qualifier
+    @discount = discount
+    @buy_x = buy_x + get_x
+    @get_x = get_x
+    @max_sets = max_sets
+  end
+  
+  def run(cart)
+    # Make sure the cart qualifies for the offer
+    return unless !@cart_qualifier.nil? || @cart_qualfier.match?(cart)
+    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x + @get_x
+    applicable_buy_items = nil
+    eligible_get_items = nil
+    discountable_sets = 0
+    
+    # Find the items that qualify for buy_x
+    if @buy_item_qualifier.nil?
+      applicable_buy_items = cart.line_items
+    else
+      applicable_buy_items = cart.line_items.select { |item| @buy_item_qualifier.match?(item) }
+    end
+    
+    # Find the items that qualify for get_x
+    if @get_item_qualifier.nil?
+      eligible_get_items = cart.line_items
+    else
+      eligible_get_items = cart.line_items.select {|item| @get_item_qualifier.match?(item) }
+    end
+    
+    # Check if cart qualifies for discounts and limit the discount sets
+    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }
+    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x
+    return if discountable_sets < 1
+    discountable_quantity = (discountable_sets * @get_x).to_i
+    # Apply the discounts (sort to discount lower priced items first)
+    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }
+    eligible_get_items.each do |item|
+      break if discountable_quantity == 0
+      if item.quantity <= discountable_quantity
+        @discount.apply(item)
+        discountable_quantity -= item.quantity
+      else
+        new_item = item.split({ take: discountable_quantity })
+        @discount.apply(new_item)
+        cart.line_items << new_item
+        discountable_quantity = 0
+      end
+    end
+  end
 end`;
 
 const defaultCode = `
-CAMPAIGNS = [|].freeze
+CAMPAIGNS = [|
+].freeze
 
 CAMPAIGNS.each do |campaign|
   campaign.run(Input.cart)
@@ -260,14 +319,14 @@ const DISCOUNTS = [
 ]
 
 const LINE_ITEM_AND_SELECTOR = {
-    value: "AndSelector",
-    label: "And Selector",
-    description: "Qualifies if all of the requirements are met",
-    inputs: {
-      line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-      line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-      line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
-    }
+  value: "AndSelector",
+  label: "And Selector",
+  description: "Qualifies if all of the requirements are met",
+  inputs: {
+    line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+  }
 };
 
 const LINE_ITEM_OR_SELECTOR = {
@@ -281,6 +340,28 @@ const LINE_ITEM_OR_SELECTOR = {
   }
 };
 
+const CART_OR_SELECTOR = {
+  value: "OrSelector",
+  label: "Or Selector",
+  description: "Qualifies if any of the requirements are met",
+  inputs: {
+    cart_qualifier_1: [...CART_QUALIFIERS],
+    cart_qualifier_2: [...CART_QUALIFIERS],
+    cart_qualifier_3: [...CART_QUALIFIERS]
+  }
+};
+
+const CART_AND_SELECTOR = {
+  value: "AndSelector",
+  label: "And Selector",
+  description: "Qualifies if all of the requirements are met",
+  inputs: {
+    cart_qualifier_1: [...CART_QUALIFIERS],
+    cart_qualifier_2: [...CART_QUALIFIERS],
+    cart_qualifier_3: [...CART_QUALIFIERS]
+  }
+};
+
 
 const campaigns = [
   {
@@ -288,9 +369,32 @@ const campaigns = [
     label: "Discount Using Selector",
     description: "Applies a discount to each item that matches the selector if the cart qualifies",
     inputs: {
-      cart_qualifier: [...CART_QUALIFIERS],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discount_to_apply: [...DISCOUNTS]
+    }
+  },
+  {
+    value: "BuyXGetX",
+    label: "Buy X Get X Discounted",
+    description: "Applies a discount to items based on multiples of an item",
+    inputs: {
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      buy_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      get_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discount_to_apply: [...DISCOUNTS],
+      buy_number: {
+        type: "number",
+        description: "Number of items to buy before qualifying for discount"
+      },
+      get_number: {
+        type: "number",
+        description: "Number of items to get when qualified for discount"
+      },
+      maximum_sets: {
+        type: "number",
+        description: "Maximum number of item sets to discount (Buy 4 Get 1 = 1 set)"
+      }
     }
   }
 ];

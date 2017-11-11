@@ -324,6 +324,7 @@ export default class Step2Form extends Component {
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
       inputs: []
     }
+    console.log(this.inputMap);
     Object.keys(this.inputMap).forEach((campaignSelect) => {
       if (campaignSelect.split('-').length === 1) {
         newCampaign.inputs.push(this.getInputsForCampaign(campaignSelect));
@@ -397,6 +398,7 @@ export default class Step2Form extends Component {
     this.inputMap = {};
     const campaignSelector = (
       <Select
+        name="mainCampaign"
         label={<strong>Select a campaign</strong>}
         options={this.props.availableCampaigns}
         value={this.props.currentCampaign && this.props.currentCampaign.value}
@@ -436,7 +438,7 @@ export default class Step2Form extends Component {
             {campaignSelector}
             {description}
           </div>
-          {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign)}
+          {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, 'mainCampaign')}
         </FormLayout>
       </Card>
     )
