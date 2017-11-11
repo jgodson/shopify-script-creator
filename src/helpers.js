@@ -31,14 +31,14 @@
     return newWord.join('');
   }
 
-  function isNestedCampaignSelect(inputName) {
+  function isCampaignSelect(inputName) {
     const temparr = inputName.split('-');
-    return temparr.length > 1 && temparr[0].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
+    return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
   }
 
 export {
   capitalize,
   splitAndCapitalize,
   splitCamelCase,
-  isNestedCampaignSelect
+  isCampaignSelect
 }

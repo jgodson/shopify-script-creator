@@ -12,7 +12,7 @@ import {
   ButtonGroup
 } from '@shopify/polaris';
 import styles from './Step2Form.css';
-import { capitalize, splitAndCapitalize, isNestedCampaignSelect } from '../helpers';
+import { capitalize, splitAndCapitalize, isCampaignSelect } from '../helpers';
 
 export default class Step2Form extends Component {
   constructor(props) {
@@ -30,6 +30,8 @@ export default class Step2Form extends Component {
     this.state = {
       inputs: JSON.parse(JSON.stringify(this.blankInputState))
     }
+
+    this.mainCampaignName = 'mainCampaign';
 
     this.inputMap = {};
     this.totalCampaigns = 0;
@@ -80,6 +82,7 @@ export default class Step2Form extends Component {
   }
 
   populateBasedOnExistingInfo(existingInfo) {
+    if (!existingInfo) { return; }
     const newState = this.state;
     const inputs = existingInfo.inputs;
     const updateCount = this.updateCount;
@@ -87,23 +90,25 @@ export default class Step2Form extends Component {
     if (updateCount === 0) {
       newState.inputs = JSON.parse(JSON.stringify(this.blankInputState));
     }
+    const mainCampaign = this.mainCampaignName;
     setValuesForInputs(inputs);
     this.updateCount++;
     this.setState(newState);
 
     function setValuesForInputs(inputs, doNested) {
-      if (updateCount === 3) { return; }
+      if (!inputs) { return; }
+      console.log(inputs);
       inputs.forEach((input, inputIndex) => {
         switch (updateCount) {
           case 0:
             // Pick the first set of campaigns
-            newState.inputs.campaignSelect[`campaignSelect_${inputIndex}`] = input.name;
+            newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}`] = input.name;
             break;
           case 1:
             // Pick the second set of campaigns (if there is any)
             if (Array.isArray(input.inputs) && typeof input.inputs[0] === 'object') {
               input.inputs.forEach((secondInput, secondIndex) => {
-                newState.inputs.campaignSelect[`campaignSelect_${inputIndex}-campaignSelect_${secondIndex}`] = secondInput.name;
+                newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}-campaignSelect_${secondIndex}`] = secondInput.name;
               });
             }
             break;
@@ -112,15 +117,15 @@ export default class Step2Form extends Component {
             if (input.inputs !== undefined && typeof input.inputs[0] !== "object") {
               const inputsToDo = Object.keys(inputMap).filter((key) => {
                 if (doNested) {
-                  return isNestedCampaignSelect(key);
+                  return isCampaignSelect(key);
                 } else {
-                  return !isNestedCampaignSelect(key);
+                  return !isCampaignSelect(key);
                 }
               });
               inputsToDo.forEach((key, campaignIndex) => {
                 if (inputIndex === campaignIndex) {
                   inputMap[key].forEach((inputName, index) => {
-                    if (!isNestedCampaignSelect(inputName)) {
+                    if (!isCampaignSelect(inputName)) {
                       let type = inputName.split('-');
                       type = type[type.length - 1].split('_')[0];
                       newState.inputs[type][inputName] = convertInput(input.inputs[index], type);
@@ -324,10 +329,18 @@ export default class Step2Form extends Component {
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
       inputs: []
     }
-    console.log(this.inputMap);
-    Object.keys(this.inputMap).forEach((campaignSelect) => {
-      if (campaignSelect.split('-').length === 1) {
-        newCampaign.inputs.push(this.getInputsForCampaign(campaignSelect));
+    const allInputs = Object.keys(this.inputMap).sort().reverse();
+    allInputs.forEach((input) => {
+      if (input === this.mainCampaignName) {
+        this.inputMap[this.mainCampaignName].forEach((field) => {
+          if (!(field.indexOf('campaignSelect') > -1)) {
+            newCampaign.inputs.push(this.getInputValue(field))
+          }
+        });
+      } else if (isCampaignSelect(input)) {
+        newCampaign.inputs.push(this.getInputsForCampaign(input));
+      } else {
+        newCampaign.inputs.push(this.getInputValue(input));
       }
     });
 
@@ -342,7 +355,7 @@ export default class Step2Form extends Component {
     if (newInput.name !== 'none') {
       newInput.inputs = [];
       this.inputMap[campaignSelect].forEach((campaignInput) => {
-        if (isCampaign(campaignInput)) {
+        if (isCampaignSelect(campaignInput)) {
           newInput.inputs.push(this.getInputsForCampaign(campaignInput))
         } else {
           newInput.inputs.push(this.getInputValue(campaignInput));
@@ -351,16 +364,11 @@ export default class Step2Form extends Component {
     }
 
     return newInput;
-
-    function isCampaign(inputName) {
-      const split = inputName.split('-');
-      const compareTo = split[0].split('_')[0];
-      return split[split.length - 1].split('_')[0] === compareTo;
-    }
   }
 
   getInputValue(inputName) {
     let type = inputName.split('-');
+    if (type.length < 2) { return; };
     type = type[type.length - 1].split('_')[0];
     let value = this.state.inputs[type][inputName];
     // Can modify values here (like make an array into an array)
@@ -398,7 +406,7 @@ export default class Step2Form extends Component {
     this.inputMap = {};
     const campaignSelector = (
       <Select
-        name="mainCampaign"
+        name={this.mainCampaignName}
         label={<strong>Select a campaign</strong>}
         options={this.props.availableCampaigns}
         value={this.props.currentCampaign && this.props.currentCampaign.value}
@@ -438,7 +446,7 @@ export default class Step2Form extends Component {
             {campaignSelector}
             {description}
           </div>
-          {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, 'mainCampaign')}
+          {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
         </FormLayout>
       </Card>
     )
