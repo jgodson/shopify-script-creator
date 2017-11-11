@@ -25,6 +25,10 @@ class App extends Component {
       editCampaignInfo: null
     };
 
+    // Version used for saving script files to detect imcompatabilities
+    this.version = "0.0.1";
+    this.incompatibleVersions = [];
+
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
     this.typeChange = this.typeChange.bind(this);
@@ -37,6 +41,8 @@ class App extends Component {
     this.getCampagins = this.getCampagins.bind(this);
     this.getCampaignInfo = this.getCampaignInfo.bind(this);
     this.getCampaignById = this.getCampaignById.bind(this);
+    this.readFile = this.readFile.bind(this);
+    this.processFile = this.processFile.bind(this);
     this.showForm = this.showForm.bind(this);
     this.download = this.download.bind(this);
     this.downloadCampaigns = this.downloadCampaigns.bind(this);
@@ -235,7 +241,7 @@ ${inputsCode}
       fileInput.style.display = 'none';
       document.body.appendChild(fileInput);
       fileInput.addEventListener('change', (evt) => {
-        readFile(evt.target, (loadedCampaigns) => {
+        this.readFile(evt.target, (loadedCampaigns) => {
           if (loadedCampaigns && loadedCampaigns.length > 0) {
             const newState = JSON.parse(JSON.stringify(this.defaultState));
             loadedCampaigns.reverse().forEach((campaign) => {
@@ -250,44 +256,49 @@ ${inputsCode}
       });
     }
     fileInput.click();
+  }
 
-    function readFile(fileInput, callback) {
-      // Create a reader object
-      const reader = new FileReader();
-      if (fileInput.files.length) {
-        const textFile = fileInput.files[0];
-        // Read the file
-        reader.readAsText(textFile);
-        // When it's loaded, process it
-        reader.addEventListener('load', (evt) => {
-          const result = processFile(evt);
-          callback(result);
-        });
-      }
-      
-      function processFile(evt) {
-        const file = evt.target.result;
-        const validFileSignature = 'ShopifyScriptCreatorFile';
-        let results = null;
-        if (file && file.length) {
-          results = file;
-          if (results.indexOf(validFileSignature) > -1) {
-            return JSON.parse(results.split(validFileSignature)[1]);
-          } else {
-            alert('File does not appear to be a valid script creator file');
-          }
-        } else {
-          alert('File does not appear to be a valid script creator file');
-          return null;
-        }
-      }
+  readFile(fileInput, callback) {
+    // Create a reader object
+    const reader = new FileReader();
+    if (fileInput.files.length) {
+      const textFile = fileInput.files[0];
+      // Read the file
+      reader.readAsText(textFile);
+      // When it's loaded, process it
+      reader.addEventListener('load', (evt) => {
+        const result = this.processFile(evt);
+        callback(result);
+      });
     }
   }
 
+  processFile(evt) {
+    const file = evt.target.result;
+    const validFileSignature = 'ShopifyScriptCreatorFile';
+    let results = null;
+    if (file && file.length) {
+      results = file;
+      if (results.indexOf(validFileSignature) > -1) {
+        const fileVersion = results.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
+        if (this.incompatibleVersions.indexOf(fileVersion) > -1) {
+          alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
+        } else {
+          return JSON.parse(results.split(`${validFileSignature}-V${this.version}-`)[1]);
+        }
+      } else {
+        alert('File does not appear to be a valid script creator file');
+      }
+    } else {
+      alert('File does not appear to be a valid script creator file');
+    }
+    return null;
+  }
+
   downloadCampaigns() {
-    const filename = `SSC-script-${parseInt(Math.random() * 100000000)}.txt`;
+    const filename = `SSC-V${this.version}-script-${parseInt(Math.random() * 100000000)}.txt`;
     const campaigns = this.state.campaigns.filter((campaign) => !campaign.skip);
-    const data = `ShopifyScriptCreatorFile${JSON.stringify(campaigns)}`;
+    const data = `ShopifyScriptCreatorFile-V${this.version}-${JSON.stringify(campaigns)}`;
     this.download(data, filename, 'text/plain');
   }
 

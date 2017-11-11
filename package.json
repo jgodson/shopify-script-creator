@@ -1,8 +1,8 @@
 {
-  "name": "polaris-webpack-example",
+  "name": "shopify-script-creator",
   "private": true,
-  "version": "1.0.0",
-  "description": "A Polaris example application using webpack",
+  "version": "0.0.1",
+  "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
