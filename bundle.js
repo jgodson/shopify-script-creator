@@ -13837,15 +13837,15 @@ function splitCamelCase(word) {
   return newWord.join('');
 }
 
-function isNestedCampaignSelect(inputName) {
+function isCampaignSelect(inputName) {
   var temparr = inputName.split('-');
-  return temparr.length > 1 && temparr[0].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
+  return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
 }
 
 exports.capitalize = capitalize;
 exports.splitAndCapitalize = splitAndCapitalize;
 exports.splitCamelCase = splitCamelCase;
-exports.isNestedCampaignSelect = isNestedCampaignSelect;
+exports.isCampaignSelect = isCampaignSelect;
 
 /***/ }),
 /* 170 */
@@ -41319,6 +41319,8 @@ var Step2Form = function (_Component) {
       inputs: JSON.parse(JSON.stringify(_this.blankInputState))
     };
 
+    _this.mainCampaignName = 'mainCampaign';
+
     _this.inputMap = {};
     _this.totalCampaigns = 0;
     _this.updateCount = 0;
@@ -41375,6 +41377,9 @@ var Step2Form = function (_Component) {
   }, {
     key: 'populateBasedOnExistingInfo',
     value: function populateBasedOnExistingInfo(existingInfo) {
+      if (!existingInfo) {
+        return;
+      }
       var newState = this.state;
       var inputs = existingInfo.inputs;
       var updateCount = this.updateCount;
@@ -41382,25 +41387,27 @@ var Step2Form = function (_Component) {
       if (updateCount === 0) {
         newState.inputs = JSON.parse(JSON.stringify(this.blankInputState));
       }
+      var mainCampaign = this.mainCampaignName;
       setValuesForInputs(inputs);
       this.updateCount++;
       this.setState(newState);
 
       function setValuesForInputs(inputs, doNested) {
-        if (updateCount === 3) {
+        if (!inputs) {
           return;
         }
+        console.log(inputs);
         inputs.forEach(function (input, inputIndex) {
           switch (updateCount) {
             case 0:
               // Pick the first set of campaigns
-              newState.inputs.campaignSelect['campaignSelect_' + inputIndex] = input.name;
+              newState.inputs.campaignSelect[mainCampaign + '-campaignSelect_' + inputIndex] = input.name;
               break;
             case 1:
               // Pick the second set of campaigns (if there is any)
               if (Array.isArray(input.inputs) && _typeof(input.inputs[0]) === 'object') {
                 input.inputs.forEach(function (secondInput, secondIndex) {
-                  newState.inputs.campaignSelect['campaignSelect_' + inputIndex + '-campaignSelect_' + secondIndex] = secondInput.name;
+                  newState.inputs.campaignSelect[mainCampaign + '-campaignSelect_' + inputIndex + '-campaignSelect_' + secondIndex] = secondInput.name;
                 });
               }
               break;
@@ -41409,15 +41416,15 @@ var Step2Form = function (_Component) {
               if (input.inputs !== undefined && _typeof(input.inputs[0]) !== "object") {
                 var inputsToDo = Object.keys(inputMap).filter(function (key) {
                   if (doNested) {
-                    return (0, _helpers.isNestedCampaignSelect)(key);
+                    return (0, _helpers.isCampaignSelect)(key);
                   } else {
-                    return !(0, _helpers.isNestedCampaignSelect)(key);
+                    return !(0, _helpers.isCampaignSelect)(key);
                   }
                 });
                 inputsToDo.forEach(function (key, campaignIndex) {
                   if (inputIndex === campaignIndex) {
                     inputMap[key].forEach(function (inputName, index) {
-                      if (!(0, _helpers.isNestedCampaignSelect)(inputName)) {
+                      if (!(0, _helpers.isCampaignSelect)(inputName)) {
                         var type = inputName.split('-');
                         type = type[type.length - 1].split('_')[0];
                         newState.inputs[type][inputName] = convertInput(input.inputs[index], type);
@@ -41670,8 +41677,15 @@ var Step2Form = function (_Component) {
         id: this.props.existingInfo ? this.props.existingInfo.id : null,
         inputs: []
       };
-      Object.keys(this.inputMap).forEach(function (input) {
-        if (input.split('-').length >= 2) {
+      var allInputs = Object.keys(this.inputMap).sort().reverse();
+      allInputs.forEach(function (input) {
+        if (input === _this4.mainCampaignName) {
+          _this4.inputMap[_this4.mainCampaignName].forEach(function (field) {
+            if (!(field.indexOf('campaignSelect') > -1)) {
+              newCampaign.inputs.push(_this4.getInputValue(field));
+            }
+          });
+        } else if ((0, _helpers.isCampaignSelect)(input)) {
           newCampaign.inputs.push(_this4.getInputsForCampaign(input));
         } else {
           newCampaign.inputs.push(_this4.getInputValue(input));
@@ -41692,7 +41706,7 @@ var Step2Form = function (_Component) {
       if (newInput.name !== 'none') {
         newInput.inputs = [];
         this.inputMap[campaignSelect].forEach(function (campaignInput) {
-          if (isCampaign(campaignInput)) {
+          if ((0, _helpers.isCampaignSelect)(campaignInput)) {
             newInput.inputs.push(_this5.getInputsForCampaign(campaignInput));
           } else {
             newInput.inputs.push(_this5.getInputValue(campaignInput));
@@ -41701,17 +41715,14 @@ var Step2Form = function (_Component) {
       }
 
       return newInput;
-
-      function isCampaign(inputName) {
-        var split = inputName.split('-');
-        var compareTo = split[0].split('_')[0];
-        return split[split.length - 1].split('_')[0] === compareTo;
-      }
     }
   }, {
     key: 'getInputValue',
     value: function getInputValue(inputName) {
       var type = inputName.split('-');
+      if (type.length < 2) {
+        return;
+      };
       type = type[type.length - 1].split('_')[0];
       var value = this.state.inputs[type][inputName];
       // Can modify values here (like make an array into an array)
@@ -41757,7 +41768,7 @@ var Step2Form = function (_Component) {
 
       this.inputMap = {};
       var campaignSelector = _react2.default.createElement(_polaris.Select, {
-        name: 'mainCampaign',
+        name: this.mainCampaignName,
         label: _react2.default.createElement(
           'strong',
           null,
@@ -41814,7 +41825,7 @@ var Step2Form = function (_Component) {
             campaignSelector,
             description
           ),
-          this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, 'mainCampaign')
+          this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)
         )
       );
     }
