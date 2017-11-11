@@ -5,9 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Shopify Script Creator</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=UA-85041190-3"></script>
+  <script>
+    if (window.location.hostname !== "localhost") {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'UA-85041190-3');
+    }
+  </script>
+  <!-- Polaris Styles -->
   <link rel="stylesheet" href="https://sdks.shopifycdn.com/polaris/latest/polaris.css">
 </head>
 <body>
   <div id="root"></div>
+  <noscript>
+    <div style="text-align: center; margin-top: 50%; font-size: 3rem; line-height: 1.2">
+      <p>This web app requires JavaScript.</p>
+      <p>Please enable JavaScript in your browser and reload the page.</p>
+    </div>
+  </noscript>
+  <!-- TODO: Add GA tracking? -->
 </body>
 </html>
