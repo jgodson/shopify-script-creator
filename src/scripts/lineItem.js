@@ -6,8 +6,10 @@ class AndSelector
   end
 
   def match?(item)
-    @selectors.all? { |selector| 
-    selector.match?(item) }
+    @selectors.all? do |selector|
+      return true if selector.nil?
+      puts selector.match?(item) 
+    end
   end
 end
 
@@ -18,7 +20,10 @@ class OrSelector
   end
 
   def match?(item)
-    @selectors.any? { |selector| selector.match?(item) }
+    @selectors.any? do |selector|
+      next if selector.nil?
+      selector.match?(item) 
+    end
   end
 end
 
@@ -132,7 +137,7 @@ class DiscountUsingSelector
 end
 
 # BOGO campaign
-class BuyOneGetOne
+class BuyXGetX
   def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)
     raise "buy_x must be greater than or equal to get_x" unless buy_x >= get_x
     
@@ -142,7 +147,7 @@ class BuyOneGetOne
     @discount = discount
     @buy_x = buy_x + get_x
     @get_x = get_x
-    @max_sets = max_sets
+    @max_sets = max_sets == 0 ? nil : max_sets
   end
   
   def run(cart)

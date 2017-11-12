@@ -1,4 +1,31 @@
 const classes = `\
+class AndSelector
+  def initialize(*selectors)
+    @selectors = selectors
+  end
+
+  def match?(item)
+    @selectors.all? do |selector|
+      return true if selector.nil?
+      puts selector.match?(item) 
+    end
+  end
+end
+
+# Combines selectors together and returns true if any of them match
+class OrSelector
+  def initialize(*selectors)
+    @selectors = selectors
+  end
+
+  def match?(item)
+    @selectors.any? do |selector|
+      next if selector.nil?
+      selector.match?(item) 
+    end
+  end
+end
+
 class ProductTagSelector
   def initialize(tags)
     @tags = tags.map(&:downcase)

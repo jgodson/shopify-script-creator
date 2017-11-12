@@ -12,7 +12,7 @@ import {
   ButtonGroup
 } from '@shopify/polaris';
 import styles from './Step2Form.css';
-import { capitalize, splitAndCapitalize, isCampaignSelect } from '../helpers';
+import { capitalize, splitAndCapitalize, isCampaignSelect, getInputType } from '../helpers';
 
 export default class Step2Form extends Component {
   constructor(props) {
@@ -98,7 +98,6 @@ export default class Step2Form extends Component {
 
     function setValuesForInputs(inputs, doNested) {
       if (!inputs) { return; }
-      console.log(inputs, inputMap);
       inputs.forEach((input, inputIndex) => {
         switch (updateCount) {
           case 0:
@@ -117,31 +116,30 @@ export default class Step2Form extends Component {
             break;
           default:
             // Set the values
-            console.log(input, inputIndex);
-              console.log("here");
               inputMap[mainCampaignName].forEach((inputName, index) => {
-                console.log(inputName, inputIndex, index);
                   if (inputIndex === index) {
                     if (isCampaignSelect(inputName)) { 
-                      console.log("inside");
-                      const fields = inputMap[inputName];
+                      let fields = inputMap[inputName];
                       if (Array.isArray(fields)) {
                         fields.forEach((fieldName, fieldIndex) => {
-                          if (!isCampaignSelect(fieldName)) {    
-                            let type = fieldName.split('-');
-                            type = type[type.length - 1].split('_')[0];
+                          if (!isCampaignSelect(fieldName)) {
+                            const type = getInputType(fieldName);
                             const value = input.inputs[fieldIndex];
-                            console.log(value, type);
                             newState.inputs[type][fieldName] = convertInput(value, type);
-                          }
+                          } else {
+                            const nestedFields = inputMap[fieldName];
+                            if (nestedFields === 'none') { return; }
+                            nestedFields.forEach((nestedName, nestedIndex) => {
+                              const type = getInputType(nestedName);
+                              const value = input.inputs[fieldIndex].inputs[nestedIndex];
+                              newState.inputs[type][nestedName] = convertInput(value, type);
+                            });
+                          }                    
                         });
                       }
                     } else {
-                        console.log(inputName);
-                        let type = inputName.split('-');
-                        type = type[type.length - 1].split('_')[0];
+                        const type = getInputType(inputName);
                         const value = input;
-                        console.log(value, type);
                         newState.inputs[type][inputName] = convertInput(value, type);
                     }
                   }
@@ -372,9 +370,7 @@ export default class Step2Form extends Component {
   }
 
   getInputValue(inputName) {
-    let type = inputName.split('-');
-    if (type.length < 2) { return; };
-    type = type[type.length - 1].split('_')[0];
+    const type = getInputType(inputName);
     let value = this.state.inputs[type][inputName];
     // Can modify values here (like make an array into an array)
     switch (type) {

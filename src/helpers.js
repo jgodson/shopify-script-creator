@@ -37,9 +37,15 @@
     return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
   }
 
+  function getInputType(inputName) {
+    const type = inputName.split('-');
+    return type[type.length - 1].split('_')[0];
+  }
+
 export {
   capitalize,
   splitAndCapitalize,
   splitCamelCase,
-  isCampaignSelect
+  isCampaignSelect,
+  getInputType
 }
