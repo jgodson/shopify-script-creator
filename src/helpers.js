@@ -32,6 +32,7 @@
   }
 
   function isCampaignSelect(inputName) {
+    if (inputName.indexOf('campaignSelect') === -1) { return false; }
     const temparr = inputName.split('-');
     return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
   }

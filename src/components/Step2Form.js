@@ -84,25 +84,28 @@ export default class Step2Form extends Component {
   populateBasedOnExistingInfo(existingInfo) {
     if (!existingInfo) { return; }
     const newState = this.state;
-    const inputs = existingInfo.inputs;
+    const mainInputs = existingInfo.inputs;
     const updateCount = this.updateCount;
     const inputMap = this.inputMap;
+    const mainCampaignName = this.mainCampaignName;
     if (updateCount === 0) {
       newState.inputs = JSON.parse(JSON.stringify(this.blankInputState));
     }
     const mainCampaign = this.mainCampaignName;
-    setValuesForInputs(inputs);
+    setValuesForInputs(mainInputs);
     this.updateCount++;
     this.setState(newState);
 
     function setValuesForInputs(inputs, doNested) {
       if (!inputs) { return; }
-      console.log(inputs);
+      console.log(inputs, inputMap);
       inputs.forEach((input, inputIndex) => {
         switch (updateCount) {
           case 0:
             // Pick the first set of campaigns
-            newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}`] = input.name;
+            if (typeof input === "object" || input === "none") {
+              newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}`] = input.name || input;
+            }
             break;
           case 1:
             // Pick the second set of campaigns (if there is any)
@@ -114,28 +117,35 @@ export default class Step2Form extends Component {
             break;
           default:
             // Set the values
-            if (input.inputs !== undefined && typeof input.inputs[0] !== "object") {
-              const inputsToDo = Object.keys(inputMap).filter((key) => {
-                if (doNested) {
-                  return isCampaignSelect(key);
-                } else {
-                  return !isCampaignSelect(key);
-                }
-              });
-              inputsToDo.forEach((key, campaignIndex) => {
-                if (inputIndex === campaignIndex) {
-                  inputMap[key].forEach((inputName, index) => {
-                    if (!isCampaignSelect(inputName)) {
-                      let type = inputName.split('-');
-                      type = type[type.length - 1].split('_')[0];
-                      newState.inputs[type][inputName] = convertInput(input.inputs[index], type);
+            console.log(input, inputIndex);
+              console.log("here");
+              inputMap[mainCampaignName].forEach((inputName, index) => {
+                console.log(inputName, inputIndex, index);
+                  if (inputIndex === index) {
+                    if (isCampaignSelect(inputName)) { 
+                      console.log("inside");
+                      const fields = inputMap[inputName];
+                      if (Array.isArray(fields)) {
+                        fields.forEach((fieldName, fieldIndex) => {
+                          if (!isCampaignSelect(fieldName)) {    
+                            let type = fieldName.split('-');
+                            type = type[type.length - 1].split('_')[0];
+                            const value = input.inputs[fieldIndex];
+                            console.log(value, type);
+                            newState.inputs[type][fieldName] = convertInput(value, type);
+                          }
+                        });
+                      }
+                    } else {
+                        console.log(inputName);
+                        let type = inputName.split('-');
+                        type = type[type.length - 1].split('_')[0];
+                        const value = input;
+                        console.log(value, type);
+                        newState.inputs[type][inputName] = convertInput(value, type);
                     }
-                  });
-                }
+                  }
               });
-            } else if (input.name !== 'none') {
-              setValuesForInputs(input.inputs, true);
-            }
             break;
         }
       });
@@ -180,15 +190,17 @@ export default class Step2Form extends Component {
   generateInputsForCampaign(campaign, mapTo) {
     const inputs = [];
     const fields = campaign.inputs;
-    Object.keys(fields).forEach((key) => {
-      const inputType = fields[key].type || 'campaignSelect';
+    const campaignInputKeys = Object.keys(campaign.inputs);
+    Object.keys(fields).forEach((key, index) => {
+      const field = typeof fields[key] !== "object" ? fields[key] : fields[campaignInputKeys[index]];
+      const inputType = field.type || 'campaignSelect';
       const inputId = inputs.length;
       const inputName = mapTo ? `${mapTo}-${inputType}_${inputId}` : `${inputType}_${inputId}`;
       const newInput = {
         type: inputType,
         label: key.indexOf('_') > -1 ? splitAndCapitalize('_', key) : capitalize(key),
-        options: fields[key].options || fields[key],
-        description: fields[key].description,
+        options: field.options || field,
+        description: field.description,
         name: inputName,
       };
       inputs.push(this.inputGenerator(newInput));
@@ -329,21 +341,14 @@ export default class Step2Form extends Component {
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
       inputs: []
     }
-    const allInputs = Object.keys(this.inputMap).sort().reverse();
-    allInputs.forEach((input) => {
-      if (input === this.mainCampaignName) {
-        this.inputMap[this.mainCampaignName].forEach((field) => {
-          if (!(field.indexOf('campaignSelect') > -1)) {
-            newCampaign.inputs.push(this.getInputValue(field))
-          }
-        });
-      } else if (isCampaignSelect(input)) {
-        newCampaign.inputs.push(this.getInputsForCampaign(input));
-      } else {
-        newCampaign.inputs.push(this.getInputValue(input));
-      }
-    });
 
+    this.inputMap[this.mainCampaignName].forEach((input) => {
+        if (!isCampaignSelect(input) || this.inputMap[input] === 'none') {
+          newCampaign.inputs.push(this.getInputValue(input));
+        } else {
+          newCampaign.inputs.push(this.getInputsForCampaign(input));
+        }
+    });
     this.props.addCampaign(newCampaign);
   }
 
