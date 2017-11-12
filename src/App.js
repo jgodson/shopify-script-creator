@@ -7,6 +7,7 @@ import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
 
 import LineItemScript from './scripts/lineItem';
+import ShippingScript from './scripts/shipping';
 
 class App extends Component {
   constructor(props) {
@@ -162,11 +163,13 @@ class App extends Component {
         output += this.generateCampaignsOutput();
         break;
       case 'shipping':
+        output += ShippingScript.classes;
+        output += this.generateCampaignsOutput();
         break;
       case 'payment':
         break;
       default:
-      console.warn("Invalid type");
+        console.warn("Invalid type");
     }
     // Trim space from lines
     //output = output.split('\n').filter((line) => line.trim() !== '').map((line) => line.trim()).join('\n');
@@ -175,20 +178,25 @@ class App extends Component {
   }
 
   generateCampaignsOutput() {
-    let output;
+    let output = null;
+    let campaigns = null;
     switch(this.state.scriptType) {
       case 'line_item':
-        let campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
         // remove the last `,` from the string (raises syntax error)
         campaigns = campaigns.substring(campaigns.length -1, 0);
         output = LineItemScript.defaultCode.replace('|', campaigns);
         break;
       case 'shipping':
+        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        // remove the last `,` from the string (raises syntax error)
+        campaigns = campaigns.substring(campaigns.length -1, 0);
+        output = ShippingScript.defaultCode.replace('|', campaigns);
         break;
       case 'payment':
         break;
       default:
-      console.warn("Invalid type");
+        console.warn("Invalid type");
     }
     return output;
   }
@@ -314,6 +322,13 @@ ${inputsCode}
       onAction: this.reset
     };
 
+    const reportIssue = {
+      content: 'Report an Issue',
+      external: true,
+      plain: true,
+      url: 'https://github.com/jgodson/shopify-script-creator/issues/new' 
+    }
+
     const secondaryActions = [
       {
         content: 'Download campaigns',
@@ -351,7 +366,7 @@ ${inputsCode}
     };
     
     return (
-      <Page title="Shopify Script Creator" secondaryActions={secondaryActions}>
+      <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
         <Layout>
           <Layout.Section>
             <Step1Buttons changeType={this.typeChange} currentType={this.state.scriptType} />
@@ -380,7 +395,7 @@ ${inputsCode}
         </Layout>
         <PageActions
           primaryAction={generate}
-          secondaryActions={[clear]}
+          secondaryActions={clear}
         />
         <Footer />
       </Page>
