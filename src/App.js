@@ -15,9 +15,7 @@ class App extends Component {
 
     this.defaultState = {
       scriptType: 'line_item',
-      step2: {
-        shown: false,
-      },
+      showForm: false,
       currentCampaign: null,
       availableCampaigns: this.getCampagins('line_item'),
       campaigns: [{name: "Create new campaign", skip: true}],
@@ -51,7 +49,7 @@ class App extends Component {
   }
 
   typeChange(newType) {
-    if (this.state.campaigns.length > 1 || this.state.step2.shown) {
+    if (this.state.campaigns.length > 1 || this.state.showForm) {
       const response = confirm("Changing the script type will clear your current campaigns. Are you sure?");
       if (!response) { return; }
     }
@@ -99,7 +97,7 @@ class App extends Component {
 
   editCampaign(campaignId) {
     const newState = this.state;
-    newState.step2.shown = true;
+    newState.showForm = true;
     const campaign = this.getCampaignById(campaignId);
     newState.currentCampaign = this.getCampaignInfo(campaign.name);
     newState.editCampaignInfo = campaign;
@@ -127,7 +125,7 @@ class App extends Component {
     if (!boolean) {
       newState.editCampaignInfo = null;
     }
-    newState.step2.shown = boolean;
+    newState.showForm = boolean;
     newState.output = '';
     this.setState(newState);
   }
@@ -145,17 +143,17 @@ class App extends Component {
     }
     newState.currentCampaign = null;
     newState.editCampaignInfo = null;
-    newState.step2.shown = false;
+    newState.showForm = false;
     this.setState(newState);
   }
 
   generateScript() {
-    if (this.state.step2.shown) {
+    if (this.state.showForm) {
       alert("Save or discard changes to the current campaign first.");
       return;
     }
     const newState = this.state;
-    newState.step2.shown = false;
+    newState.showForm = false;
     let output = "";
     switch(this.state.scriptType) {
       case 'line_item':
@@ -370,7 +368,7 @@ ${inputsCode}
         <Layout>
           <Layout.Section>
             <Step1Buttons changeType={this.typeChange} currentType={this.state.scriptType} />
-            {this.state.step2.shown && 
+            {this.state.showForm && 
               <Step2Form
                 currentCampaign={this.state.currentCampaign}
                 availableCampaigns={this.state.availableCampaigns}
@@ -381,7 +379,7 @@ ${inputsCode}
               />
             }
             {this.state.output && <ScriptOutput output={this.state.output} />}
-            {(!this.state.step2.shown && !this.state.output) && instructions()}
+            {(!this.state.showForm && !this.state.output) && instructions()}
           </Layout.Section>
           <Layout.Section secondary>
             <Campaigns 
