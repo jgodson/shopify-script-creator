@@ -13838,6 +13838,9 @@ function splitCamelCase(word) {
 }
 
 function isCampaignSelect(inputName) {
+  if (inputName.indexOf('campaignSelect') === -1) {
+    return false;
+  }
   var temparr = inputName.split('-');
   return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
 }
@@ -31141,6 +31144,10 @@ var App = function (_Component) {
       editCampaignInfo: null
     };
 
+    // Version used for saving script files to detect imcompatabilities
+    _this.version = "0.0.1";
+    _this.incompatibleVersions = [];
+
     _this.state = JSON.parse(JSON.stringify(_this.defaultState));
 
     _this.typeChange = _this.typeChange.bind(_this);
@@ -31153,6 +31160,8 @@ var App = function (_Component) {
     _this.getCampagins = _this.getCampagins.bind(_this);
     _this.getCampaignInfo = _this.getCampaignInfo.bind(_this);
     _this.getCampaignById = _this.getCampaignById.bind(_this);
+    _this.readFile = _this.readFile.bind(_this);
+    _this.processFile = _this.processFile.bind(_this);
     _this.showForm = _this.showForm.bind(_this);
     _this.download = _this.download.bind(_this);
     _this.downloadCampaigns = _this.downloadCampaigns.bind(_this);
@@ -31386,7 +31395,7 @@ var App = function (_Component) {
         fileInput.style.display = 'none';
         document.body.appendChild(fileInput);
         fileInput.addEventListener('change', function (evt) {
-          readFile(evt.target, function (loadedCampaigns) {
+          _this4.readFile(evt.target, function (loadedCampaigns) {
             if (loadedCampaigns && loadedCampaigns.length > 0) {
               var newState = JSON.parse(JSON.stringify(_this4.defaultState));
               loadedCampaigns.reverse().forEach(function (campaign) {
@@ -31403,53 +31412,62 @@ var App = function (_Component) {
         });
       }
       fileInput.click();
+    }
+  }, {
+    key: 'readFile',
+    value: function readFile(fileInput, callback) {
+      var _this5 = this;
 
-      function readFile(fileInput, callback) {
-        // Create a reader object
-        var reader = new FileReader();
-        if (fileInput.files.length) {
-          var textFile = fileInput.files[0];
-          // Read the file
-          reader.readAsText(textFile);
-          // When it's loaded, process it
-          reader.addEventListener('load', function (evt) {
-            var result = processFile(evt);
-            callback(result);
-          });
-        }
-
-        function processFile(evt) {
-          var file = evt.target.result;
-          var validFileSignature = 'ShopifyScriptCreatorFile';
-          var results = null;
-          if (file && file.length) {
-            results = file;
-            if (results.indexOf(validFileSignature) > -1) {
-              return JSON.parse(results.split(validFileSignature)[1]);
-            } else {
-              alert('File does not appear to be a valid script creator file');
-            }
-          } else {
-            alert('File does not appear to be a valid script creator file');
-            return null;
-          }
-        }
+      // Create a reader object
+      var reader = new FileReader();
+      if (fileInput.files.length) {
+        var textFile = fileInput.files[0];
+        // Read the file
+        reader.readAsText(textFile);
+        // When it's loaded, process it
+        reader.addEventListener('load', function (evt) {
+          var result = _this5.processFile(evt);
+          callback(result);
+        });
       }
+    }
+  }, {
+    key: 'processFile',
+    value: function processFile(evt) {
+      var file = evt.target.result;
+      var validFileSignature = 'ShopifyScriptCreatorFile';
+      var results = null;
+      if (file && file.length) {
+        results = file;
+        if (results.indexOf(validFileSignature) > -1) {
+          var fileVersion = results.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
+          if (this.incompatibleVersions.indexOf(fileVersion) > -1) {
+            alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
+          } else {
+            return JSON.parse(results.split(validFileSignature + '-V' + this.version + '-')[1]);
+          }
+        } else {
+          alert('File does not appear to be a valid script creator file');
+        }
+      } else {
+        alert('File does not appear to be a valid script creator file');
+      }
+      return null;
     }
   }, {
     key: 'downloadCampaigns',
     value: function downloadCampaigns() {
-      var filename = 'SSC-script-' + parseInt(Math.random() * 100000000) + '.txt';
+      var filename = 'SSC-V' + this.version + '-script-' + parseInt(Math.random() * 100000000) + '.txt';
       var campaigns = this.state.campaigns.filter(function (campaign) {
         return !campaign.skip;
       });
-      var data = 'ShopifyScriptCreatorFile' + JSON.stringify(campaigns);
+      var data = 'ShopifyScriptCreatorFile-V' + this.version + '-' + JSON.stringify(campaigns);
       this.download(data, filename, 'text/plain');
     }
   }, {
     key: 'render',
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       var generate = {
         content: 'Generate script',
@@ -31473,13 +31491,13 @@ var App = function (_Component) {
       }];
 
       var instructions = function instructions() {
-        if (_this5.state.campaigns.length === 1) {
+        if (_this6.state.campaigns.length === 1) {
           return _react2.default.createElement(
             _polaris.EmptyState,
             {
               heading: 'Add your campaigns to generate a script',
               action: { content: 'Add campaign', onAction: function onAction() {
-                  return _this5.showForm(true);
+                  return _this6.showForm(true);
                 } }
             },
             _react2.default.createElement(
@@ -31499,9 +31517,9 @@ var App = function (_Component) {
             _polaris.EmptyState,
             {
               heading: 'Add more campaigns or generate your script now',
-              action: { content: 'Generate script', onAction: _this5.generateScript },
+              action: { content: 'Generate script', onAction: _this6.generateScript },
               secondaryAction: { content: 'Add another campaign', onAction: function onAction() {
-                  return _this5.showForm(true);
+                  return _this6.showForm(true);
                 } }
             },
             _react2.default.createElement(
@@ -41381,14 +41399,15 @@ var Step2Form = function (_Component) {
         return;
       }
       var newState = this.state;
-      var inputs = existingInfo.inputs;
+      var mainInputs = existingInfo.inputs;
       var updateCount = this.updateCount;
       var inputMap = this.inputMap;
+      var mainCampaignName = this.mainCampaignName;
       if (updateCount === 0) {
         newState.inputs = JSON.parse(JSON.stringify(this.blankInputState));
       }
       var mainCampaign = this.mainCampaignName;
-      setValuesForInputs(inputs);
+      setValuesForInputs(mainInputs);
       this.updateCount++;
       this.setState(newState);
 
@@ -41396,12 +41415,14 @@ var Step2Form = function (_Component) {
         if (!inputs) {
           return;
         }
-        console.log(inputs);
+        console.log(inputs, inputMap);
         inputs.forEach(function (input, inputIndex) {
           switch (updateCount) {
             case 0:
               // Pick the first set of campaigns
-              newState.inputs.campaignSelect[mainCampaign + '-campaignSelect_' + inputIndex] = input.name;
+              if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === "object" || input === "none") {
+                newState.inputs.campaignSelect[mainCampaign + '-campaignSelect_' + inputIndex] = input.name || input;
+              }
               break;
             case 1:
               // Pick the second set of campaigns (if there is any)
@@ -41413,28 +41434,35 @@ var Step2Form = function (_Component) {
               break;
             default:
               // Set the values
-              if (input.inputs !== undefined && _typeof(input.inputs[0]) !== "object") {
-                var inputsToDo = Object.keys(inputMap).filter(function (key) {
-                  if (doNested) {
-                    return (0, _helpers.isCampaignSelect)(key);
+              console.log(input, inputIndex);
+              console.log("here");
+              inputMap[mainCampaignName].forEach(function (inputName, index) {
+                console.log(inputName, inputIndex, index);
+                if (inputIndex === index) {
+                  if ((0, _helpers.isCampaignSelect)(inputName)) {
+                    console.log("inside");
+                    var fields = inputMap[inputName];
+                    if (Array.isArray(fields)) {
+                      fields.forEach(function (fieldName, fieldIndex) {
+                        if (!(0, _helpers.isCampaignSelect)(fieldName)) {
+                          var type = fieldName.split('-');
+                          type = type[type.length - 1].split('_')[0];
+                          var value = input.inputs[fieldIndex];
+                          console.log(value, type);
+                          newState.inputs[type][fieldName] = convertInput(value, type);
+                        }
+                      });
+                    }
                   } else {
-                    return !(0, _helpers.isCampaignSelect)(key);
+                    console.log(inputName);
+                    var type = inputName.split('-');
+                    type = type[type.length - 1].split('_')[0];
+                    var value = input;
+                    console.log(value, type);
+                    newState.inputs[type][inputName] = convertInput(value, type);
                   }
-                });
-                inputsToDo.forEach(function (key, campaignIndex) {
-                  if (inputIndex === campaignIndex) {
-                    inputMap[key].forEach(function (inputName, index) {
-                      if (!(0, _helpers.isCampaignSelect)(inputName)) {
-                        var type = inputName.split('-');
-                        type = type[type.length - 1].split('_')[0];
-                        newState.inputs[type][inputName] = convertInput(input.inputs[index], type);
-                      }
-                    });
-                  }
-                });
-              } else if (input.name !== 'none') {
-                setValuesForInputs(input.inputs, true);
-              }
+                }
+              });
               break;
           }
         });
@@ -41489,15 +41517,17 @@ var Step2Form = function (_Component) {
 
       var inputs = [];
       var fields = campaign.inputs;
-      Object.keys(fields).forEach(function (key) {
-        var inputType = fields[key].type || 'campaignSelect';
+      var campaignInputKeys = Object.keys(campaign.inputs);
+      Object.keys(fields).forEach(function (key, index) {
+        var field = _typeof(fields[key]) !== "object" ? fields[key] : fields[campaignInputKeys[index]];
+        var inputType = field.type || 'campaignSelect';
         var inputId = inputs.length;
         var inputName = mapTo ? mapTo + '-' + inputType + '_' + inputId : inputType + '_' + inputId;
         var newInput = {
           type: inputType,
           label: key.indexOf('_') > -1 ? (0, _helpers.splitAndCapitalize)('_', key) : (0, _helpers.capitalize)(key),
-          options: fields[key].options || fields[key],
-          description: fields[key].description,
+          options: field.options || field,
+          description: field.description,
           name: inputName
         };
         inputs.push(_this2.inputGenerator(newInput));
@@ -41677,21 +41707,14 @@ var Step2Form = function (_Component) {
         id: this.props.existingInfo ? this.props.existingInfo.id : null,
         inputs: []
       };
-      var allInputs = Object.keys(this.inputMap).sort().reverse();
-      allInputs.forEach(function (input) {
-        if (input === _this4.mainCampaignName) {
-          _this4.inputMap[_this4.mainCampaignName].forEach(function (field) {
-            if (!(field.indexOf('campaignSelect') > -1)) {
-              newCampaign.inputs.push(_this4.getInputValue(field));
-            }
-          });
-        } else if ((0, _helpers.isCampaignSelect)(input)) {
-          newCampaign.inputs.push(_this4.getInputsForCampaign(input));
-        } else {
+
+      this.inputMap[this.mainCampaignName].forEach(function (input) {
+        if (!(0, _helpers.isCampaignSelect)(input) || _this4.inputMap[input] === 'none') {
           newCampaign.inputs.push(_this4.getInputValue(input));
+        } else {
+          newCampaign.inputs.push(_this4.getInputsForCampaign(input));
         }
       });
-
       this.props.addCampaign(newCampaign);
     }
   }, {
