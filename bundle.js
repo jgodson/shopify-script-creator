@@ -13845,10 +13845,16 @@ function isCampaignSelect(inputName) {
   return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
 }
 
+function getInputType(inputName) {
+  var type = inputName.split('-');
+  return type[type.length - 1].split('_')[0];
+}
+
 exports.capitalize = capitalize;
 exports.splitAndCapitalize = splitAndCapitalize;
 exports.splitCamelCase = splitCamelCase;
 exports.isCampaignSelect = isCampaignSelect;
+exports.getInputType = getInputType;
 
 /***/ }),
 /* 170 */
@@ -31115,6 +31121,10 @@ var _lineItem = __webpack_require__(452);
 
 var _lineItem2 = _interopRequireDefault(_lineItem);
 
+var _shipping = __webpack_require__(453);
+
+var _shipping2 = _interopRequireDefault(_shipping);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -31306,6 +31316,8 @@ var App = function (_Component) {
           output += this.generateCampaignsOutput();
           break;
         case 'shipping':
+          output += _shipping2.default.classes;
+          output += this.generateCampaignsOutput();
           break;
         case 'payment':
           break;
@@ -31322,10 +31334,11 @@ var App = function (_Component) {
     value: function generateCampaignsOutput() {
       var _this2 = this;
 
-      var output = void 0;
+      var output = null;
+      var campaigns = null;
       switch (this.state.scriptType) {
         case 'line_item':
-          var campaigns = this.state.campaigns.map(function (campaign) {
+          campaigns = this.state.campaigns.map(function (campaign) {
             return _this2.generateCode(campaign);
           }).join();
           // remove the last `,` from the string (raises syntax error)
@@ -31333,6 +31346,12 @@ var App = function (_Component) {
           output = _lineItem2.default.defaultCode.replace('|', campaigns);
           break;
         case 'shipping':
+          campaigns = this.state.campaigns.map(function (campaign) {
+            return _this2.generateCode(campaign);
+          }).join();
+          // remove the last `,` from the string (raises syntax error)
+          campaigns = campaigns.substring(campaigns.length - 1, 0);
+          output = _shipping2.default.defaultCode.replace('|', campaigns);
           break;
         case 'payment':
           break;
@@ -31480,6 +31499,13 @@ var App = function (_Component) {
         onAction: this.reset
       };
 
+      var reportIssue = {
+        content: 'Report an Issue',
+        external: true,
+        plain: true,
+        url: 'https://github.com/jgodson/shopify-script-creator/issues/new'
+      };
+
       var secondaryActions = [{
         content: 'Download campaigns',
         onAction: this.downloadCampaigns,
@@ -31533,7 +31559,7 @@ var App = function (_Component) {
 
       return _react2.default.createElement(
         _polaris.Page,
-        { title: 'Shopify Script Creator', secondaryActions: secondaryActions },
+        { title: 'Shopify Script Creator', secondaryActions: secondaryActions, primaryAction: reportIssue },
         _react2.default.createElement(
           _polaris.Layout,
           null,
@@ -31565,8 +31591,7 @@ var App = function (_Component) {
           )
         ),
         _react2.default.createElement(_polaris.PageActions, {
-          primaryAction: generate,
-          secondaryActions: [clear]
+          secondaryActions: clear
         }),
         _react2.default.createElement(_Footer2.default, null)
       );
@@ -41415,7 +41440,6 @@ var Step2Form = function (_Component) {
         if (!inputs) {
           return;
         }
-        console.log(inputs, inputMap);
         inputs.forEach(function (input, inputIndex) {
           switch (updateCount) {
             case 0:
@@ -41434,31 +41458,32 @@ var Step2Form = function (_Component) {
               break;
             default:
               // Set the values
-              console.log(input, inputIndex);
-              console.log("here");
               inputMap[mainCampaignName].forEach(function (inputName, index) {
-                console.log(inputName, inputIndex, index);
                 if (inputIndex === index) {
                   if ((0, _helpers.isCampaignSelect)(inputName)) {
-                    console.log("inside");
                     var fields = inputMap[inputName];
                     if (Array.isArray(fields)) {
                       fields.forEach(function (fieldName, fieldIndex) {
                         if (!(0, _helpers.isCampaignSelect)(fieldName)) {
-                          var type = fieldName.split('-');
-                          type = type[type.length - 1].split('_')[0];
+                          var type = (0, _helpers.getInputType)(fieldName);
                           var value = input.inputs[fieldIndex];
-                          console.log(value, type);
                           newState.inputs[type][fieldName] = convertInput(value, type);
+                        } else {
+                          var nestedFields = inputMap[fieldName];
+                          if (nestedFields === 'none') {
+                            return;
+                          }
+                          nestedFields.forEach(function (nestedName, nestedIndex) {
+                            var type = (0, _helpers.getInputType)(nestedName);
+                            var value = input.inputs[fieldIndex].inputs[nestedIndex];
+                            newState.inputs[type][nestedName] = convertInput(value, type);
+                          });
                         }
                       });
                     }
                   } else {
-                    console.log(inputName);
-                    var type = inputName.split('-');
-                    type = type[type.length - 1].split('_')[0];
+                    var type = (0, _helpers.getInputType)(inputName);
                     var value = input;
-                    console.log(value, type);
                     newState.inputs[type][inputName] = convertInput(value, type);
                   }
                 }
@@ -41742,11 +41767,7 @@ var Step2Form = function (_Component) {
   }, {
     key: 'getInputValue',
     value: function getInputValue(inputName) {
-      var type = inputName.split('-');
-      if (type.length < 2) {
-        return;
-      };
-      type = type[type.length - 1].split('_')[0];
+      var type = (0, _helpers.getInputType)(inputName);
       var value = this.state.inputs[type][inputName];
       // Can modify values here (like make an array into an array)
       switch (type) {
@@ -42142,20 +42163,37 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var ScriptOutput = function (_Component) {
   _inherits(ScriptOutput, _Component);
 
-  function ScriptOutput() {
+  function ScriptOutput(props) {
     _classCallCheck(this, ScriptOutput);
 
-    return _possibleConstructorReturn(this, (ScriptOutput.__proto__ || Object.getPrototypeOf(ScriptOutput)).apply(this, arguments));
+    var _this = _possibleConstructorReturn(this, (ScriptOutput.__proto__ || Object.getPrototypeOf(ScriptOutput)).call(this, props));
+
+    _this.textfieldId = 'ScriptOutput';
+
+    _this.copyOutputCode = _this.copyOutputCode.bind(_this);
+    return _this;
   }
 
   _createClass(ScriptOutput, [{
+    key: 'copyOutputCode',
+    value: function copyOutputCode() {
+      document.querySelector('#' + this.textfieldId).select();
+      document.execCommand('selectAll');
+      document.execCommand('copy');
+    }
+  }, {
     key: 'render',
     value: function render() {
+      var copy = {
+        content: "Copy",
+        onAction: this.copyOutputCode
+      };
+
       return _react2.default.createElement(
         _polaris.Card,
-        { title: 'Script code', sectioned: true },
+        { title: 'Script code', sectioned: true, actions: [copy] },
         _react2.default.createElement(_polaris.TextField, {
-          id: 'ScriptOutput',
+          id: this.textfieldId,
           multiline: 10,
           readOnly: true,
           value: this.props.output,
@@ -42262,7 +42300,7 @@ exports.default = function () {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var classes = "# Combines selectors together and returns true if they all match\nclass AndSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.all? { |selector| \n    selector.match?(item) }\n  end\nend\n\n# Combines selectors together and returns true if any of them match\nclass OrSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.any? { |selector| selector.match?(item) }\n  end\nend\n\n# Checks to see if the product is a gift card, returns true if it is\nclass ExcludeGiftCardSelector\n  def match?(line_item)\n    !line_item.variant.product.gift_card?\n  end\nend\n\n# Applies a given percentage discount to an item with the given message\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend\n\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend\n\nclass ProductIdSelector\n  def initialize(product_ids)\n    @product_ids = product_ids\n  end\n\n  def match?(line_item)\n    @product_ids.include?(line_item.variant.product.id)\n  end\nend\n\nclass ProductTagSelector\n  def initialize(tags)\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(line_item)\n    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n    (@tags & product_tags).length > 0\n  end\nend\n\n# Ensures the cart amount meets a certain criteria\nclass CartAmountQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    total = cart.subtotal_price\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend\n\n# Checks to see if the cart has no discount codes. Optionally can reject the discount code with a message\nclass ExcludeDiscountCodes\n  def initialize(reject, message)\n    @reject = reject\n    @message = message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend\n\nclass DiscountUsingSelector\n  def initialize(cart_qualifier, line_item_qualifier, discount)\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n  end\n\n  def run(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    cart.line_items.each do |item|\n      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)\n      @discount.apply(item)\n    end\n  end\nend\n\n# BOGO campaign\nclass BuyOneGetOne\n  def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)\n    raise \"buy_x must be greater than or equal to get_x\" unless buy_x >= get_x\n    \n    @cart_qualifier = cart_qualifier\n    @buy_item_qualifier = buy_item_qualifier\n    @get_item_qualifier = get_item_qualifier\n    @discount = discount\n    @buy_x = buy_x + get_x\n    @get_x = get_x\n    @max_sets = max_sets\n  end\n  \n  def run(cart)\n    # Make sure the cart qualifies for the offer\n    return unless !@cart_qualifier.nil? || @cart_qualfier.match?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x + @get_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @buy_item_qualifier.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @buy_item_qualifier.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_qualifier.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_qualifier.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n  end\nend";
+var classes = "# Combines selectors together and returns true if they all match\nclass AndSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.all? do |selector|\n      return true if selector.nil?\n      puts selector.match?(item) \n    end\n  end\nend\n\n# Combines selectors together and returns true if any of them match\nclass OrSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.any? do |selector|\n      next if selector.nil?\n      selector.match?(item) \n    end\n  end\nend\n\n# Checks to see if the product is a gift card, returns true if it is\nclass ExcludeGiftCardSelector\n  def match?(line_item)\n    !line_item.variant.product.gift_card?\n  end\nend\n\n# Applies a given percentage discount to an item with the given message\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend\n\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend\n\nclass ProductIdSelector\n  def initialize(product_ids)\n    @product_ids = product_ids\n  end\n\n  def match?(line_item)\n    @product_ids.include?(line_item.variant.product.id)\n  end\nend\n\nclass ProductTagSelector\n  def initialize(tags)\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(line_item)\n    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n    (@tags & product_tags).length > 0\n  end\nend\n\n# Ensures the cart amount meets a certain criteria\nclass CartAmountQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    total = cart.subtotal_price\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend\n\n# Checks to see if the cart has no discount codes. Optionally can reject the discount code with a message\nclass ExcludeDiscountCodes\n  def initialize(reject, message)\n    @reject = reject\n    @message = message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend\n\nclass DiscountUsingSelector\n  def initialize(cart_qualifier, line_item_qualifier, discount)\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n  end\n\n  def run(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    cart.line_items.each do |item|\n      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)\n      @discount.apply(item)\n    end\n  end\nend\n\n# BOGO campaign\nclass BuyXGetX\n  def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)\n    raise \"buy_x must be greater than or equal to get_x\" unless buy_x >= get_x\n    \n    @cart_qualifier = cart_qualifier\n    @buy_item_qualifier = buy_item_qualifier\n    @get_item_qualifier = get_item_qualifier\n    @discount = discount\n    @buy_x = buy_x + get_x\n    @get_x = get_x\n    @max_sets = max_sets == 0 ? nil : max_sets\n  end\n  \n  def run(cart)\n    # Make sure the cart qualifies for the offer\n    return unless !@cart_qualifier.nil? || @cart_qualfier.match?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x + @get_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @buy_item_qualifier.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @buy_item_qualifier.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_qualifier.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_qualifier.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n  end\nend";
 
 var defaultCode = "\nCAMPAIGNS = [|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
 
@@ -42450,6 +42488,26 @@ exports.default = {
   classes: classes,
   defaultCode: defaultCode,
   campaigns: campaigns
+};
+
+/***/ }),
+/* 453 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var classes = "class AndSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.all? do |selector|\n      return true if selector.nil?\n      puts selector.match?(item) \n    end\n  end\nend\n\n# Combines selectors together and returns true if any of them match\nclass OrSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.any? do |selector|\n      next if selector.nil?\n      selector.match?(item) \n    end\n  end\nend\n\nclass ProductTagSelector\n  def initialize(tags)\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(line_item)\n    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n    (@tags & product_tags).length > 0\n  end\nend\n\n# Checks if a rate matches a given name or not.\n# Can do a :partial or :exact match\nclass RateNameSelector\n  def initialize(name, match_type)\n    @name = name.downcase\n    @match_type = match_type\n  end\n  \n  def match?(rate)\n    case @match_type\n      when :partial\n        rate.name.downcase.include?(@name)\n      when :exact\n        rate.name.downcase === @name\n      else\n        raise \"Invalid match type. Must be :partial or :exact\"\n    end\n  end\nend\n\nclass HideRateUnlessConditionsMet\n  def initialize(cart_qualifier, line_item_qualifier, rate_selector)\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @rate_selector = rate_selector\n  end\n\n  def run(rates, cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }\n      rates.delete_if do |rate|\n        @rate_selector.match?(rate)\n      end\n    end\n  end\nend\n# --------------- Script Configuration --------------- #\n# ----- Qualifying Addresses ----- #\n# Example: {\n#   address1: [\"150 Elgin St\", \"150 Elgin Street\"],\n#   address2: \"8th floor\",\n#   phone: 123-456-7890,\n#   city: \"Ottawa\",\n#   province: \"Ontario\",\n#   country_code: \"CA\",\n#   zip: \"K2P 1L4\",\n#   match_type: :exact\n# }\n\n# Takes an array of rate names and matches a given rate\nclass RateSelector\n  \n  def initialize(rate_names)\n    @rate_names = rate_names.map { |name| name.downcase! }\n  end\n  \n  def match?(rate)\n    @rate_names.include?(rate.name.downcase)\n  end\nend\n\n# Applies a percentage discount to a given rate\nclass PercentageDiscount\n  \n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100\n    @message = message\n  end\n  \n  def apply(rate)\n    rate.apply_discount(rate.price * @percent, { message: @message })\n  end\n  \nend\n\n# Matches a given address to an array of addresses given\n# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)\n# If no match type is specified, :partial will be the default\n# Only the given paramaters will be compared. Arrays can be used to match different options\nclass AddressQualifier\n  \n  def initialize(addresses)\n    @addresses = addresses\n  end\n  \n  def match?(cart)\n    return false if cart.shipping_address.nil?\n    \n    @addresses.any? do |accepted_address|\n      match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial\n\n      cart.shipping_address.to_hash.all? do |key, value|\n        match = true\n        key = key.to_sym\n        value.downcase!\n        \n        unless accepted_address[key].nil?\n          if accepted_address[key].kind_of?(Array)\n            match = accepted_address[key].any? do |potential_address|\n              potential_address.downcase!\n              case match_type\n                when :partial\n                  value.include?(potential_address)\n                when :exact\n                  potential_address == value\n              end\n            end\n          else\n            accepted_address[key].downcase!\n            case match_type\n              when :partial\n                match = value.include?(accepted_address[key])\n              when :exact\n                match = accepted_address[key] == value\n            end\n          end\n        end\n        match\n      end\n    end\n  end\nend\n\n# COUNTRY MAP = { \"COUNTRY_CODE\" => [\"PROVINCE_CODE_1\", \"PROVINCE_CODE_2\", etc] }\nclass CountryAndProvinceSelector\n  def initialize(country_map)\n    @country_map = country_map\n  end\n\n  def match?(cart)\n    address = cart.shipping_address\n    address && @country_map.key?(address.country_code.upcase) && @country_map[address.country_code.upcase].include?(address.province_code.upcase)\n  end\nend\n\n# Accepts a qualifier, rate selector and a discount to apply to shipping rates\nclass ShippingDiscount\n  def initialize(qualifier, rate_selector, discount)\n    @qualifier = qualifier\n    @rate_selector = rate_selector\n    @discount = discount\n  end\n  \n  def run(cart, rates)\n    return unless @qualifier.match?(cart)\n    rates.each do |rate|\n      next unless @rate_selector.match?(rate)\n      @discount.apply(rate)\n    end\n  end\nend";
+
+var defaultCode = "\nCAMPAIGNS = [|].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.shipping_rates, Input.cart)\nend\n\nOutput.shipping_rates = Input.shipping_rates";
+
+exports.default = {
+  classes: classes,
+  defaultCode: defaultCode
+  //campaigns
 };
 
 /***/ })
