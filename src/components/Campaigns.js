@@ -32,7 +32,7 @@ export default class Campaigns extends Component {
     return (
       <Card.Section title={splitCamelCase(campaign.name)} key={`campaign-${campaign.id || ''}`}>
         {message && 
-            <div class="campaign-info"><TextStyle variation="subdued">{message[0].replace(/"/g, '')}</TextStyle></div>
+            <div className="campaign-info"><TextStyle variation="subdued">{message[0].replace(/"/g, '')}</TextStyle></div>
         }
         <Stack distribution="trailing">
           {campaign.id && <Button size="slim" destructive onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
