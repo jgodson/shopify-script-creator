@@ -206,7 +206,7 @@ class App extends Component {
       if (input.inputs) {
         return this.generateCode(input);
       } else {
-        return input.name === "none" ? '\nnil' : `\n${input}`;
+        return input === "none" ? '\nnil' : `\n${input}`;
       }
     }).join();
     return `

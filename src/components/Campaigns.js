@@ -22,8 +22,11 @@ export default class Campaigns extends Component {
 
   renderCardSection(campaign) {
     let button = null;
-    let message = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount/i) > -1 );
-    message = message && message.map((campaign) => campaign.inputs[campaign.inputs.length - 1]);
+    let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount/i) > -1);
+    messages = messages && messages.map((campaign) => {
+      const lastValueIndex = campaign.inputs.length - 1;
+      return campaign.inputs[lastValueIndex].replace(/"/g, '').trim();
+    });
     if (campaign.id) {
       button = <Button size="slim" onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;
     } else {
@@ -31,8 +34,11 @@ export default class Campaigns extends Component {
     }
     return (
       <Card.Section title={splitCamelCase(campaign.name)} key={`campaign-${campaign.id || ''}`}>
-        {message && 
-            <div className="campaign-info"><TextStyle variation="subdued">{message[0].replace(/"/g, '')}</TextStyle></div>
+        {messages && 
+          messages.map((message, index) => {
+            if (message === "") { return false; }
+            return <div key={`campaign-${campaign.id}-message-${index}`}className="campaign-info"><TextStyle variation="subdued">{message}</TextStyle></div>
+          })
         }
         <Stack distribution="trailing">
           {campaign.id && <Button size="slim" destructive onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
