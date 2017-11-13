@@ -7,8 +7,7 @@ class AndSelector
 
   def match?(item)
     @selectors.all? do |selector|
-      return true if selector.nil?
-      puts selector.match?(item) 
+      selector.nil? || selector.match?(item) 
     end
   end
 end
@@ -22,13 +21,13 @@ class OrSelector
   def match?(item)
     @selectors.any? do |selector|
       next if selector.nil?
-      selector.match?(item) 
+      return selector.match?(item) 
     end
   end
 end
 
 # Checks to see if the product is a gift card, returns true if it is
-class ExcludeGiftCardSelector
+class ExcludeGiftCards
   def match?(line_item)
     !line_item.variant.product.gift_card?
   end
@@ -152,7 +151,7 @@ class BuyXGetX
   
   def run(cart)
     # Make sure the cart qualifies for the offer
-    return unless !@cart_qualifier.nil? || @cart_qualfier.match?(cart)
+    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
     return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x + @get_x
     applicable_buy_items = nil
     eligible_get_items = nil
@@ -208,7 +207,7 @@ const CART_QUALIFIERS = [
   {
     value: "none",
     label: "None",
-    description: "Applies to any cart"
+    description: "No additional conditions"
   },
   {
     value: "CartAmountQualifier",
@@ -264,7 +263,7 @@ const LINE_ITEM_QUALIFIERS = [
   {
     value: "none",
     label: "None",
-    description: "Applies to any line item"
+    description: "No additional conditions"
   },
   {
     value: "ProductIdSelector",
@@ -287,6 +286,11 @@ const LINE_ITEM_QUALIFIERS = [
         description: "Seperate individual tags with a comma (,)"
       }
     }
+  },
+  {
+    value: "ExcludeGiftCards",
+    label: "Exclude Gift Cards",
+    description: "Do not include products that are gift cards"
   }
 ]
 
@@ -329,8 +333,8 @@ const LINE_ITEM_AND_SELECTOR = {
   description: "Qualifies if all of the requirements are met",
   inputs: {
     line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
     line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
   }
 };
 
@@ -398,7 +402,7 @@ const campaigns = [
       },
       maximum_sets: {
         type: "number",
-        description: "Maximum number of item sets to discount (Buy 4 Get 1 = 1 set)"
+        description: "Maximum number of item sets to discount, 0 for no limit (Buy 2 Get 1 = 1 set)"
       }
     }
   }

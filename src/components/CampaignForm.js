@@ -128,7 +128,7 @@ export default class Step2Form extends Component {
                             newState.inputs[type][fieldName] = convertInput(value, type);
                           } else {
                             const nestedFields = inputMap[fieldName];
-                            if (nestedFields === 'none') { return; }
+                            if (!nestedFields || nestedFields === 'none') { return; }
                             nestedFields.forEach((nestedName, nestedIndex) => {
                               const type = getInputType(nestedName);
                               const value = input.inputs[fieldIndex].inputs[nestedIndex];
@@ -309,8 +309,10 @@ export default class Step2Form extends Component {
           let additionalInputs = null;
           if (value && value !== 'none') {
             const campaign = input.options.filter((option) => option.value === value)[0];
-            description = <TextStyle variation="subdued"><strong>Details: </strong>{campaign.description}</TextStyle>;
-            additionalInputs = this.generateAdditionalInputs(campaign, input.name);
+              description = <TextStyle variation="subdued"><strong>Details: </strong>{campaign.description}</TextStyle>;
+            if (campaign.inputs) {
+              additionalInputs = this.generateAdditionalInputs(campaign, input.name);
+            }
           }
           return [
             <div key={input.name} className="select-wrapper">
@@ -355,7 +357,7 @@ export default class Step2Form extends Component {
       name: this.getInputValue(campaignSelect)
     }
 
-    if (newInput.name !== 'none') {
+    if (Array.isArray(this.inputMap[campaignSelect])) {
       newInput.inputs = [];
       this.inputMap[campaignSelect].forEach((campaignInput) => {
         if (isCampaignSelect(campaignInput)) {

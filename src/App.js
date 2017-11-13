@@ -202,12 +202,17 @@ class App extends Component {
 
   generateCode(campaign) {
     if (campaign.skip) { return; }
-    console.log(campaign);
     const inputsCode = campaign.inputs.map((input, index) => {
       if (input.inputs) {
         return this.generateCode(input);
+      } else if (typeof input === "object" && input.name !== "none") {
+        return `${input.name}.new()`;
       } else {
-        return input === "none" ? '\nnil' : `\n${input}`;
+        if (input === 'none' || typeof input === "object" && input.name === 'none') {
+          return '\nnil';
+        } else {
+          return `\n${input}`;
+        }
       }
     }).join();
     return `
@@ -355,7 +360,7 @@ ${inputsCode}
       } else {
         return (
           <EmptyState
-            heading="Add more campaigns or generate your script now"
+            heading="Your script is ready to go! You can also add additional campaigns."
             action={{content: 'Generate script', onAction: this.generateScript}}
             secondaryAction={{content: 'Add another campaign', onAction: () => this.showForm(true)}}
           >
