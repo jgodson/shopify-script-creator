@@ -8,6 +8,7 @@ import Footer from './components/Footer';
 
 import LineItemScript from './scripts/lineItem';
 import ShippingScript from './scripts/shipping';
+import { RegExp } from 'core-js/library/web/timers';
 
 class App extends Component {
   constructor(props) {
@@ -290,7 +291,8 @@ ${inputsCode}
         if (this.incompatibleVersions.indexOf(fileVersion) > -1) {
           alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
         } else {
-          return JSON.parse(results.split(`${validFileSignature}-V${this.version}-`)[1]);
+          const splitOn = /-V\d+\.\d+\.\d+-/;
+          return JSON.parse(results.split(splitOn)[1]);
         }
       } else {
         alert('File does not appear to be a valid script creator file');
