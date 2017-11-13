@@ -42106,7 +42106,7 @@ var Campaigns = function (_Component) {
         { title: (0, _helpers.splitCamelCase)(campaign.name), key: 'campaign-' + (campaign.id || '') },
         message && _react2.default.createElement(
           'div',
-          { 'class': 'campaign-info' },
+          { className: 'campaign-info' },
           _react2.default.createElement(
             _polaris.TextStyle,
             { variation: 'subdued' },
