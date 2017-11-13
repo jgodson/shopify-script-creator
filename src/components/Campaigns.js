@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
-import { Layout, ResourceList, Card, Subheading, Stack, Button } from '@shopify/polaris';
+import { Layout, ResourceList, Card, Subheading, Stack, Button, TextStyle } from '@shopify/polaris';
 import { splitCamelCase } from '../helpers';
+
+import styles from './Campaigns.css';
 
 export default class Campaigns extends Component {
   constructor(props) {
@@ -20,13 +22,18 @@ export default class Campaigns extends Component {
 
   renderCardSection(campaign) {
     let button = null;
+    let message = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount/i) > -1 );
+    message = message && message.map((campaign) => campaign.inputs[campaign.inputs.length - 1]);
     if (campaign.id) {
       button = <Button size="slim" onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;
     } else {
       button = <Button size="slim" primary onClick={this.createNew}>Create new</Button>;
     }
     return (
-      <Card.Section title={splitCamelCase(campaign.name)} key={`campaign${'-' + (campaign.id || '')}`}>
+      <Card.Section title={splitCamelCase(campaign.name)} key={`campaign-${campaign.id || ''}`}>
+        {message && 
+            <div class="campaign-info"><TextStyle variation="subdued">{message[0].replace(/"/g, '')}</TextStyle></div>
+        }
         <Stack distribution="trailing">
           {campaign.id && <Button size="slim" destructive onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
           {button}

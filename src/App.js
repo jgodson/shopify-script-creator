@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import { Layout, Page, PageActions, EmptyState } from '@shopify/polaris';
-import Step1Buttons from './components/Step1Buttons';
-import Step2Form from './components/Step2Form';
+import ScriptSelector from './components/ScriptSelector';
+import CampaignForm from './components/CampaignForm';
 import Campaigns from './components/Campaigns';
 import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
@@ -367,9 +367,9 @@ ${inputsCode}
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
         <Layout>
           <Layout.Section>
-            <Step1Buttons changeType={this.typeChange} currentType={this.state.scriptType} />
+            <ScriptSelector changeType={this.typeChange} currentType={this.state.scriptType} />
             {this.state.showForm && 
-              <Step2Form
+              <CampaignForm
                 currentCampaign={this.state.currentCampaign}
                 availableCampaigns={this.state.availableCampaigns}
                 updateCurrentCampaign={this.updateCurrentCampaign}

@@ -11,7 +11,7 @@ import {
   Button,
   ButtonGroup
 } from '@shopify/polaris';
-import styles from './Step2Form.css';
+import styles from './CampaignForm.css';
 import { capitalize, splitAndCapitalize, isCampaignSelect, getInputType } from '../helpers';
 
 export default class Step2Form extends Component {
