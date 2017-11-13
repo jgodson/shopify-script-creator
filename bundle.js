@@ -31371,7 +31371,7 @@ var App = function (_Component) {
         if (input.inputs) {
           return _this3.generateCode(input);
         } else {
-          return input.name === "none" ? '\nnil' : '\n' + input;
+          return input === "none" ? '\nnil' : '\n' + input;
         }
       }).join();
       return '\n' + campaign.name + '.new(\n' + inputsCode + '\n)';
@@ -42080,11 +42080,12 @@ var Campaigns = function (_Component) {
       var _this2 = this;
 
       var button = null;
-      var message = campaign.inputs && campaign.inputs.filter(function (input) {
+      var messages = campaign.inputs && campaign.inputs.filter(function (input) {
         return input.name && input.name.search(/discount/i) > -1;
       });
-      message = message && message.map(function (campaign) {
-        return campaign.inputs[campaign.inputs.length - 1];
+      messages = messages && messages.map(function (campaign) {
+        var lastValueIndex = campaign.inputs.length - 1;
+        return campaign.inputs[lastValueIndex].replace(/"/g, '').trim();
       });
       if (campaign.id) {
         button = _react2.default.createElement(
@@ -42104,15 +42105,20 @@ var Campaigns = function (_Component) {
       return _react2.default.createElement(
         _polaris.Card.Section,
         { title: (0, _helpers.splitCamelCase)(campaign.name), key: 'campaign-' + (campaign.id || '') },
-        message && _react2.default.createElement(
-          'div',
-          { className: 'campaign-info' },
-          _react2.default.createElement(
-            _polaris.TextStyle,
-            { variation: 'subdued' },
-            message[0].replace(/"/g, '')
-          )
-        ),
+        messages && messages.map(function (message, index) {
+          if (message === "") {
+            return false;
+          }
+          return _react2.default.createElement(
+            'div',
+            { key: 'campaign-' + campaign.id + '-message-' + index, className: 'campaign-info' },
+            _react2.default.createElement(
+              _polaris.TextStyle,
+              { variation: 'subdued' },
+              message
+            )
+          );
+        }),
         _react2.default.createElement(
           _polaris.Stack,
           { distribution: 'trailing' },
