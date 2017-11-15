@@ -31407,13 +31407,13 @@ var App = function (_Component) {
           return input.name + '.new()';
         } else {
           if (input === 'none' || (typeof input === 'undefined' ? 'undefined' : _typeof(input)) === "object" && input.name === 'none') {
-            return '\nnil';
+            return 'nil';
           } else {
-            return '\n' + input;
+            return '' + input;
           }
         }
-      }).join();
-      return '\n' + campaign.name + '.new(\n' + inputsCode + '\n)';
+      }).join(',\n');
+      return campaign.name + '.new(\n' + inputsCode + '\n)';
     }
   }, {
     key: 'download',
@@ -42402,9 +42402,9 @@ exports.default = function () {
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-var classes = "# Combines selectors together and returns true if they all match\nclass AndSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.all? do |selector|\n      selector.nil? || selector.match?(item) \n    end\n  end\nend\n\n# Combines selectors together and returns true if any of them match\nclass OrSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.any? do |selector|\n      next if selector.nil?\n      return selector.match?(item) \n    end\n  end\nend\n\n# Checks to see if the product is a gift card, returns true if it is\nclass ExcludeGiftCards\n  def match?(line_item)\n    !line_item.variant.product.gift_card?\n  end\nend\n\n# Applies a given percentage discount to an item with the given message\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend\n\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend\n\nclass ProductIdSelector\n  def initialize(product_ids)\n    @product_ids = product_ids\n  end\n\n  def match?(line_item)\n    @product_ids.include?(line_item.variant.product.id)\n  end\nend\n\nclass ProductTagSelector\n  def initialize(tags)\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(line_item)\n    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n    (@tags & product_tags).length > 0\n  end\nend\n\n# Ensures the cart amount meets a certain criteria\nclass CartAmountQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    total = cart.subtotal_price\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend\n\n# Checks to see if the cart has no discount codes. Optionally can reject the discount code with a message\nclass ExcludeDiscountCodes\n  def initialize(reject, message)\n    @reject = reject\n    @message = message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend\n\nclass DiscountUsingSelector\n  def initialize(cart_qualifier, line_item_qualifier, discount)\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n  end\n\n  def run(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    cart.line_items.each do |item|\n      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)\n      @discount.apply(item)\n    end\n  end\nend\n\n# BOGO campaign\nclass BuyXGetX\n  def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)\n    raise \"buy_x must be greater than or equal to get_x\" unless buy_x >= get_x\n    \n    @cart_qualifier = cart_qualifier\n    @buy_item_qualifier = buy_item_qualifier\n    @get_item_qualifier = get_item_qualifier\n    @discount = discount\n    @buy_x = buy_x + get_x\n    @get_x = get_x\n    @max_sets = max_sets == 0 ? nil : max_sets\n  end\n  \n  def run(cart)\n    # Make sure the cart qualifies for the offer\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x + @get_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @buy_item_qualifier.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @buy_item_qualifier.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_qualifier.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_qualifier.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n  end\nend";
+var classes = "# Combines selectors together and returns true if they all match\nclass AndSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.all? do |selector|\n      selector.nil? || selector.match?(item) \n    end\n  end\nend\n\n# Combines selectors together and returns true if any of them match\nclass OrSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.any? do |selector|\n      next if selector.nil?\n      return selector.match?(item) \n    end\n  end\nend\n\n# Checks to see if the product is a gift card, returns true if it is\nclass ExcludeGiftCards\n  def match?(line_item)\n    !line_item.variant.product.gift_card?\n  end\nend\n\n# Checks to see if a specific discount code is present\nclass HasDiscountCode\n  def initialize(match_type, code)\n    @match_type = match_type\n    @code = code.downcase\n  end\n  def match?(cart)\n    return true if cart.discount_code.nil?\n    entered_code = cart.discount_code.code.downcase\n    case @match_type\n      when :is_equal\n        return entered_code == @code\n      when :not_equal\n        return entered_code != @code\n      when :contains\n        return entered_code.include?(@code)\n      when :starts_with\n        return entered_code.start_with?(@code)\n      when :ends_with\n        return entered_code.end_with?(@code)\n    end\n  end\nend\n\n# Applies a given percentage discount to an item with the given message\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend\n\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend\n\nclass ProductIdSelector\n  def initialize(match_type, product_ids)\n    @invert = match_type == :is_one ? false : true\n    @product_ids = product_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @product_ids.include?(line_item.variant.product.id)\n  end\nend\n\nclass ProductTagSelector\ndef initialize(match_type, tags)\n  @match_type = match_type\n  @tags = tags.map(&:downcase)\nend\n\ndef match?(line_item)\n  product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n  case @match_type\n    when :is_one\n      return (@tags & product_tags).length > 0\n    when :not_one\n      return (@tags & product_tags).length == 0\n    when :contains\n      return @tags.any? do |required_tag|\n        product_tags.any? do |product_tag|\n          product_tag.include?(required_tag)\n        end\n      end\n    when :starts_with\n      return @tags.any? do |required_tag|\n        product_tags.any? do |product_tag|\n          puts \"#{required_tag} st_with #{product_tag}\"\n          product_tag.start_with?(required_tag)\n        end\n      end\n    when :ends_with\n      return @tags.any? do |required_tag|\n        product_tags.any? do |product_tag|\n          puts \"#{required_tag} ed_with #{product_tag}\"\n          product_tag.end_with?(required_tag)\n        end\n      end\n  end\nend\nend\n\n# Ensures the cart amount meets a certain criteria\nclass CartAmountQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    total = cart.subtotal_price\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend\n\n# Checks to see if the cart has no discount codes. Optionally can reject the discount code with a message\nclass ExcludeDiscountCodes\n  def initialize(reject, message)\n    @reject = reject\n    @message = message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend\n\nclass DiscountUsingSelector\n  def initialize(cart_qualifier, line_item_qualifier, discount)\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n  end\n\n  def run(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    cart.line_items.each do |item|\n      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)\n      @discount.apply(item)\n    end\n  end\nend\n\n# BOGO campaign\nclass BuyXGetX\n  def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)\n    raise \"buy_x must be greater than or equal to get_x\" unless buy_x >= get_x\n    \n    @cart_qualifier = cart_qualifier\n    @buy_item_qualifier = buy_item_qualifier\n    @get_item_qualifier = get_item_qualifier\n    @discount = discount\n    @buy_x = buy_x + get_x\n    @get_x = get_x\n    @max_sets = max_sets == 0 ? nil : max_sets\n  end\n  \n  def run(cart)\n    # Make sure the cart qualifies for the offer\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @buy_item_qualifier.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @buy_item_qualifier.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_qualifier.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_qualifier.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n  end\nend";
 
-var defaultCode = "\nCAMPAIGNS = [|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
+var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
 
 var CART_QUALIFIERS = [{
   value: "none",
@@ -42440,15 +42440,45 @@ var CART_QUALIFIERS = [{
 }, {
   value: "ExcludeDiscountCodes",
   label: "Exclude Discount Codes",
-  description: "Set behavious for when a discount code is entered in checkout",
+  description: "Do not allow discount codes and script discount to combine",
   inputs: {
     reject_discount_code: {
       type: "boolean",
-      description: "Checked will apply script. Unchecked will apply discount code"
+      description: "Enable to reject code and apply script. Leave disabled to apply discount code only."
     },
     rejection_message: {
       type: "text",
       description: "Will be shown to the customer if discount code was rejected"
+    }
+  }
+}, {
+  value: "HasDiscountCode",
+  label: "Has Discount Code",
+  description: "Checks to see if the discount code entered matches conditions",
+  inputs: {
+    match_condition: {
+      type: 'select',
+      description: "Set how discount code is matched",
+      options: [{
+        value: "is_equal",
+        label: "Is equal to"
+      }, {
+        value: "not_equal",
+        label: "Is not equal to"
+      }, {
+        value: "contains",
+        label: "Contains"
+      }, {
+        value: "starts_with",
+        label: "Stars with"
+      }, {
+        value: "ends_with",
+        label: "Ends with"
+      }]
+    },
+    discount_code: {
+      type: "text",
+      description: "Discount code to check for"
     }
   }
 }];
@@ -42462,7 +42492,18 @@ var LINE_ITEM_QUALIFIERS = [{
   label: "Product ID Selector",
   description: "Selects line items by product ID",
   inputs: {
-    product_ids: {
+    condition: {
+      type: "select",
+      description: "Set how product ID's are matched",
+      options: [{
+        value: "is_one",
+        label: "Is one of"
+      }, {
+        value: "not_one",
+        label: "Is not one of"
+      }]
+    },
+    product_IDs: {
       type: "array",
       description: "Seperate individual product ID's with a comma (,)"
     }
@@ -42472,15 +42513,39 @@ var LINE_ITEM_QUALIFIERS = [{
   label: "Product Tag Selector",
   description: "Selects line items by product tag",
   inputs: {
-    tags: {
+    condition: {
+      type: "select",
+      description: "Set how product tags are matched",
+      options: [{
+        value: "is_one",
+        label: "Is one of"
+      }, {
+        value: "not_one",
+        label: "Is not one of"
+      }, {
+        value: "contains",
+        label: "Contains one of"
+      }, {
+        value: "start_with",
+        label: "Starts with one of"
+      }, {
+        value: "ends_with",
+        label: "Ends with one of"
+      }]
+    },
+    product_tags: {
       type: "array",
-      description: "Seperate individual tags with a comma (,)"
+      description: "Seperate individual product tags with a comma (,)"
     }
   }
 }, {
   value: "ExcludeGiftCards",
   label: "Exclude Gift Cards",
   description: "Do not include products that are gift cards"
+}, {
+  value: "ExcludeSaleItems",
+  label: "Exclude Sale Items",
+  description: "Do not include products that are on sale (price is less than compare at price)"
 }];
 
 var DISCOUNTS = [{
