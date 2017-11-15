@@ -33,6 +33,30 @@ class ExcludeGiftCards
   end
 end
 
+# Checks to see if a specific discount code is present
+class HasDiscountCode
+  def initialize(match_type, code)
+    @match_type = match_type
+    @code = code.downcase
+  end
+  def match?(cart)
+    return true if cart.discount_code.nil?
+    entered_code = cart.discount_code.code.downcase
+    case @match_type
+      when :is_equal
+        return entered_code == @code
+      when :not_equal
+        return entered_code != @code
+      when :contains
+        return entered_code.include?(@code)
+      when :starts_with
+        return entered_code.start_with?(@code)
+      when :ends_with
+        return entered_code.end_with?(@code)
+    end
+  end
+end
+
 # Applies a given percentage discount to an item with the given message
 class PercentageDiscount
   def initialize(percent, message)
@@ -63,24 +87,51 @@ class FixedDiscount
 end
 
 class ProductIdSelector
-  def initialize(product_ids)
-    @product_ids = product_ids
+  def initialize(match_type, product_ids)
+    @invert = match_type == :is_one ? false : true
+    @product_ids = product_ids.map { |id| id.to_i }
   end
 
   def match?(line_item)
-    @product_ids.include?(line_item.variant.product.id)
+    @invert ^ @product_ids.include?(line_item.variant.product.id)
   end
 end
 
 class ProductTagSelector
-  def initialize(tags)
-    @tags = tags.map(&:downcase)
-  end
+def initialize(match_type, tags)
+  @match_type = match_type
+  @tags = tags.map(&:downcase)
+end
 
-  def match?(line_item)
-    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
-    (@tags & product_tags).length > 0
+def match?(line_item)
+  product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
+  case @match_type
+    when :is_one
+      return (@tags & product_tags).length > 0
+    when :not_one
+      return (@tags & product_tags).length == 0
+    when :contains
+      return @tags.any? do |required_tag|
+        product_tags.any? do |product_tag|
+          product_tag.include?(required_tag)
+        end
+      end
+    when :starts_with
+      return @tags.any? do |required_tag|
+        product_tags.any? do |product_tag|
+          puts "#{required_tag} st_with #{product_tag}"
+          product_tag.start_with?(required_tag)
+        end
+      end
+    when :ends_with
+      return @tags.any? do |required_tag|
+        product_tags.any? do |product_tag|
+          puts "#{required_tag} ed_with #{product_tag}"
+          product_tag.end_with?(required_tag)
+        end
+      end
   end
+end
 end
 
 # Ensures the cart amount meets a certain criteria
@@ -152,7 +203,7 @@ class BuyXGetX
   def run(cart)
     # Make sure the cart qualifies for the offer
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
-    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x + @get_x
+    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x
     applicable_buy_items = nil
     eligible_get_items = nil
     discountable_sets = 0
@@ -194,7 +245,8 @@ class BuyXGetX
 end`;
 
 const defaultCode = `
-CAMPAIGNS = [|
+CAMPAIGNS = [
+|
 ].freeze
 
 CAMPAIGNS.each do |campaign|
@@ -245,15 +297,52 @@ const CART_QUALIFIERS = [
   {
     value: "ExcludeDiscountCodes",
     label: "Exclude Discount Codes",
-    description: "Set behavious for when a discount code is entered in checkout",
+    description: "Do not allow discount codes and script discount to combine",
     inputs: {
       reject_discount_code: {
         type: "boolean",
-        description: "Checked will apply script. Unchecked will apply discount code",
+        description: "Enable to reject code and apply script. Leave disabled to apply discount code only.",
       },
       rejection_message: {
         type: "text",
         description: "Will be shown to the customer if discount code was rejected"
+      }
+    }
+  },
+  {
+    value: "HasDiscountCode",
+    label: "Has Discount Code",
+    description: "Checks to see if the discount code entered matches conditions",
+    inputs: {
+      match_condition: {
+        type: 'select',
+        description: "Set how discount code is matched",
+        options: [
+          {
+            value: "is_equal",
+            label: "Is equal to"
+          },
+          {
+            value: "not_equal",
+            label: "Is not equal to"
+          },
+          {
+            value: "contains",
+            label: "Contains"
+          },
+          {
+            value: "starts_with",
+            label: "Stars with"
+          },
+          {
+            value: "ends_with",
+            label: "Ends with"
+          }
+        ]
+      },
+      discount_code: {
+        type: "text",
+        description: "Discount code to check for"
       }
     }
   }
@@ -270,7 +359,21 @@ const LINE_ITEM_QUALIFIERS = [
     label: "Product ID Selector",
     description: "Selects line items by product ID",
     inputs: {
-      product_ids: {
+      condition: {
+        type: "select",
+        description: "Set how product ID's are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      product_IDs: {
         type: "array",
         description: "Seperate individual product ID's with a comma (,)"
       }
@@ -281,9 +384,35 @@ const LINE_ITEM_QUALIFIERS = [
     label: "Product Tag Selector",
     description: "Selects line items by product tag",
     inputs: {
-      tags: {
+      condition: {
+        type: "select",
+        description: "Set how product tags are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          },
+          {
+            value: "contains",
+            label: "Contains one of"
+          },
+          {
+            value: "start_with",
+            label: "Starts with one of"
+          },
+          {
+            value: "ends_with",
+            label: "Ends with one of"
+          }
+        ]
+      },
+      product_tags: {
         type: "array",
-        description: "Seperate individual tags with a comma (,)"
+        description: "Seperate individual product tags with a comma (,)"
       }
     }
   },
@@ -291,6 +420,11 @@ const LINE_ITEM_QUALIFIERS = [
     value: "ExcludeGiftCards",
     label: "Exclude Gift Cards",
     description: "Do not include products that are gift cards"
+  },
+  {
+    value: "ExcludeSaleItems",
+    label: "Exclude Sale Items",
+    description: "Do not include products that are on sale (price is less than compare at price)"
   }
 ]
 

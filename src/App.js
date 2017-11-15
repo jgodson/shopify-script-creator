@@ -209,13 +209,13 @@ class App extends Component {
         return `${input.name}.new()`;
       } else {
         if (input === 'none' || typeof input === "object" && input.name === 'none') {
-          return '\nnil';
+          return 'nil';
         } else {
-          return `\n${input}`;
+          return `${input}`;
         }
       }
-    }).join();
-    return `
+    }).join(',\n');
+    return `\
 ${campaign.name}.new(
 ${inputsCode}
 )`;
