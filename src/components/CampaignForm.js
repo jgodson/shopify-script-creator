@@ -186,6 +186,9 @@ export default class Step2Form extends Component {
   }
 
   generateInputsForCampaign(campaign, mapTo) {
+    if (mapTo === this.mainCampaignName) {
+      this.totalCampaigns = 0;
+    }
     const inputs = [];
     const fields = campaign.inputs;
     const campaignInputKeys = Object.keys(campaign.inputs);
@@ -395,6 +398,7 @@ export default class Step2Form extends Component {
   handleCampaignSelect(val) {
     if (this.props.currentCampaign !== null) {
       this.setState({inputs: JSON.parse(JSON.stringify(this.blankInputState))});
+      this.totalCampaigns = 0;
     }
     this.props.updateCurrentCampaign(val);
   }
@@ -420,13 +424,14 @@ export default class Step2Form extends Component {
     const description = this.props.currentCampaign && (
       <TextStyle variation="subdued"><strong>Details: </strong>{this.props.currentCampaign.description}</TextStyle>
     );
-    const inputCount = this.props.currentCampaign ? Math.max(this.totalCampaigns, this.props.availableCampaigns.length) : this.totalCampaigns + 1;
+    const hasAdditionalSelects = this.props.currentCampaign ? Object.keys(this.props.currentCampaign.inputs).filter((input) => Array.isArray(this.props.currentCampaign.inputs[input])).length > 0 : true;
+    const inputCount = this.totalCampaigns;
     const fieldsFilled = Object.keys(this.state.inputs.campaignSelect).length;
     const footerActions = {
       secondary: {
         content: "Save",
         primary: true,
-        disabled: inputCount !== fieldsFilled,
+        disabled: hasAdditionalSelects && inputCount === 0 || inputCount !== fieldsFilled,
         onAction: this.buildAndAddCampaign
       },
       primary: {
@@ -435,7 +440,6 @@ export default class Step2Form extends Component {
         onAction: this.hideForm
       }
     };
-    this.totalCampaigns = 0;
 
     return (
       <Card

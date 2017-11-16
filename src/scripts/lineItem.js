@@ -1,5 +1,5 @@
 const classes = `\
-# Combines selectors together and returns true if they all match
+############### HELPER/UTILITY CLASSES ###############h
 class AndSelector
   def initialize(*selectors)
     @selectors = selectors
@@ -26,7 +26,6 @@ class OrSelector
   end
 end
 
-# Checks to see if the product is a gift card, returns true if it is
 class ExcludeGiftCards
   def match?(line_item)
     !line_item.variant.product.gift_card?
@@ -57,7 +56,6 @@ class HasDiscountCode
   end
 end
 
-# Applies a given percentage discount to an item with the given message
 class PercentageDiscount
   def initialize(percent, message)
     @percent = Decimal.new(percent) / 100.0
@@ -134,7 +132,6 @@ def match?(line_item)
 end
 end
 
-# Ensures the cart amount meets a certain criteria
 class CartAmountQualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type
@@ -158,7 +155,6 @@ class CartAmountQualifier
   end
 end
 
-# Checks to see if the cart has no discount codes. Optionally can reject the discount code with a message
 class ExcludeDiscountCodes
   def initialize(reject, message)
     @reject = reject
@@ -170,6 +166,7 @@ class ExcludeDiscountCodes
   end
 end
 
+############### CAMPAIGNS ###############
 class DiscountUsingSelector
   def initialize(cart_qualifier, line_item_qualifier, discount)
     @cart_qualifier = cart_qualifier
@@ -186,7 +183,18 @@ class DiscountUsingSelector
   end
 end
 
-# BOGO campaign
+class RejectAllDiscountCodes
+  def initialize(message)
+    @message = message
+  end
+
+  def run(cart)
+    if cart.discount_code
+      cart.discount_code.reject({message: @message})
+    end
+  end
+end
+
 class BuyXGetX
   def initialize(cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)
     raise "buy_x must be greater than or equal to get_x" unless buy_x >= get_x
@@ -242,7 +250,8 @@ class BuyXGetX
       end
     end
   end
-end`;
+end
+`;
 
 const defaultCode = `
 CAMPAIGNS = [
@@ -305,7 +314,7 @@ const CART_QUALIFIERS = [
       },
       rejection_message: {
         type: "text",
-        description: "Will be shown to the customer if discount code was rejected"
+        description: "Message to display to customer when code is rejected"
       }
     }
   },
@@ -537,6 +546,17 @@ const campaigns = [
       maximum_sets: {
         type: "number",
         description: "Maximum number of item sets to discount, 0 for no limit (Buy 2 Get 1 = 1 set)"
+      }
+    }
+  },
+  {
+    value: "RejectAllDiscountCodes",
+    label: "Reject All Discount Codes",
+    description: "Rejects discount codes with a custom message",
+    inputs: {
+      message: {
+        type: "text",
+        description: "Message to display to customer when code is rejected"
       }
     }
   }
