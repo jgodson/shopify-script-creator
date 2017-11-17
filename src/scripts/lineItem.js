@@ -32,6 +32,13 @@ class ExcludeGiftCards
   end
 end
 
+# Checks to see if the product is on sale (price < compare_at_price)
+class ExcludeSaleItems
+  def match?(line_item)
+    line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price < line_item.variant.price
+  end
+end
+
 # Checks to see if a specific discount code is present
 class HasDiscountCode
   def initialize(match_type, code)
@@ -117,14 +124,12 @@ def match?(line_item)
     when :starts_with
       return @tags.any? do |required_tag|
         product_tags.any? do |product_tag|
-          puts "#{required_tag} st_with #{product_tag}"
           product_tag.start_with?(required_tag)
         end
       end
     when :ends_with
       return @tags.any? do |required_tag|
         product_tags.any? do |product_tag|
-          puts "#{required_tag} ed_with #{product_tag}"
           product_tag.end_with?(required_tag)
         end
       end
@@ -249,6 +254,24 @@ class BuyXGetX
         discountable_quantity = 0
       end
     end
+  end
+end
+
+class ConditionalDiscountCodeRejection
+  def initialize(match_type, cart_qualifier, line_item_selector, message)
+    @invert = match_type == :match ? false : true
+    @cart_qualifier = cart_qualifier
+    @line_item_selector = line_item_selector
+    @message = message
+  end
+
+  def run(cart)
+    return unless cart.discount_code
+    return unless @cart_qualifier.nil? || @invert ^ @cart_qualifier.match?(cart)
+    return unless @line_item_selector.nil? || @invert ^ cart.line_items.any? do |item|
+      @line_item_selector.match?(item)
+    end
+    cart.discount_code.reject({message: @message})
   end
 end
 `;
@@ -554,6 +577,33 @@ const campaigns = [
     label: "Reject All Discount Codes",
     description: "Rejects discount codes with a custom message",
     inputs: {
+      message: {
+        type: "text",
+        description: "Message to display to customer when code is rejected"
+      }
+    }
+  },
+  {
+    value: "ConditionalDiscountCodeRejection",
+    label: "Conditionally Reject Discount Code",
+    description: "Rejects discount codes based on conditions",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Sets the type of match needed to reject the code",
+        options: [
+          {
+            value: "match",
+            label: "Reject if any match"
+          },
+          {
+            value: "no_match",
+            label: "Reject if none match"
+          }
+        ]
+      },
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       message: {
         type: "text",
         description: "Message to display to customer when code is rejected"

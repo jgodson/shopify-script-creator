@@ -96,7 +96,7 @@ export default class Step2Form extends Component {
     this.updateCount++;
     this.setState(newState);
 
-    function setValuesForInputs(inputs, doNested) {
+    function setValuesForInputs(inputs) {
       if (!inputs) { return; }
       inputs.forEach((input, inputIndex) => {
         switch (updateCount) {
@@ -118,7 +118,7 @@ export default class Step2Form extends Component {
             // Set the values
               inputMap[mainCampaignName].forEach((inputName, index) => {
                   if (inputIndex === index) {
-                    if (isCampaignSelect(inputName)) { 
+                    if (isCampaignSelect(inputName)) {
                       let fields = inputMap[inputName];
                       if (Array.isArray(fields)) {
                         fields.forEach((fieldName, fieldIndex) => {
@@ -134,13 +134,13 @@ export default class Step2Form extends Component {
                               const value = input.inputs[fieldIndex].inputs[nestedIndex];
                               newState.inputs[type][nestedName] = convertInput(value, type);
                             });
-                          }                    
+                          }
                         });
                       }
                     } else {
-                        const type = getInputType(inputName);
-                        const value = input;
-                        newState.inputs[type][inputName] = convertInput(value, type);
+                      const type = getInputType(inputName);
+                      const value = input;
+                      newState.inputs[type][inputName] = convertInput(value, type);
                     }
                   }
               });
