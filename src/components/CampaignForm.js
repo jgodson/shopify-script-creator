@@ -102,7 +102,7 @@ export default class Step2Form extends Component {
         switch (updateCount) {
           case 0:
             // Pick the first set of campaigns
-            if (typeof input === "object" || input === "none") {
+            if (typeof input === "object") {
               newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}`] = input.name || input;
             }
             break;
@@ -346,7 +346,7 @@ export default class Step2Form extends Component {
     }
 
     this.inputMap[this.mainCampaignName].forEach((input) => {
-        if (!isCampaignSelect(input) || this.inputMap[input] === 'none') {
+        if (!isCampaignSelect(input)) {
           newCampaign.inputs.push(this.getInputValue(input));
         } else {
           newCampaign.inputs.push(this.getInputsForCampaign(input));

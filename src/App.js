@@ -26,8 +26,8 @@ class App extends Component {
     };
 
     // Version used for saving script files to detect imcompatabilities
-    this.version = "0.0.1";
-    this.incompatibleVersions = [];
+    this.version = "0.0.2";
+    this.incompatibleVersions = ["0.0.1"];
 
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
@@ -207,12 +207,10 @@ class App extends Component {
         return this.generateCode(input);
       } else if (typeof input === "object" && input.name !== "none") {
         return `${input.name}.new()`;
+      } else if (typeof input === "object" && input.name === 'none') {
+        return 'nil';
       } else {
-        if (input === 'none' || typeof input === "object" && input.name === 'none') {
-          return 'nil';
-        } else {
-          return `${input}`;
-        }
+        return `${input}`;
       }
     }).join(',\n');
     return `\
