@@ -1,42 +1,7 @@
+import Common from './common';
+
 const classes = `\
-class AndSelector
-  def initialize(*selectors)
-    @selectors = selectors
-  end
-
-  def match?(item)
-    @selectors.all? do |selector|
-      return true if selector.nil?
-      puts selector.match?(item) 
-    end
-  end
-end
-
-# Combines selectors together and returns true if any of them match
-class OrSelector
-  def initialize(*selectors)
-    @selectors = selectors
-  end
-
-  def match?(item)
-    @selectors.any? do |selector|
-      next if selector.nil?
-      selector.match?(item) 
-    end
-  end
-end
-
-class ProductTagSelector
-  def initialize(tags)
-    @tags = tags.map(&:downcase)
-  end
-
-  def match?(line_item)
-    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
-    (@tags & product_tags).length > 0
-  end
-end
-
+############### SHIPPING SCRIPT CLASSES ###############
 # Checks if a rate matches a given name or not.
 # Can do a :partial or :exact match
 class RateNameSelector
@@ -73,22 +38,9 @@ class HideRateUnlessConditionsMet
     end
   end
 end
-# --------------- Script Configuration --------------- #
-# ----- Qualifying Addresses ----- #
-# Example: {
-#   address1: ["150 Elgin St", "150 Elgin Street"],
-#   address2: "8th floor",
-#   phone: 123-456-7890,
-#   city: "Ottawa",
-#   province: "Ontario",
-#   country_code: "CA",
-#   zip: "K2P 1L4",
-#   match_type: :exact
-# }
 
 # Takes an array of rate names and matches a given rate
 class RateSelector
-  
   def initialize(rate_names)
     @rate_names = rate_names.map { |name| name.downcase! }
   end
@@ -100,7 +52,6 @@ end
 
 # Applies a percentage discount to a given rate
 class PercentageDiscount
-  
   def initialize(percent, message)
     @percent = Decimal.new(percent) / 100
     @message = message
@@ -108,16 +59,38 @@ class PercentageDiscount
   
   def apply(rate)
     rate.apply_discount(rate.price * @percent, { message: @message })
-  end
-  
+  end 
 end
 
+# Applies a fixed discount to a given rate
+class FixedDiscount
+  def initialize(amount, message)
+    @amount = Money.new(cents: amount * 100)
+    @message = message
+  end
+  
+  def apply(rate)
+    discount_amount = rate.price - @amount < 0 ? rate.price : @amount
+    rate.apply_discount(discount_amount, { message: @message })
+  end
+end
+
+# ----- Qualifying Addresses ----- #
+# Example: {
+#   address1: ["150 Elgin St", "150 Elgin Street"],
+#   address2: "8th floor",
+#   phone: 123-456-7890,
+#   city: "Ottawa",
+#   province: "Ontario",
+#   country_code: "CA",
+#   zip: "K2P 1L4",
+#   match_type: :exact
+# }
 # Matches a given address to an array of addresses given
 # Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)
 # If no match type is specified, :partial will be the default
 # Only the given paramaters will be compared. Arrays can be used to match different options
 class AddressQualifier
-  
   def initialize(addresses)
     @addresses = addresses
   end
@@ -129,6 +102,7 @@ class AddressQualifier
       match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial
 
       cart.shipping_address.to_hash.all? do |key, value|
+        return true if value.empty?
         match = true
         key = key.to_sym
         value.downcase!
@@ -154,7 +128,7 @@ class AddressQualifier
             end
           end
         end
-        match
+        return match
       end
     end
   end
@@ -187,10 +161,15 @@ class ShippingDiscount
       @discount.apply(rate)
     end
   end
-end`;
+end
+
+############### CAMPAIGNS ###############
+`;
 
 const defaultCode = `
-CAMPAIGNS = [|].freeze
+CAMPAIGNS = [
+|
+].freeze
 
 CAMPAIGNS.each do |campaign|
   campaign.run(Input.shipping_rates, Input.cart)
@@ -198,8 +177,123 @@ end
 
 Output.shipping_rates = Input.shipping_rates`;
 
+const CUSTOMER_QUALIFIERS = [
+  ...Common.customer_qualifiers
+];
+
+const CART_QUALIFIERS = [
+  ...Common.cart_qualifiers
+];
+
+const LINE_ITEM_QUALIFIERS = [
+  ...Common.line_item_qualifiers
+];
+
+const DISCOUNTS = [
+  {
+    value: "PercentageDiscount",
+    label: "Percentage Discount",
+    description: "Discounts the shipping rate by a percentage",
+    inputs: {
+      percent: {
+        type: "number",
+        description: "Percent discount to apply"
+      },
+      message: {
+        type: "text",
+        description: "Message to display to customer"
+      }
+    }
+  },
+  {
+    value: "FixedDiscount",
+    label: "Fixed Discount",
+    description: "Discounts the shipping rate by a fixed amount",
+    inputs: {
+      amount: {
+        type: "number",
+        description: "Total discount to apply"
+      },
+      message: {
+        type: "text",
+        description: "Message to display to customer"
+      }
+    }
+  }
+];
+
+const CUSTOMER_AND_SELECTOR = {
+  value: "AndSelector",
+  label: "And Selector",
+  description: "Qualifies if all of the requirements are met",
+  inputs: {
+    line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
+    line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    line_item_qualifier_3: [...CUSTOMER_QUALIFIERS],
+  }
+};
+
+const CUSTOMER_OR_SELECTOR = {
+  value: "OrSelector",
+  label: "Or Selector",
+  description: "Qualifies if any of the requirements are met",
+  inputs: {
+    line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
+    line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    line_item_qualifier_3: [...CUSTOMER_QUALIFIERS]
+  }
+};
+
+const LINE_ITEM_AND_SELECTOR = {
+  value: "AndSelector",
+  label: "And Selector",
+  description: "Qualifies if all of the requirements are met",
+  inputs: {
+    line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
+  }
+};
+
+const LINE_ITEM_OR_SELECTOR = {
+  value: "OrSelector",
+  label: "Or Selector",
+  description: "Qualifies if any of the requirements are met",
+  inputs: {
+    line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
+  }
+};
+
+const CART_OR_SELECTOR = {
+  value: "OrSelector",
+  label: "Or Selector",
+  description: "Qualifies if any of the requirements are met",
+  inputs: {
+    cart_qualifier_1: [...CART_QUALIFIERS],
+    cart_qualifier_2: [...CART_QUALIFIERS],
+    cart_qualifier_3: [...CART_QUALIFIERS]
+  }
+};
+
+const CART_AND_SELECTOR = {
+  value: "AndSelector",
+  label: "And Selector",
+  description: "Qualifies if all of the requirements are met",
+  inputs: {
+    cart_qualifier_1: [...CART_QUALIFIERS],
+    cart_qualifier_2: [...CART_QUALIFIERS],
+    cart_qualifier_3: [...CART_QUALIFIERS]
+  }
+};
+
+const campaigns = [
+
+];
+
 export default {
   classes,
   defaultCode,
-  //campaigns
+  campaigns
 };

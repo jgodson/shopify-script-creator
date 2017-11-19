@@ -8,7 +8,8 @@ import Footer from './components/Footer';
 
 import LineItemScript from './scripts/lineItem';
 import ShippingScript from './scripts/shipping';
-import { RegExp } from 'core-js/library/web/timers';
+import PaymentScript from './scripts/payment';
+import Common from './scripts/common';
 
 class App extends Component {
   constructor(props) {
@@ -74,8 +75,10 @@ class App extends Component {
         return LineItemScript.campaigns;
         break;
       case 'shipping':
+        return ShippingScript.campaigns;
         break;
       case 'payment':
+        return PaymentScript.campaigns;
         break;
       default:
       console.warn("Invalid type");
@@ -155,23 +158,22 @@ class App extends Component {
     }
     const newState = this.state;
     newState.showForm = false;
-    let output = "";
+    let output = Common.classes;
     switch(this.state.scriptType) {
       case 'line_item':
         output += LineItemScript.classes;
-        output += this.generateCampaignsOutput();
         break;
       case 'shipping':
         output += ShippingScript.classes;
-        output += this.generateCampaignsOutput();
         break;
       case 'payment':
+        output += ShippingScript.classes;
         break;
       default:
         console.warn("Invalid type");
     }
-    // Trim space from lines
-    //output = output.split('\n').filter((line) => line.trim() !== '').map((line) => line.trim()).join('\n');
+    output += this.generateCampaignsOutput();
+    
     newState.output = output;
     this.setState(newState);
   }
@@ -193,6 +195,10 @@ class App extends Component {
         output = ShippingScript.defaultCode.replace('|', campaigns);
         break;
       case 'payment':
+        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        // remove the last `,` from the string (raises syntax error)
+        campaigns = campaigns.substring(campaigns.length -1, 0);
+        output = PaymentScript.defaultCode.replace('|', campaigns);
         break;
       default:
         console.warn("Invalid type");
