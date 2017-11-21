@@ -11,6 +11,8 @@ import ShippingScript from './scripts/shipping';
 import PaymentScript from './scripts/payment';
 import Common from './scripts/common';
 
+import Versions from './versions';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -26,9 +28,9 @@ class App extends Component {
       editCampaignInfo: null
     };
 
-    // Version used for saving script files to detect imcompatabilities
-    this.version = "0.0.3";
-    this.incompatibleVersions = ["0.0.1", "0.0.2"];
+    // Versions used for saving script files to detect imcompatabilities
+    this.version = Versions.currentVersion;
+    this.incompatibleVersions = Versions.incompatibleVersions;
 
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
