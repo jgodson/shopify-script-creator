@@ -169,9 +169,13 @@ export default class Step2Form extends Component {
   generateAdditionalInputs(campaign, mapTo) {
     if (campaign.inputs[Object.keys(campaign.inputs)[0]].type) {
       return (
-        <FormLayout.Group>
-          {this.generateInputsForCampaign(campaign, mapTo)}
-        </FormLayout.Group>
+        <div className="input-container">
+          <FormLayout>
+            <FormLayout.Group>
+              {this.generateInputsForCampaign(campaign, mapTo)}
+            </FormLayout.Group>
+          </FormLayout>
+        </div>
       );
     } else {
       return this.generateInputsForCampaign(campaign, mapTo)
