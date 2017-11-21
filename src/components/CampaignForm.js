@@ -174,14 +174,7 @@ export default class Step2Form extends Component {
         </FormLayout.Group>
       );
     } else {
-      return (
-        <Card sectioned>
-          <FormLayout>
-            <Subheading>Conditions</Subheading>
-            {this.generateInputsForCampaign(campaign, mapTo)}
-          </FormLayout>
-        </Card>
-      );
+      return this.generateInputsForCampaign(campaign, mapTo)
     }
   }
 
@@ -204,7 +197,8 @@ export default class Step2Form extends Component {
         description: field.description,
         name: inputName,
       };
-      inputs.push(this.inputGenerator(newInput));
+      const isMain = mapTo === this.mainCampaignName;
+      inputs.push(this.inputGenerator(newInput, isMain));
       if (mapTo) {
         if (!this.inputMap[mapTo]) {
           this.inputMap[mapTo] = [inputName];
@@ -216,7 +210,7 @@ export default class Step2Form extends Component {
     return inputs;
   }
 
-  inputGenerator(input) {
+  inputGenerator(input, isMain) {
     const INPUT_TYPES = {
       text: {
         generate: (input) => {
@@ -317,25 +311,34 @@ export default class Step2Form extends Component {
               additionalInputs = this.generateAdditionalInputs(campaign, input.name);
             }
           }
-          return [
-            <div key={input.name} className="select-wrapper">
-              <Select
-                label={<strong>{input.label}</strong>}
-                options={input.options}
-                placeholder="Pick one"
-                name={input.name}
-                value={value}
-                onChange={(val) => this.handleInputChange(val, input.type, input.name)}
-              />
-              {description}
-            </div>,
-            additionalInputs
-          ]
+          return (
+            <Card.Section key={input.name} title={input.label}>
+              <div className="select-wrapper">
+                <Select
+                  options={input.options}
+                  placeholder="Pick one"
+                  name={input.name}
+                  value={value}
+                  onChange={(val) => this.handleInputChange(val, input.type, input.name)}
+                />
+                {description}
+              </div>
+              {additionalInputs}
+            </Card.Section>
+          );
         }
       }
     }
 
-    return INPUT_TYPES[input.type].generate(input);
+    if (isMain && input.type !== "campaignSelect") {
+      return (
+        <Card.Section key={input.name}>
+          {INPUT_TYPES[input.type].generate(input)}
+        </Card.Section>
+      );
+    } else {
+      return INPUT_TYPES[input.type].generate(input);
+    }
   }
 
   buildAndAddCampaign() {
@@ -414,7 +417,6 @@ export default class Step2Form extends Component {
     const campaignSelector = (
       <Select
         name={this.mainCampaignName}
-        label={<strong>Select a campaign</strong>}
         options={this.props.availableCampaigns}
         value={this.props.currentCampaign && this.props.currentCampaign.value}
         placeholder="Select campaign"
@@ -444,17 +446,16 @@ export default class Step2Form extends Component {
     return (
       <Card
         title="Campaign details"
-        sectioned
         primaryFooterAction={footerActions.primary}
         secondaryFooterAction={footerActions.secondary}
       >
-        <FormLayout>
+        <Card.Section title="Select a campaign">
           <div className="select-wrapper">
             {campaignSelector}
             {description}
           </div>
+        </Card.Section>
           {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
-        </FormLayout>
       </Card>
     )
   }
