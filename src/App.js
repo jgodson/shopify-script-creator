@@ -27,8 +27,8 @@ class App extends Component {
     };
 
     // Version used for saving script files to detect imcompatabilities
-    this.version = "0.0.2";
-    this.incompatibleVersions = ["0.0.1"];
+    this.version = "0.0.3";
+    this.incompatibleVersions = ["0.0.1", "0.0.2"];
 
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
