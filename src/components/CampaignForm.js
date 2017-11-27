@@ -20,6 +20,7 @@ export default class Step2Form extends Component {
 
     this.blankInputState = {
       campaignSelect: {},
+      campaignLabel: "",
       select: {},
       text: {},
       number: {},
@@ -77,7 +78,11 @@ export default class Step2Form extends Component {
         });
       });
     }
+    if (type && name) {
     newState.inputs[type][name] = newVal;
+    } else {
+      newState.inputs.campaignLabel = newVal;
+    }
     this.setState(newState);
   }
 
@@ -90,6 +95,7 @@ export default class Step2Form extends Component {
     const mainCampaignName = this.mainCampaignName;
     if (updateCount === 0) {
       newState.inputs = JSON.parse(JSON.stringify(this.blankInputState));
+      newState.inputs.campaignLabel = existingInfo.label
     }
     const mainCampaign = this.mainCampaignName;
     setValuesForInputs(mainInputs);
@@ -348,6 +354,7 @@ export default class Step2Form extends Component {
   buildAndAddCampaign() {
     const newCampaign = {
       name: this.props.currentCampaign.value,
+      label: this.state.inputs.campaignLabel,
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
       inputs: []
     }
@@ -427,8 +434,17 @@ export default class Step2Form extends Component {
         onChange={(val) => this.handleCampaignSelect(val)}
       />
     );
-    const description = this.props.currentCampaign && (
-      <TextStyle variation="subdued"><strong>Details: </strong>{this.props.currentCampaign.description}</TextStyle>
+    const campaignNamer = (
+      <div className="input-container">
+        <TextField
+          label="Campaign description"
+          key="campaign-desc"
+          name="campaign-desc"
+          helpText="Describe the campaign (not visible to customers)"
+          value={this.state.inputs.campaignLabel}
+          onChange={(val) => this.handleInputChange(val)}
+        />
+      </div>
     );
     const hasAdditionalSelects = this.props.currentCampaign ? Object.keys(this.props.currentCampaign.inputs).filter((input) => Array.isArray(this.props.currentCampaign.inputs[input])).length > 0 : true;
     const inputCount = this.totalCampaigns;
@@ -456,7 +472,10 @@ export default class Step2Form extends Component {
         <Card.Section title="Select a campaign">
           <div className="select-wrapper">
             {campaignSelector}
-            {description}
+            {this.props.currentCampaign && 
+              <TextStyle variation="subdued"><strong>Details: </strong>{this.props.currentCampaign.description}</TextStyle> 
+              && campaignNamer
+            }
           </div>
         </Card.Section>
           {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}

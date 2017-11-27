@@ -169,7 +169,7 @@ class App extends Component {
         output += ShippingScript.classes;
         break;
       case 'payment':
-        output += ShippingScript.classes;
+        output += PaymentScript.classes;
         break;
       default:
         console.warn("Invalid type");

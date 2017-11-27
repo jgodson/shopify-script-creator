@@ -11,7 +11,7 @@ end
 # Checks to see if the product is on sale (price < compare_at_price)
 class ExcludeSaleItems
   def match?(line_item)
-    line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price < line_item.variant.price
+    line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price
   end
 end
 
@@ -55,7 +55,7 @@ class ExcludeDiscountCodes
 end
 
 ############### CAMPAIGNS ###############
-class DiscountUsingSelector
+class ConditionalDiscount
   def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount)
     @customer_qualifier = customer_qualifier
     @cart_qualifier = cart_qualifier
@@ -313,7 +313,7 @@ const CART_AND_SELECTOR = {
 
 const campaigns = [
   {
-    value: "DiscountUsingSelector",
+    value: "ConditionalDiscount",
     label: "Conditional Discount",
     description: "Specify cart and item condtions to apply a specific discount",
     inputs: {

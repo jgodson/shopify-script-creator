@@ -32,8 +32,9 @@ export default class Campaigns extends Component {
     } else {
       button = <Button size="slim" primary onClick={this.createNew}>Create new</Button>;
     }
+    const campaignTitle = campaign.label || splitCamelCase(campaign.name)
     return (
-      <Card.Section title={splitCamelCase(campaign.name)} key={`campaign-${campaign.id || ''}`}>
+      <Card.Section title={campaignTitle} key={`campaign-${campaign.id || ''}`}>
         {messages && 
           messages.map((message, index) => {
             if (message === "") { return false; }

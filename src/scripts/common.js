@@ -53,7 +53,7 @@ end
 
 class ProductIdSelector
   def initialize(match_type, product_ids)
-    @invert = match_type == :is_one ? false : true
+    @invert = match_type != :is_one;
     @product_ids = product_ids.map { |id| id.to_i }
   end
 
@@ -100,13 +100,13 @@ def match?(line_item)
     when :contains
       return @skus.any? do |required_sku|
         variant_skus.any? do |sku|
-          sku.include?(required_tag)
+          sku.include?(required_sku)
         end
       end
     when :starts_with
       return @skus.any? do |required_sku|
         variant_skus.any? do |sku|
-          sku.start_with?(required_tag)
+          sku.start_with?(required_sku)
         end
       end
     when :ends_with
@@ -131,38 +131,37 @@ end
 end
 
 class ProductTagSelector
-  def initialize(match_type, tags)
-    @match_type = match_type
-    @tags = tags.map(&:downcase)
-  end
+def initialize(invert, match_type, tags)
+  @match_type = match_type
+  @invert = invert == :does_not
+  @tags = tags.map(&:downcase)
+end
 
-  def match?(line_item)
-    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
-    case @match_type
-      when :is_one
-        return (@tags & product_tags).length > 0
-      when :not_one
-        return (@tags & product_tags).length == 0
-      when :contains
-        return @tags.any? do |required_tag|
-          product_tags.any? do |product_tag|
-            product_tag.include?(required_tag)
-          end
+def match?(line_item)
+  product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
+  case @match_type
+    when :match
+      return @invert ^ (@tags & product_tags).length > 0
+    when :contains
+      return @invert ^ @tags.any? do |required_tag|
+        product_tags.any? do |product_tag|
+          product_tag.include?(required_tag)
         end
-      when :starts_with
-        return @tags.any? do |required_tag|
-          product_tags.any? do |product_tag|
-            product_tag.start_with?(required_tag)
-          end
+      end
+    when :starts_with
+      return @invert ^ @tags.any? do |required_tag|
+        product_tags.any? do |product_tag|
+          product_tag.start_with?(required_tag)
         end
-      when :ends_with
-        return @tags.any? do |required_tag|
-          product_tags.any? do |product_tag|
-            product_tag.end_with?(required_tag)
-          end
+      end
+    when :ends_with
+      return @invert ^ @tags.any? do |required_tag|
+        product_tags.any? do |product_tag|
+          product_tag.end_with?(required_tag)
         end
-    end
+      end
   end
+end
 end
 
 class CartAmountQualifier
@@ -259,7 +258,7 @@ const cart_qualifiers = [
           },
           {
             value: "starts_with",
-            label: "Stars with"
+            label: "Starts with"
           },
           {
             value: "ends_with",
@@ -313,27 +312,37 @@ const line_item_qualifiers = [
     inputs: {
       condition: {
         type: "select",
-        description: "Set how product tags are matched",
+        description: "Set how tags are matched",
         options: [
           {
-            value: "is_one",
-            label: "Is one of"
+            value: "does",
+            label: "Does"
           },
           {
-            value: "not_one",
-            label: "Is not one of"
+            value: "does_not",
+            label: "Does not"
+          }
+        ]
+      },
+      match_type: {
+        type: "select",
+        description: "Set what portion of the tags to compare",
+        options: [
+          {
+            value: "match",
+            label: "Match one of"
           },
           {
             value: "contains",
-            label: "Contains one of"
+            label: "Contain one of"
           },
           {
-            value: "start_with",
-            label: "Starts with one of"
+            value: "starts_with",
+            label: "Start with one of"
           },
           {
             value: "ends_with",
-            label: "Ends with one of"
+            label: "End with one of"
           }
         ]
       },
