@@ -7,9 +7,6 @@ import {
   Checkbox,
   TextStyle,
   Select,
-  Subheading,
-  Button,
-  ButtonGroup
 } from '@shopify/polaris';
 import styles from './CampaignForm.css';
 import { capitalize, splitAndCapitalize, isCampaignSelect, getInputType } from '../helpers';

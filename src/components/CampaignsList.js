@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Layout, ResourceList, Card, Subheading, Stack, Button, TextStyle } from '@shopify/polaris';
+import { Card, Stack, Button, TextStyle } from '@shopify/polaris';
 import { splitCamelCase } from '../helpers';
 
 import styles from './CampaignsList.css';
