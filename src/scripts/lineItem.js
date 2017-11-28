@@ -1,20 +1,21 @@
 import Common from './common';
 
-const classes = `\
-############### LINE ITEM SCRIPT CLASSES ###############
+const classes = {
+  ExcludeGiftCards: `
 class ExcludeGiftCards
   def match?(line_item)
     !line_item.variant.product.gift_card?
   end
-end
+end`,
 
-# Checks to see if the product is on sale (price < compare_at_price)
+  ExcludeSaleItems: `
 class ExcludeSaleItems
   def match?(line_item)
     line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price
   end
-end
+end`,
 
+  PercentageDiscount: `
 class PercentageDiscount
   def initialize(percent, message)
     @percent = Decimal.new(percent) / 100.0
@@ -26,8 +27,9 @@ class PercentageDiscount
     new_line_price = line_item.line_price - line_discount
     line_item.change_line_price(new_line_price, message: @message)
   end
-end
+end`,
 
+  FixedDiscount: `
 class FixedDiscount
   def initialize(amount, message)
     @amount = Money.new(cents: amount * 100)
@@ -41,8 +43,9 @@ class FixedDiscount
     line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
     @discount_applied += discount_to_apply
   end
-end
+end`,
 
+  ExcludeDiscountCodes: `
 class ExcludeDiscountCodes
   def initialize(reject, message)
     @reject = reject
@@ -52,9 +55,9 @@ class ExcludeDiscountCodes
   def match?(cart)
     cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})
   end
-end
+end`,
 
-############### CAMPAIGNS ###############
+  ConditionalDiscount: `
 class ConditionalDiscount
   def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount)
     @customer_qualifier = customer_qualifier
@@ -71,8 +74,9 @@ class ConditionalDiscount
       @discount.apply(item)
     end
   end
-end
+end`,
 
+  RejectAllDiscountCodes: `
 class RejectAllDiscountCodes
   def initialize(message)
     @message = message
@@ -83,8 +87,9 @@ class RejectAllDiscountCodes
       cart.discount_code.reject({message: @message})
     end
   end
-end
+end`,
 
+  BuyXGetX: `
 class BuyXGetX
   def initialize(customer_qualifier, cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)
     raise "buy_x must be greater than or equal to get_x" unless buy_x >= get_x
@@ -141,8 +146,9 @@ class BuyXGetX
       end
     end
   end
-end
+end`,
 
+  ConditionalDiscountCodeRejection: `
 class ConditionalDiscountCodeRejection
   def initialize(match_type, customer_qualifier, cart_qualifier, line_item_selector, message)
     @invert = match_type != :match
@@ -160,8 +166,8 @@ class ConditionalDiscountCodeRejection
     end)
     cart.discount_code.reject({message: @message})
   end
-end
-`;
+end`
+};
 
 const defaultCode = `
 CAMPAIGNS = [

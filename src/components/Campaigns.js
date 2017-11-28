@@ -25,7 +25,8 @@ export default class Campaigns extends Component {
     let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount/i) > -1);
     messages = messages && messages.map((campaign) => {
       const lastValueIndex = campaign.inputs.length - 1;
-      return campaign.inputs[lastValueIndex].replace(/"/g, '').trim();
+      const messageType = campaign.name.search(/(reject|exclude)/i) > -1 ? 'Rejection message' : 'Discount message';
+      return [messageType, campaign.inputs[lastValueIndex].replace(/"/g, '').trim()];
     });
     if (campaign.id) {
       button = <Button size="slim" onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;
@@ -37,8 +38,13 @@ export default class Campaigns extends Component {
       <Card.Section title={campaignTitle} key={`campaign-${campaign.id || ''}`}>
         {messages && 
           messages.map((message, index) => {
-            if (message === "") { return false; }
-            return <div key={`campaign-${campaign.id}-message-${index}`}className="campaign-info"><TextStyle variation="subdued">{message}</TextStyle></div>
+            if (message[1] === "") { return false; }
+            return (
+              <div key={`campaign-${campaign.id}-message-${index}`} className="campaign-info">
+                <TextStyle>{`${message[0]}: `}</TextStyle>
+                <TextStyle variation="subdued">{message[1]}</TextStyle>
+              </div>
+            );
           })
         }
         <Stack distribution="trailing">

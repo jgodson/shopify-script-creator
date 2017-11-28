@@ -160,60 +160,72 @@ class App extends Component {
     }
     const newState = this.state;
     newState.showForm = false;
-    let output = Common.classes;
-    switch(this.state.scriptType) {
-      case 'line_item':
-        output += LineItemScript.classes;
-        break;
-      case 'shipping':
-        output += ShippingScript.classes;
-        break;
-      case 'payment':
-        output += PaymentScript.classes;
-        break;
-      default:
-        console.warn("Invalid type");
-    }
-    output += this.generateCampaignsOutput();
-    
-    newState.output = output;
+    newState.output = this.generateCampaignsOutput();
     this.setState(newState);
   }
 
   generateCampaignsOutput() {
-    let output = null;
+    let defaultCode = null;
     let campaigns = null;
+    const classesUsed = [];
+    let allClasses = {};
     switch(this.state.scriptType) {
       case 'line_item':
-        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        Object.assign(allClasses, Common.classes, LineItemScript.classes);
+        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
         // remove the last `,` from the string (raises syntax error)
         campaigns = campaigns.substring(campaigns.length -1, 0);
-        output = LineItemScript.defaultCode.replace('|', campaigns);
+        defaultCode = LineItemScript.defaultCode;
         break;
       case 'shipping':
-        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        Object.assign(allClasses, Common.classes, ShippingScript.classes);
+        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
         // remove the last `,` from the string (raises syntax error)
         campaigns = campaigns.substring(campaigns.length -1, 0);
-        output = ShippingScript.defaultCode.replace('|', campaigns);
+        defaultCode = ShippingScript.defaultCode;
         break;
       case 'payment':
-        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign)).join();
+        Object.assign(allClasses, Common.classes, PaymentScript.classes);
+        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
         // remove the last `,` from the string (raises syntax error)
         campaigns = campaigns.substring(campaigns.length -1, 0);
-        output = PaymentScript.defaultCode.replace('|', campaigns);
+        defaultCode = PaymentScript.defaultCode;
         break;
       default:
-        console.warn("Invalid type");
+        throw Error('Invalid script type');
     }
+    let output = generateClassCode(allClasses, classesUsed);
+    // Remove first newline 
+    output = output.substring(1);
+    output += defaultCode.replace('|', campaigns);
     return output;
+
+    function generateClassCode(allClasses, classesUsed) {
+      let code = '';
+      classesUsed.forEach((className) => {
+        if (allClasses[className]) {
+          code += allClasses[className] + '\n';
+        } else {
+          throw Error(`Missing class ${className}`);
+        }
+      });
+      return code;
+    }
   }
 
-  generateCode(campaign) {
+  generateCode(campaign, classesUsed) {
     if (campaign.skip) { return; }
+
+    addUsedClass(campaign.name);
+    if (campaign.dependants) {
+      campaign.dependants.forEach((dependant) => addUsedClass(dependant));
+    }
+    
     const inputsCode = campaign.inputs.map((input, index) => {
       if (input.inputs) {
-        return this.generateCode(input);
+        return this.generateCode(input, classesUsed);
       } else if (typeof input === "object" && input.name !== "none") {
+        addUsedClass(input.name);
         return `${input.name}.new()`;
       } else if (typeof input === "object" && input.name === 'none') {
         return 'nil';
@@ -225,6 +237,12 @@ class App extends Component {
 ${campaign.name}.new(
 ${inputsCode}
 )`;
+
+    function addUsedClass(className) {
+      if (classesUsed.indexOf(className) === -1) {
+        classesUsed.push(className);
+      }
+    }
   }
 
   download(data, filename, type) {

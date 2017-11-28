@@ -356,6 +356,7 @@ export default class Step2Form extends Component {
       name: this.props.currentCampaign.value,
       label: this.state.inputs.campaignLabel,
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
+      dependants: this.props.currentCampaign.dependants,
       inputs: []
     }
 
@@ -437,10 +438,10 @@ export default class Step2Form extends Component {
     const campaignNamer = (
       <div className="input-container">
         <TextField
-          label="Campaign description"
+          label="Campaign description (optional)"
           key="campaign-desc"
           name="campaign-desc"
-          helpText="Describe the campaign (not visible to customers)"
+          helpText="Brief summary of the campaign (not visible to customers)"
           value={this.state.inputs.campaignLabel}
           onChange={(val) => this.handleInputChange(val)}
         />

@@ -1,6 +1,5 @@
-const classes = `\
-############### COMMON CLASSES ###############
-# Combines selectors together and returns true if all of them match
+const classes = {
+  AndSelector: `
 class AndSelector
   def initialize(*selectors)
     @selectors = selectors
@@ -11,9 +10,9 @@ class AndSelector
       selector.nil? || selector.match?(item) 
     end
   end
-end
+end`,
 
-# Combines selectors together and returns true if any of them match
+  OrSelector: `
 class OrSelector
   def initialize(*selectors)
     @selectors = selectors
@@ -25,14 +24,15 @@ class OrSelector
       return selector.match?(item) 
     end
   end
-end
+end`,
 
-# Checks to see if a specific discount code is present
+  HasDiscountCode: `
 class HasDiscountCode
   def initialize(match_type, code)
     @match_type = match_type
     @code = code.downcase
   end
+
   def match?(cart)
     return true if cart.discount_code.nil?
     entered_code = cart.discount_code.code.downcase
@@ -49,8 +49,9 @@ class HasDiscountCode
         return entered_code.end_with?(@code)
     end
   end
-end
+end`,
 
+  ProductIdSelector: `
 class ProductIdSelector
   def initialize(match_type, product_ids)
     @invert = match_type != :is_one;
@@ -60,110 +61,115 @@ class ProductIdSelector
   def match?(line_item)
     @invert ^ @product_ids.include?(line_item.variant.product.id)
   end
-end
+end`,
 
+  ProductTypeSelector: `
 class ProductTypeSelector
-def initialize(match_type, product_types)
-  @invert = match_type == :is_one ? false : true
-  @product_types = product_types.map(&:downcase)
-end
+  def initialize(match_type, product_types)
+    @invert = match_type == :is_one ? false : true
+    @product_types = product_types.map(&:downcase)
+  end
 
-def match?(line_item)
-  @invert ^ @product_types.include?(line_item.variant.product.product_type)
-end
-end
+  def match?(line_item)
+    @invert ^ @product_types.include?(line_item.variant.product.product_type)
+  end
+  end
 
-class ProductVendorSelector
-def initialize(match_type, vendors)
-  @invert = match_type == :is_one ? false : true
-  @vendors = vendors.map(&:downcase)
-end
+  class ProductVendorSelector
+  def initialize(match_type, vendors)
+    @invert = match_type == :is_one ? false : true
+    @vendors = vendors.map(&:downcase)
+  end
 
-def match?(line_item)
-  @invert ^ @vendors.include?(line_item.variant.product.vendor)
-end
-end
+  def match?(line_item)
+    @invert ^ @vendors.include?(line_item.variant.product.vendor)
+  end
+end`,
 
+  VariantSkuSelector: `
 class VariantSkuSelector
-def initialize(match_type, skus)
-  @match_type = match_type
-  @skus = skus.map(&:downcase)
-end
-
-def match?(line_item)
-  variant_skus = line_item.variant.skus.to_a.map(&:downcase)
-  case @match_type
-    when :is_one
-      return (@skus & variant_skus).length > 0
-    when :not_one
-      return (@skus & variant_skus).length == 0
-    when :contains
-      return @skus.any? do |required_sku|
-        variant_skus.any? do |sku|
-          sku.include?(required_sku)
-        end
-      end
-    when :starts_with
-      return @skus.any? do |required_sku|
-        variant_skus.any? do |sku|
-          sku.start_with?(required_sku)
-        end
-      end
-    when :ends_with
-      return @skus.any? do |required_sku|
-        variant_skus.any? do |sku|
-          sku.end_with?(required_sku)
-        end
-      end
+  def initialize(match_type, skus)
+    @match_type = match_type
+    @skus = skus.map(&:downcase)
   end
-end
-end
 
+  def match?(line_item)
+    variant_skus = line_item.variant.skus.to_a.map(&:downcase)
+    case @match_type
+      when :is_one
+        return (@skus & variant_skus).length > 0
+      when :not_one
+        return (@skus & variant_skus).length == 0
+      when :contains
+        return @skus.any? do |required_sku|
+          variant_skus.any? do |sku|
+            sku.include?(required_sku)
+          end
+        end
+      when :starts_with
+        return @skus.any? do |required_sku|
+          variant_skus.any? do |sku|
+            sku.start_with?(required_sku)
+          end
+        end
+      when :ends_with
+        return @skus.any? do |required_sku|
+          variant_skus.any? do |sku|
+            sku.end_with?(required_sku)
+          end
+        end
+    end
+  end
+end`,
+
+  VariantIdSelector: `
 class VariantIdSelector
-def initialize(match_type, variant_ids)
-  @invert = match_type == :is_one ? false : true
-  @variant_ids = variant_ids.map { |id| id.to_i }
-end
-
-def match?(line_item)
-  @invert ^ @variant_ids.include?(line_item.variant.id)
-end
-end
-
-class ProductTagSelector
-def initialize(invert, match_type, tags)
-  @match_type = match_type
-  @invert = invert == :does_not
-  @tags = tags.map(&:downcase)
-end
-
-def match?(line_item)
-  product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
-  case @match_type
-    when :match
-      return @invert ^ (@tags & product_tags).length > 0
-    when :contains
-      return @invert ^ @tags.any? do |required_tag|
-        product_tags.any? do |product_tag|
-          product_tag.include?(required_tag)
-        end
-      end
-    when :starts_with
-      return @invert ^ @tags.any? do |required_tag|
-        product_tags.any? do |product_tag|
-          product_tag.start_with?(required_tag)
-        end
-      end
-    when :ends_with
-      return @invert ^ @tags.any? do |required_tag|
-        product_tags.any? do |product_tag|
-          product_tag.end_with?(required_tag)
-        end
-      end
+  def initialize(match_type, variant_ids)
+    @invert = match_type == :is_one ? false : true
+    @variant_ids = variant_ids.map { |id| id.to_i }
   end
-end
-end
 
+  def match?(line_item)
+    @invert ^ @variant_ids.include?(line_item.variant.id)
+  end
+end`,
+
+  ProductTagSelector: `
+class ProductTagSelector
+  def initialize(invert, match_type, tags)
+    @match_type = match_type
+    @invert = invert == :does_not
+    @tags = tags.map(&:downcase)
+  end
+
+  def match?(line_item)
+    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
+    case @match_type
+      when :match
+        return @invert ^ (@tags & product_tags).length > 0
+      when :contains
+        return @invert ^ @tags.any? do |required_tag|
+          product_tags.any? do |product_tag|
+            product_tag.include?(required_tag)
+          end
+        end
+      when :starts_with
+        return @invert ^ @tags.any? do |required_tag|
+          product_tags.any? do |product_tag|
+            product_tag.start_with?(required_tag)
+          end
+        end
+      when :ends_with
+        return @invert ^ @tags.any? do |required_tag|
+          product_tags.any? do |product_tag|
+            product_tag.end_with?(required_tag)
+          end
+        end
+    end
+  end
+end`,
+
+  CartAmountQualifier: `
 class CartAmountQualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type
@@ -185,8 +191,8 @@ class CartAmountQualifier
         raise "Invalid comparison type"
     end
   end
-end
-`;
+end`
+};
 
 const customer_qualifiers = [
   {
