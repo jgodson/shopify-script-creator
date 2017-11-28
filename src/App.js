@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import { Layout, Page, PageActions, EmptyState } from '@shopify/polaris';
 import ScriptSelector from './components/ScriptSelector';
 import CampaignForm from './components/CampaignForm';
-import Campaigns from './components/Campaigns';
+import CampaignsList from './components/CampaignsList';
 import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
 
@@ -166,37 +166,36 @@ class App extends Component {
 
   generateCampaignsOutput() {
     let defaultCode = null;
-    let campaigns = null;
     const classesUsed = [];
-    let allClasses = {};
+    const allClasses = {};
     switch(this.state.scriptType) {
       case 'line_item':
         Object.assign(allClasses, Common.classes, LineItemScript.classes);
-        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
-        // remove the last `,` from the string (raises syntax error)
-        campaigns = campaigns.substring(campaigns.length -1, 0);
         defaultCode = LineItemScript.defaultCode;
         break;
       case 'shipping':
         Object.assign(allClasses, Common.classes, ShippingScript.classes);
-        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
-        // remove the last `,` from the string (raises syntax error)
-        campaigns = campaigns.substring(campaigns.length -1, 0);
         defaultCode = ShippingScript.defaultCode;
         break;
       case 'payment':
         Object.assign(allClasses, Common.classes, PaymentScript.classes);
-        campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
-        // remove the last `,` from the string (raises syntax error)
-        campaigns = campaigns.substring(campaigns.length -1, 0);
         defaultCode = PaymentScript.defaultCode;
         break;
       default:
         throw Error('Invalid script type');
     }
+
+    // Generate the campaign initialization code (also finds out what classes are used)
+    let campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
+    // remove the last `,` from the campaigns string (raises syntax error)
+    campaigns = campaigns.substring(campaigns.length -1, 0);
+
+    // Generate the classes code
     let output = generateClassCode(allClasses, classesUsed);
     // Remove first newline 
     output = output.substring(1);
+
+    // Replace the default code with the campaign initialization code
     output += defaultCode.replace('|', campaigns);
     return output;
 
@@ -215,12 +214,11 @@ class App extends Component {
 
   generateCode(campaign, classesUsed) {
     if (campaign.skip) { return; }
-
     addUsedClass(campaign.name);
     if (campaign.dependants) {
       campaign.dependants.forEach((dependant) => addUsedClass(dependant));
     }
-    
+
     const inputsCode = campaign.inputs.map((input, index) => {
       if (input.inputs) {
         return this.generateCode(input, classesUsed);
@@ -233,6 +231,7 @@ class App extends Component {
         return `${input}`;
       }
     }).join(',\n');
+
     return `\
 ${campaign.name}.new(
 ${inputsCode}
@@ -413,7 +412,7 @@ ${inputsCode}
             {(!this.state.showForm && !this.state.output) && instructions()}
           </Layout.Section>
           <Layout.Section secondary>
-            <Campaigns 
+            <CampaignsList
               campaigns={this.state.campaigns}
               editCampaign={this.editCampaign}
               removeCampaign={this.removeCampaign}
