@@ -15,6 +15,13 @@ class ExcludeSaleItems
   end
 end`,
 
+  ExcludeDiscountedItems: `
+class ExcludeDiscountedItems
+  def match?(line_item)
+    !line_item.discounted?
+  end
+end`,
+
   PercentageDiscount: `
 class PercentageDiscount
   def initialize(percent, message)
@@ -207,13 +214,18 @@ const LINE_ITEM_QUALIFIERS = [
   ...Common.line_item_qualifiers,
   {
     value: "ExcludeGiftCards",
-    label: "Exclude Gift Cards",
-    description: "Do not include products that are gift cards"
+    label: "Not a Gift Card",
+    description: "Do not match products that are gift cards"
   },
   {
     value: "ExcludeSaleItems",
-    label: "Exclude Sale Items",
-    description: "Do not include products that are on sale (price is less than compare at price)"
+    label: "Not on sale",
+    description: "Do not match products that are on sale (price is less than compare at price)"
+  },
+  {
+    value: "ExcludeDiscountedItems",
+    label: "Not previously discounted (via script)",
+    description: "Do not match products that were already discounted via scripts"
   }
 ];
 
@@ -252,67 +264,67 @@ const DISCOUNTS = [
 
 const CUSTOMER_AND_SELECTOR = {
   value: "AndSelector",
-  label: "Multi-Select - Meets all of",
-  description: "Qualifies if all of the requirements are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Qualifies if all of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_3: [...CUSTOMER_QUALIFIERS],
+    and_line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    and_line_item_qualifier_3: [...CUSTOMER_QUALIFIERS],
   }
 };
 
 const CUSTOMER_OR_SELECTOR = {
   value: "OrSelector",
-  label: "Multi-Select - Meets any of",
-  description: "Qualifies if any of the requirements are met",
+  label: "Multi-Select - Meets any conditions",
+  description: "Qualifies if any of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_3: [...CUSTOMER_QUALIFIERS]
+    or_line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    or_line_item_qualifier_3: [...CUSTOMER_QUALIFIERS]
   }
 };
 
 const LINE_ITEM_AND_SELECTOR = {
   value: "AndSelector",
-  label: "Multi-Select - Meets all of",
-  description: "Qualifies if all of the requirements are met",
+  label: "Multi-Select - Meets all condtions",
+  description: "Qualifies if all of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
+    and_line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    and_line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
   }
 };
 
 const LINE_ITEM_OR_SELECTOR = {
   value: "OrSelector",
-  label: "Multi-Select - Meets any of",
-  description: "Qualifies if any of the requirements are met",
+  label: "Multi-Select - Meets any conditions",
+  description: "Qualifies if any of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
+    or_line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    or_line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
   }
 };
 
 const CART_OR_SELECTOR = {
   value: "OrSelector",
-  label: "Multi-Select - Meets any of",
-  description: "Qualifies if any of the requirements are met",
+  label: "Multi-Select - Meets any conditions",
+  description: "Qualifies if any of the following conditions are met",
   inputs: {
     cart_qualifier_1: [...CART_QUALIFIERS],
-    cart_qualifier_2: [...CART_QUALIFIERS],
-    cart_qualifier_3: [...CART_QUALIFIERS]
+    or_cart_qualifier_2: [...CART_QUALIFIERS],
+    or_cart_qualifier_3: [...CART_QUALIFIERS]
   }
 };
 
 const CART_AND_SELECTOR = {
   value: "AndSelector",
-  label: "Multi-Select - Meets all of",
-  description: "Qualifies if all of the requirements are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Qualifies if all of the following conditions are met",
   inputs: {
     cart_qualifier_1: [...CART_QUALIFIERS],
-    cart_qualifier_2: [...CART_QUALIFIERS],
-    cart_qualifier_3: [...CART_QUALIFIERS]
+    and_cart_qualifier_2: [...CART_QUALIFIERS],
+    and_cart_qualifier_3: [...CART_QUALIFIERS]
   }
 };
 
@@ -321,7 +333,7 @@ const campaigns = [
   {
     value: "ConditionalDiscount",
     label: "Conditional Discount",
-    description: "Specify cart and item condtions to apply a specific discount",
+    description: "Specify cart and item conditions to apply a specific discount",
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
@@ -369,7 +381,7 @@ const campaigns = [
     label: "Conditionally Reject Discount Code",
     description: "Rejects discount codes based on conditions",
     inputs: {
-      match_type: {
+      match_condition: {
         type: "select",
         description: "Sets the type of match needed to reject the code",
         options: [

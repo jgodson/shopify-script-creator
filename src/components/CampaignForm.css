@@ -6,3 +6,15 @@
 .input-container {
   margin-top: 0.7rem;
 }
+
+/* TODO: Remove when released */
+.beta-tag {
+  position: absolute;
+  font-family: monospace;
+  font-size: 14px;
+  width: 60px;
+  background: #47C1BF;
+  top: 5px;
+  right: 5px;
+  text-align: center;
+}

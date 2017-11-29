@@ -395,6 +395,7 @@ ${inputsCode}
     
     return (
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
+        <div className="beta-tag">ALPHA {this.version}</div>
         <Layout>
           <Layout.Section>
             <ScriptSelector changeType={this.typeChange} currentType={this.state.scriptType} />

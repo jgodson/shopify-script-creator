@@ -309,11 +309,11 @@ export default class Step2Form extends Component {
             descText = input.options.filter((option) => option.value === value)[0].description;
             this.inputMap[input.name] = 'none';
           }
-          let description = value === 'none' ? <TextStyle variation="subdued"><strong>Details: </strong>{descText}</TextStyle> : null;
+          let description = value === 'none' ? <TextStyle variation="subdued"><strong>What it does: </strong>{descText}</TextStyle> : null;
           let additionalInputs = null;
           if (value && value !== 'none') {
             const campaign = input.options.filter((option) => option.value === value)[0];
-              description = <TextStyle variation="subdued"><strong>Details: </strong>{campaign.description}</TextStyle>;
+              description = <TextStyle variation="subdued"><strong>What it does: </strong>{campaign.description}</TextStyle>;
             if (campaign.inputs) {
               additionalInputs = this.generateAdditionalInputs(campaign, input.name);
             }
@@ -433,16 +433,15 @@ export default class Step2Form extends Component {
       />
     );
     const campaignNamer = (
-      <div className="input-container">
+      <Card.Section title="Campaign name (optional)">
         <TextField
-          label="Campaign description (optional)"
           key="campaign-desc"
           name="campaign-desc"
-          helpText="Brief summary of the campaign (not visible to customers)"
+          helpText="Not visible to customers"
           value={this.state.inputs.campaignLabel}
           onChange={(val) => this.handleInputChange(val)}
         />
-      </div>
+      </Card.Section>
     );
     const hasAdditionalSelects = this.props.currentCampaign ? Object.keys(this.props.currentCampaign.inputs).filter((input) => Array.isArray(this.props.currentCampaign.inputs[input])).length > 0 : true;
     const inputCount = this.totalCampaigns;
@@ -470,12 +469,10 @@ export default class Step2Form extends Component {
         <Card.Section title="Select a campaign">
           <div className="select-wrapper">
             {campaignSelector}
-            {this.props.currentCampaign && 
-              <TextStyle variation="subdued"><strong>Details: </strong>{this.props.currentCampaign.description}</TextStyle> 
-              && campaignNamer
-            }
+            {this.props.currentCampaign && <TextStyle variation="subdued"><strong>What it does: </strong>{this.props.currentCampaign.description}</TextStyle>}
           </div>
         </Card.Section>
+          {this.props.currentCampaign && campaignNamer}
           {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
       </Card>
     )
