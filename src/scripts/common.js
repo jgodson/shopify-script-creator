@@ -26,22 +26,23 @@ class OrSelector
   end
 end`,
 
-  CustomerEmailQualifer: `
-class CustomerEmailQualifer
+  CustomerEmailQualifier: `
+class CustomerEmailQualifier
   def initialize(match_type, match_condition, emails)
     @invert = match_type == :does_not
-    @match_condition = match_condition
+    @match_condition = match_condition == :undefined ? :match : match_condition
     @emails = emails.map(&:downcase)
   end
 
   def match?(cart)
+    return false if cart.customer.nil?
     customer_email = cart.customer.email
     case @match_condition
-      when :is_one
+      when :match
         return @invert ^ @emails.include?(customer_email)
       when :contains
         return @invert ^ @emails.any? do |partial|
-          customer_email.includes?(partial)
+          customer_email.include?(partial)
         end
       when :starts_with
         return @invert ^ @emails.any? do |partial|
@@ -58,16 +59,17 @@ end`,
   CustomerTagQualifier: `
 class CustomerTagQualifier
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition
+    @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end
 
   def match?(cart)
+    return false if cart.customer.nil?
     customer_tags = cart.customer.tags.to_a.map(&:downcase)
     case @match_condition
       when :match
-        return @invert ^ (@tags & customer_tags).length > 0
+        return @invert ^ ((@tags & customer_tags).length > 0)
       when :contains
         return @invert ^ @tags.any? do |partial_tag|
           customer_tags.any? do |customer_tag|
@@ -98,6 +100,7 @@ class CustomerOrderCountQualifier
   end
 
   def match?(cart)
+    return false if cart.customer.nil?
     total = cart.customer.orders_count
     case @comparison_type
       when :greater_than
@@ -122,6 +125,7 @@ class CustomerTotalSpentQualifier
   end
 
   def match?(cart)
+    return false if cart.customer.nil?
     total = cart.customer.total_spent
     case @comparison_type
       when :greater_than
@@ -138,14 +142,15 @@ class CustomerTotalSpentQualifier
   end
 end`,
 
-  CustomerAcceptsMarketing: `
-class CustomerAcceptsMarketing
+  CustomerAcceptsMarketingQualifier: `
+class CustomerAcceptsMarketingQualifier
   def initialize(match_type)
     @invert = match_type == :does_not
   end
 
   def match?(cart)
-    return invert ^ cart.customer.accepts_marketing?
+    return false if cart.customer.nil?
+    return @invert ^ cart.customer.accepts_marketing?
   end
 end`,
 
@@ -153,7 +158,7 @@ end`,
 class HasCode
   def initialize(match_type, match_condition, code)
     @invert = match_type == :does_not
-    @match_condition = match_condition
+    @match_condition = match_condition == :undefined ? :is_equal : match_condition
     @code = code.downcase
   end
 
@@ -176,7 +181,7 @@ end`,
   ProductIdSelector: `
 class ProductIdSelector
   def initialize(match_type, product_ids)
-    @invert = match_type != :is_one;
+    @invert = match_type == :not_one;
     @product_ids = product_ids.map { |id| id.to_i }
   end
 
@@ -188,7 +193,7 @@ end`,
   ProductTypeSelector: `
 class ProductTypeSelector
   def initialize(match_type, product_types)
-    @invert = match_type != :is_one
+    @invert = match_type == :not_one
     @product_types = product_types.map(&:downcase)
   end
 
@@ -213,7 +218,7 @@ end`,
 class VariantSkuSelector
   def initialize(match_type, match_condition, skus)
     @invert = match_type == :does_not
-    @match_condition = match_condition
+    @match_condition = match_condition == :undefined ? :match : match_condition
     @skus = skus.map(&:downcase)
   end
 
@@ -221,7 +226,7 @@ class VariantSkuSelector
     variant_skus = line_item.variant.skus.to_a.map(&:downcase)
     case @match_condition
       when :is_one
-        return @invert ^ (@skus & variant_skus).length > 0
+        return @invert ^ ((@skus & variant_skus).length > 0)
       when :contains
         return @invert ^ @skus.any? do |required_sku|
           variant_skus.any? do |sku|
@@ -247,7 +252,7 @@ end`,
   VariantIdSelector: `
 class VariantIdSelector
   def initialize(match_type, variant_ids)
-    @invert = match_type != :is_one
+    @invert = match_type == :not_one
     @variant_ids = variant_ids.map { |id| id.to_i }
   end
 
@@ -259,7 +264,7 @@ end`,
   ProductTagSelector: `
 class ProductTagSelector
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition
+    @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end
@@ -268,7 +273,7 @@ class ProductTagSelector
     product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
     case @match_condition
       when :match
-        return @invert ^ (@tags & product_tags).length > 0
+        return @invert ^ ((@tags & product_tags).length > 0)
       when :contains
         return @invert ^ @tags.any? do |required_tag|
           product_tags.any? do |product_tag|
@@ -287,6 +292,21 @@ class ProductTagSelector
             product_tag.end_with?(required_tag)
           end
         end
+    end
+  end
+end`,
+
+  LineItemPropertiesSelector: `
+class LineItemPropertiesSelector
+  def initialize(target_properties)
+    @target_properties = target_properties
+  end
+
+  def match?(line_item)
+    line_item_props = line_item.properties
+    @target_properties.all? do |key, value|
+      next unless line_item_props.has_key?(key)
+      next true if line_item_props[key].downcase == value.downcase
     end
   end
 end`,
@@ -324,7 +344,7 @@ const customer_qualifiers = [
   },
   {
     value: "CustomerEmailQualifier",
-    label: "Email",
+    label: "Customer Email",
     description: "Qualifies cutomers based on email",
     inputs: {
       match_type: {
@@ -347,19 +367,19 @@ const customer_qualifiers = [
         options: [
           {
             value: "match",
-            label: "Matches one of"
+            label: "Match one of"
           },
           {
             value: "contains",
-            label: "Contains one of"
+            label: "Contain one of"
           },
           {
             value: "starts_with",
-            label: "Starts with one of"
+            label: "Start with one of"
           },
           {
             value: "ends_with",
-            label: "Ends with one of"
+            label: "End with one of"
           }
         ]
       },
@@ -371,7 +391,7 @@ const customer_qualifiers = [
   },
   {
     value: "CustomerTagQualifier",
-    label: "Tags",
+    label: "Customer Tags",
     description: "Qualifies customers based on tags",
     inputs: {
       match_type: {
@@ -418,7 +438,7 @@ const customer_qualifiers = [
   },
   {
     value: "CustomerOrderCountQualifier",
-    label: "Order Count",
+    label: "Customer Order Count",
     description: "Qualifies customers based on the number of orders placed",
     inputs: {
       match_condition: {
@@ -451,7 +471,7 @@ const customer_qualifiers = [
   },
   {
     value: "CustomerTotalSpentQualifier",
-    label: "Total Spent",
+    label: "Customer Total Spent",
     description: "Qualifies customers based on the total amount spent",
     inputs: {
       match_condition: {
@@ -484,20 +504,20 @@ const customer_qualifiers = [
   },
   {
     value: "CustomerAcceptsMarketingQualifier",
-    label: "Accepts Marketing",
+    label: "Customer Accepts Marketing",
     description: "Qualifies if the customer does or does not accept marketing",
     inputs: {
-      match_type: {
+      qualifing_condition: {
         type: "select",
-        description: "Set how it matches",
+        description: "Set the condition that the customer qualifies",
         options: [
           {
             value: "does",
-            label: "Does"
+            label: "Does accept"
           },
           {
             value: "does_not",
-            label: "Does not"
+            label: "Does not accept"
           }
         ]
       }
@@ -790,6 +810,21 @@ const line_item_qualifiers = [
       variant_IDs: {
         type: "array",
         description: "Seperate individual variant ID's with a comma (,)"
+      }
+    }
+  },
+  {
+    value: "LineItemPropertiesSelector",
+    label: "Has Properties",
+    description: "Selects line items if they have specific properties",
+    inputs: {
+      keys_and_values: {
+        type: "object",
+        description: "Seperate keys and values with : and individual key/values with a , (eg: key1: value1, key2: value2)",
+        inputPattern: '\\s*(?:\\w+\\s*)+:\\s*(?:\\w+\\s*)+,{0,1}',
+        // Future implementation of objects (hopefully)
+        inputFormat: "{text}: {text}",
+        outputFormat: "'{text}'=>'{text}'"
       }
     }
   }

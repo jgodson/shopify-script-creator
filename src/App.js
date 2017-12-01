@@ -186,7 +186,7 @@ class App extends Component {
     }
 
     // Generate the campaign initialization code (also finds out what classes are used)
-    let campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join();
+    let campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join(',\n');
     // remove the last `,` from the campaigns string (raises syntax error)
     campaigns = campaigns.substring(campaigns.length -1, 0);
 

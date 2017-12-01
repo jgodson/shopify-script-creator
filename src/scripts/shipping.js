@@ -1,9 +1,7 @@
 import Common from './common';
 
-const classes = `\
-############### SHIPPING SCRIPT CLASSES ###############
-# Checks if a rate matches a given name or not.
-# Can do a :partial or :exact match
+const classes = {
+  RateNameSelector: `
 class RateNameSelector
   def initialize(name, match_type)
     @name = name.downcase
@@ -20,26 +18,9 @@ class RateNameSelector
         raise "Invalid match type. Must be :partial or :exact"
     end
   end
-end
+end`,
 
-class HideRateUnlessConditionsMet
-  def initialize(cart_qualifier, line_item_qualifier, rate_selector)
-    @cart_qualifier = cart_qualifier
-    @line_item_qualifier = line_item_qualifier
-    @rate_selector = rate_selector
-  end
-
-  def run(rates, cart)
-    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
-    unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }
-      rates.delete_if do |rate|
-        @rate_selector.match?(rate)
-      end
-    end
-  end
-end
-
-# Takes an array of rate names and matches a given rate
+  RateSelector: `
 class RateSelector
   def initialize(rate_names)
     @rate_names = rate_names.map { |name| name.downcase! }
@@ -48,9 +29,9 @@ class RateSelector
   def match?(rate)
     @rate_names.include?(rate.name.downcase)
   end
-end
+end`,
 
-# Applies a percentage discount to a given rate
+  PercentageDiscount: `
 class PercentageDiscount
   def initialize(percent, message)
     @percent = Decimal.new(percent) / 100
@@ -60,9 +41,8 @@ class PercentageDiscount
   def apply(rate)
     rate.apply_discount(rate.price * @percent, { message: @message })
   end 
-end
-
-# Applies a fixed discount to a given rate
+end`,
+  FixedDiscount: `
 class FixedDiscount
   def initialize(amount, message)
     @amount = Money.new(cents: amount * 100)
@@ -73,8 +53,9 @@ class FixedDiscount
     discount_amount = rate.price - @amount < 0 ? rate.price : @amount
     rate.apply_discount(discount_amount, { message: @message })
   end
-end
+end`,
 
+  AddressQualifier: `
 # ----- Qualifying Addresses ----- #
 # Example: {
 #   address1: ["150 Elgin St", "150 Elgin Street"],
@@ -102,7 +83,7 @@ class AddressQualifier
       match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial
 
       cart.shipping_address.to_hash.all? do |key, value|
-        return true if value.empty?
+        next true if value.empty?
         match = true
         key = key.to_sym
         value.downcase!
@@ -128,12 +109,13 @@ class AddressQualifier
             end
           end
         end
-        return match
+        match
       end
     end
   end
-end
+end`,
 
+  CountryAndProvinceSelector: `
 # COUNTRY MAP = { "COUNTRY_CODE" => ["PROVINCE_CODE_1", "PROVINCE_CODE_2", etc] }
 class CountryAndProvinceSelector
   def initialize(country_map)
@@ -144,27 +126,48 @@ class CountryAndProvinceSelector
     address = cart.shipping_address
     address && @country_map.key?(address.country_code.upcase) && @country_map[address.country_code.upcase].include?(address.province_code.upcase)
   end
-end
+end`,
 
-# Accepts a qualifier, rate selector and a discount to apply to shipping rates
+  ShippingDiscount : `
 class ShippingDiscount
-  def initialize(qualifier, rate_selector, discount)
+  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector, discount)
     @qualifier = qualifier
     @rate_selector = rate_selector
     @discount = discount
   end
   
   def run(cart, rates)
-    return unless @qualifier.match?(cart)
+    return unless @discount
+    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
+    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
+    return unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }
     rates.each do |rate|
-      next unless @rate_selector.match?(rate)
+      next unless @rate_selector.nil? || @rate_selector.match?(rate)
       @discount.apply(rate)
     end
   end
-end
+end`,
 
-############### CAMPAIGNS ###############
-`;
+  HideRateUnlessConditionsMet: `
+class HideRateUnlessConditionsMet
+  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector)
+    @cart_qualifier = cart_qualifier
+    @line_item_qualifier = line_item_qualifier
+    @rate_selector = rate_selector
+  end
+
+  def run(rates, cart)
+    met = @customer_qualifier.nil? || @customer_qualifier.match?(cart)
+    met = met ? @cart_qualifier.nil? || @cart_qualifier.match?(cart) : false
+    met = met ? @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) } : false
+    unless met
+      rates.delete_if do |rate|
+        @rate_selector.match?(rate)
+      end
+    end
+  end
+end`
+};
 
 const defaultCode = `
 CAMPAIGNS = [
@@ -189,15 +192,48 @@ const LINE_ITEM_QUALIFIERS = [
   ...Common.line_item_qualifiers
 ];
 
+const RATE_SELECTORS = [
+  {
+    value: "RateNameSelector",
+    label: "Rate Name",
+    description: "Selects shipping rates based on the name",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "How the rate is matched",
+        options: [
+          {
+            value: "exact",
+            label: "Is equal to"
+          }, 
+          {
+            value: "partial",
+            label: "Contains"
+          }
+        ]
+      },
+      rate_name: {
+        type: "text",
+        description: "Name of rate to hide"
+      }
+    }
+  },
+];
+
 const DISCOUNTS = [
+  {
+    value: "none",
+    label: "None",
+    description: "No discount"
+  },
   {
     value: "PercentageDiscount",
     label: "Percentage Discount",
-    description: "Discounts the shipping rate by a percentage",
+    description: "Discounts matched rates by a percentage",
     inputs: {
       percent: {
         type: "number",
-        description: "Percent discount to apply"
+        description: "Percent discount to apply to each rate"
       },
       message: {
         type: "text",
@@ -208,11 +244,11 @@ const DISCOUNTS = [
   {
     value: "FixedDiscount",
     label: "Fixed Discount",
-    description: "Discounts the shipping rate by a fixed amount",
+    description: "Discounts matched rates by a fixed amount",
     inputs: {
       amount: {
         type: "number",
-        description: "Total discount to apply"
+        description: "Discount to apply to each rate"
       },
       message: {
         type: "text",
@@ -224,72 +260,116 @@ const DISCOUNTS = [
 
 const CUSTOMER_AND_SELECTOR = {
   value: "AndSelector",
-  label: "And Selector",
-  description: "Qualifies if all of the requirements are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Qualifies if all of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_3: [...CUSTOMER_QUALIFIERS],
+    and_line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    and_line_item_qualifier_3: [...CUSTOMER_QUALIFIERS],
   }
 };
 
 const CUSTOMER_OR_SELECTOR = {
   value: "OrSelector",
-  label: "Or Selector",
-  description: "Qualifies if any of the requirements are met",
+  label: "Multi-Select - Meets any conditions",
+  description: "Qualifies if any of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
-    line_item_qualifier_3: [...CUSTOMER_QUALIFIERS]
+    or_line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    or_line_item_qualifier_3: [...CUSTOMER_QUALIFIERS]
   }
 };
 
 const LINE_ITEM_AND_SELECTOR = {
   value: "AndSelector",
-  label: "And Selector",
-  description: "Qualifies if all of the requirements are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Qualifies if all of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
+    and_line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    and_line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
   }
 };
 
 const LINE_ITEM_OR_SELECTOR = {
   value: "OrSelector",
-  label: "Or Selector",
-  description: "Qualifies if any of the requirements are met",
+  label: "Multi-Select - Meets any conditions",
+  description: "Qualifies if any of the following conditions are met",
   inputs: {
     line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-    line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
+    or_line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
+    or_line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
   }
 };
 
 const CART_OR_SELECTOR = {
   value: "OrSelector",
-  label: "Or Selector",
-  description: "Qualifies if any of the requirements are met",
+  label: "Multi-Select - Meets any conditions",
+  description: "Qualifies if any of the following conditions are met",
   inputs: {
     cart_qualifier_1: [...CART_QUALIFIERS],
-    cart_qualifier_2: [...CART_QUALIFIERS],
-    cart_qualifier_3: [...CART_QUALIFIERS]
+    or_cart_qualifier_2: [...CART_QUALIFIERS],
+    or_cart_qualifier_3: [...CART_QUALIFIERS]
   }
 };
 
 const CART_AND_SELECTOR = {
   value: "AndSelector",
-  label: "And Selector",
-  description: "Qualifies if all of the requirements are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Qualifies if all of the following conditions are met",
   inputs: {
     cart_qualifier_1: [...CART_QUALIFIERS],
-    cart_qualifier_2: [...CART_QUALIFIERS],
-    cart_qualifier_3: [...CART_QUALIFIERS]
+    and_cart_qualifier_2: [...CART_QUALIFIERS],
+    and_cart_qualifier_3: [...CART_QUALIFIERS]
+  }
+};
+
+const RATE_AND_SELECTOR = {
+  value: "AndSelector",
+  label: "Multi-Select - Meets all conditions",
+  description: "Selected if all of the following conditions are met",
+  inputs: {
+    line_item_qualifier_1: [...RATE_SELECTORS],
+    and_line_item_qualifier_2: [...RATE_SELECTORS],
+    and_line_item_qualifier_3: [...RATE_SELECTORS],
+  }
+};
+
+const RATE_OR_SELECTOR = {
+  value: "OrSelector",
+  label: "Multi-Select - Meets any conditions",
+  description: "Selected if any of the following conditions are met",
+  inputs: {
+    line_item_qualifier_1: [...RATE_SELECTORS],
+    or_line_item_qualifier_2: [...RATE_SELECTORS],
+    or_line_item_qualifier_3: [...RATE_SELECTORS]
   }
 };
 
 const campaigns = [
-
+  {
+    value: "ShippingDiscount",
+    label: "Shipping Discount",
+    description: "Specify conditions to apply a shipping discount",
+    inputs: {
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      rate_to_discount_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR],
+      discount_to_apply: [...DISCOUNTS]
+    }
+  },
+  {
+    value: "HideRateUnlessConditionsMet",
+    label: "Hide Rate If Not Qualified",
+    description: "Shipping rate will be hidden unless conditions are met",
+    inputs: {
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      rate_to_hide_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR]
+    }
+  }
 ];
 
 export default {

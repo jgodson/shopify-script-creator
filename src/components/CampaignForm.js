@@ -9,7 +9,7 @@ import {
   Select,
 } from '@shopify/polaris';
 import styles from './CampaignForm.css';
-import { capitalize, splitAndCapitalize, isCampaignSelect, getInputType } from '../helpers';
+import { capitalize, splitAndCapitalize, splitCamelCase, isCampaignSelect, getInputType, getObjectFormats, formatObject } from '../helpers';
 
 export default class Step2Form extends Component {
   constructor(props) {
@@ -22,6 +22,7 @@ export default class Step2Form extends Component {
       text: {},
       number: {},
       array: {},
+      object: {},
       boolean: {},
     }
 
@@ -32,7 +33,6 @@ export default class Step2Form extends Component {
     this.mainCampaignName = 'mainCampaign';
 
     this.inputMap = {};
-    this.totalCampaigns = 0;
     this.updateCount = 0;
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -41,6 +41,7 @@ export default class Step2Form extends Component {
     this.getInputValue = this.getInputValue.bind(this);
     this.populateBasedOnExistingInfo = this.populateBasedOnExistingInfo.bind(this);
     this.getInputsForCampaign = this.getInputsForCampaign.bind(this);
+    this.checkObjectInput = this.checkObjectInput.bind(this);
   }
 
   componentDidMount() {
@@ -76,11 +77,28 @@ export default class Step2Form extends Component {
       });
     }
     if (type && name) {
-    newState.inputs[type][name] = newVal;
+      newState.inputs[type][name] = newVal;
     } else {
       newState.inputs.campaignLabel = newVal;
     }
     this.setState(newState);
+  }
+
+  checkObjectInput(evt, pattern) {
+    pattern = new RegExp(pattern);
+    const value = evt.target.value;
+    if (value.trim() === "") { return; }
+    const lines = value.split(',');
+    let valid = true;
+    lines.forEach((line) => {
+      if (!pattern.test(line)) {
+        valid = false;
+      }
+    });
+    if (!valid) {
+      alert("Input value doesn't seem to be in the proper format. Please check again");
+      evt.target.focus();
+    }
   }
 
   populateBasedOnExistingInfo(existingInfo) {
@@ -155,13 +173,28 @@ export default class Step2Form extends Component {
         switch (type) {
           case 'array':
             // Remove %w( and ). Then split on space and join with a comma and space to seperate
-            return typeof value === "string" && value.substring(value.length -1, 0).substring(3).split(' ').join(', ');
+            return typeof value === "string" && value.substring(value.length - 1, 0).substring(3).split(' ').join(', ');
           case 'text':
             // Remove quotes
-            return typeof value === "string" && value.substring(value.length -1, 0).substring(1);
+            return typeof value === "string" && value.substring(value.length - 1, 0).substring(1);
           case 'select':
             // Remove :
             return typeof value === "string" && value.substring(1);
+          case 'object':
+            // TODO: Use input inputFormat defined for input instead to determine how to format
+            // Remove {} and '' and convert back to : from =>
+            value = value.substring(value.length - 1, 0).substring(1);
+            if (value === "") { return value; }
+
+            value = value.split(',').map((line) => {
+              const keyValue = line.split('=>');
+              let key = keyValue[0].trim();
+              key = key.substring(key.length - 1, 0).substring(1);
+              let value = keyValue[1].trim();
+              value = value.substring(value.length - 1, 0).substring(1);
+              return `${key}: ${value}`;
+            }).join(',\n');
+            return value;
           default:
             return value;
         }
@@ -186,9 +219,6 @@ export default class Step2Form extends Component {
   }
 
   generateInputsForCampaign(campaign, mapTo) {
-    if (mapTo === this.mainCampaignName) {
-      this.totalCampaigns = 0;
-    }
     const inputs = [];
     const fields = campaign.inputs;
     const campaignInputKeys = Object.keys(campaign.inputs);
@@ -199,6 +229,7 @@ export default class Step2Form extends Component {
       const inputName = mapTo ? `${mapTo}-${inputType}_${inputId}` : `${inputType}_${inputId}`;
       const newInput = {
         type: inputType,
+        pattern: field.inputPattern,
         label: key.indexOf('_') > -1 ? splitAndCapitalize('_', key) : capitalize(key),
         options: field.options || field,
         description: field.description,
@@ -254,6 +285,7 @@ export default class Step2Form extends Component {
               label={input.label}
               key={input.name}
               name={input.name}
+              min={0}
               type="number"
               helpText={input.description}
               value={this.state.inputs[input.type][input.name]}
@@ -296,6 +328,23 @@ export default class Step2Form extends Component {
           );
         }
       },
+      object: {
+        generate: (input) => {
+          return (
+            <TextField
+              label={input.label}
+              placeholder={`Enter some ${input.label}...`}
+              key={input.name}
+              name={input.name}
+              multiline={3}
+              helpText={input.description}
+              value={this.state.inputs[input.type][input.name] || input.value}
+              onBlur={(evt) => this.checkObjectInput(evt, input.pattern)}
+              onChange={(val) => this.handleInputChange(val, input.type, input.name)}
+            />
+          );
+        }
+      },
       campaignSelect: {
         generate: (input) => {
           let value = this.state.inputs[input.type][input.name];
@@ -303,7 +352,6 @@ export default class Step2Form extends Component {
             value = value.name;
           }
 
-          this.totalCampaigns++;
           let descText = null;
           if (value === 'none') {
             descText = input.options.filter((option) => option.value === value)[0].description;
@@ -348,7 +396,8 @@ export default class Step2Form extends Component {
     }
   }
 
-  buildAndAddCampaign() {
+  buildAndAddCampaign(evt) {
+    evt.preventDefault();
     const newCampaign = {
       name: this.props.currentCampaign.value,
       label: this.state.inputs.campaignLabel,
@@ -356,29 +405,30 @@ export default class Step2Form extends Component {
       dependants: this.props.currentCampaign.dependants,
       inputs: []
     }
+    const campaignInputs = this.props.currentCampaign.inputs;
 
     this.inputMap[this.mainCampaignName].forEach((input) => {
         if (!isCampaignSelect(input)) {
-          newCampaign.inputs.push(this.getInputValue(input));
+          newCampaign.inputs.push(this.getInputValue(input, newCampaign.name, campaignInputs));
         } else {
-          newCampaign.inputs.push(this.getInputsForCampaign(input));
+          newCampaign.inputs.push(this.getInputsForCampaign(input, campaignInputs));
         }
     });
     this.props.addCampaign(newCampaign);
   }
 
-  getInputsForCampaign(campaignSelect) {
+  getInputsForCampaign(campaignSelect, campaignInputs) {
     const newInput = {
       name: this.getInputValue(campaignSelect)
-    }
+    };
 
     if (Array.isArray(this.inputMap[campaignSelect])) {
       newInput.inputs = [];
       this.inputMap[campaignSelect].forEach((campaignInput) => {
         if (isCampaignSelect(campaignInput)) {
-          newInput.inputs.push(this.getInputsForCampaign(campaignInput))
+          newInput.inputs.push(this.getInputsForCampaign(campaignInput, campaignInputs))
         } else {
-          newInput.inputs.push(this.getInputValue(campaignInput));
+          newInput.inputs.push(this.getInputValue(campaignInput, newInput.name, campaignInputs));
         }
       });
     }
@@ -386,22 +436,43 @@ export default class Step2Form extends Component {
     return newInput;
   }
 
-  getInputValue(inputName) {
+  getInputValue(inputName, campaignName, campaignInputs) {
     const type = getInputType(inputName);
     let value = this.state.inputs[type][inputName];
     // Can modify values here (like make an array into an array)
     switch (type) {
       case 'array':
-        if (!value) { return ""; }
+        if (!value) { return '%w()'; }
         return `%w(${value.split(',').map((val) => val.trim()).join(' ')})`;
       case 'text':
-        return value ? `"${value}"` : "";
+        return value ? `"${value}"` : '""';
       case 'select':
         return `:${value}`;
       case 'boolean':
         return value ? true : false;
       case 'number':
-        return value || 0;
+        return parseInt(value) || 0;
+      case 'object':
+        if (!value) return "{}";
+        // TODO: use format definied for input instead
+        // const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+        // console.log(inputFormat, outputFormat);
+        // return formatObject('output', value, inputFormat, outputFormat);
+        try {
+          const lines = value.split(',').map((line) => {
+            const keyValue = line.split(':');
+            const key = keyValue[0].trim();
+            const value = keyValue[1].trim();
+            return `'${key}' => '${value}'`;
+          }).join();
+          return `{${lines}}`;
+        } catch (e) {
+          // Alert user if there was a parsing error (as best we can) and prevent going any further
+          alert (`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+          throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+        }
+      case 'campaignSelect':
+        return value ? value : 'none';
       default:
         return value;
     }
@@ -410,7 +481,6 @@ export default class Step2Form extends Component {
   handleCampaignSelect(val) {
     if (this.props.currentCampaign !== null) {
       this.setState({inputs: JSON.parse(JSON.stringify(this.blankInputState))});
-      this.totalCampaigns = 0;
     }
     this.props.updateCurrentCampaign(val);
   }
@@ -443,14 +513,11 @@ export default class Step2Form extends Component {
         />
       </Card.Section>
     );
-    const hasAdditionalSelects = this.props.currentCampaign ? Object.keys(this.props.currentCampaign.inputs).filter((input) => Array.isArray(this.props.currentCampaign.inputs[input])).length > 0 : true;
-    const inputCount = this.totalCampaigns;
-    const fieldsFilled = Object.keys(this.state.inputs.campaignSelect).length;
     const footerActions = {
       secondary: {
         content: "Save",
         primary: true,
-        disabled: hasAdditionalSelects && inputCount === 0 || inputCount !== fieldsFilled,
+        disabled: !this.props.currentCampaign,
         onAction: this.buildAndAddCampaign
       },
       primary: {
@@ -473,7 +540,9 @@ export default class Step2Form extends Component {
           </div>
         </Card.Section>
           {this.props.currentCampaign && campaignNamer}
-          {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
+          <form onSubmit={this.buildAndAddCampaign}>
+            {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
+          </form>
       </Card>
     )
   }

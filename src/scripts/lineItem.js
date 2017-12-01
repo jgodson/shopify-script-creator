@@ -15,8 +15,8 @@ class ExcludeSaleItems
   end
 end`,
 
-  ExcludeDiscountedItems: `
-class ExcludeDiscountedItems
+  ExcludeReducedItems: `
+class ExcludeReducedItems
   def match?(line_item)
     !line_item.discounted?
   end
@@ -56,7 +56,7 @@ end`,
 class ExcludeDiscountCodes
   def initialize(reject, message)
     @reject = reject
-    @message = message
+    @message = message == "" ? "Discount codes cannot be used with this offer" : message
   end
   
   def match?(cart)
@@ -74,6 +74,7 @@ class ConditionalDiscount
   end
 
   def run(cart)
+    return unless @discount
     return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
     cart.line_items.each do |item|
@@ -86,7 +87,7 @@ end`,
   RejectAllDiscountCodes: `
 class RejectAllDiscountCodes
   def initialize(message)
-    @message = message
+    @message = message == "" ? "Discount codes are disabled" : message
   end
 
   def run(cart)
@@ -112,6 +113,7 @@ class BuyXGetX
   end
   
   def run(cart)
+    return unless @discount
     return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
     return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x
@@ -158,19 +160,19 @@ end`,
   ConditionalDiscountCodeRejection: `
 class ConditionalDiscountCodeRejection
   def initialize(match_type, customer_qualifier, cart_qualifier, line_item_selector, message)
-    @invert = match_type != :match
+    @invert = match_type == :no_match
     @cart_qualifier = cart_qualifier
     @line_item_selector = line_item_selector
-    @message = message
+    @message = message == "" ? "Discount codes are disabled" : message
   end
 
   def run(cart)
     return unless cart.discount_code
     return unless @customer_qualifier.nil? || (@invert ^ @customer_qualifier.match?(cart))
     return unless @cart_qualifier.nil? || (@invert ^ @cart_qualifier.match?(cart))
-    return unless @line_item_selector.nil? || (@invert ^ cart.line_items.any? do |item|
+    return unless @line_item_selector.nil? || @invert ^ cart.line_items.any? do |item|
       @line_item_selector.match?(item)
-    end)
+    end
     cart.discount_code.reject({message: @message})
   end
 end`
@@ -223,13 +225,18 @@ const LINE_ITEM_QUALIFIERS = [
     description: "Do not match products that are on sale (price is less than compare at price)"
   },
   {
-    value: "ExcludeDiscountedItems",
+    value: "ExcludeReducedItems",
     label: "Not previously discounted (via script)",
     description: "Do not match products that were already discounted via scripts"
   }
 ];
 
 const DISCOUNTS = [
+  {
+    value: "none",
+    label: "None",
+    description: "No discount"
+  },
   {
     value: "PercentageDiscount",
     label: "Percentage Discount",
@@ -333,7 +340,7 @@ const campaigns = [
   {
     value: "ConditionalDiscount",
     label: "Conditional Discount",
-    description: "Specify cart and item conditions to apply a specific discount",
+    description: "Specify conditions to apply a discount",
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],

@@ -41,10 +41,35 @@
     return type[type.length - 1].split('_')[0];
   }
 
+  function getObjectFormats(campaignName, inputs) {
+    let targetInput = null;
+    const keys = Object.keys(inputs);
+    for (let index = 0, length = keys.length; index < length; index++) {
+      const key = keys[index];
+      const foundInput = inputs[key].filter((input) => input.value === campaignName);
+      if (foundInput.length > 0) {
+        targetInput = foundInput[0];
+        break;
+      }
+    }
+    const targetObjectInput = targetInput.inputs[Object.keys(targetInput.inputs).pop()];
+    return [targetObjectInput.inputFormat, targetObjectInput.outputFormat];
+  }
+
+  function formatObject(inOut, value, inputFmt, outputFmt) {
+    if (inOut == 'input') {
+
+    } else {
+
+    }
+  }
+
 export {
   capitalize,
   splitAndCapitalize,
   splitCamelCase,
   isCampaignSelect,
-  getInputType
+  getInputType,
+  getObjectFormats,
+  formatObject
 }
