@@ -172,14 +172,18 @@ export default class Step2Form extends Component {
       function convertInput(value, type) {
         switch (type) {
           case 'array':
-            // Remove %w( and ). Then split on space and join with a comma and space to seperate
-            return typeof value === "string" && value.substring(value.length - 1, 0).substring(3).split(' ').join(', ');
+            // Remove []. Then split on comma, remove "" and join with comma
+            value = value.substring(value.length - 1, 0).substring(1).split(',')
+            return value.map((entry) => {
+              entry = entry.trim();
+              return entry.substring(entry.length - 1, 0).substring(1);
+            }).join(', ');
           case 'text':
             // Remove quotes
-            return typeof value === "string" && value.substring(value.length - 1, 0).substring(1);
+            return value.substring(value.length - 1, 0).substring(1);
           case 'select':
             // Remove :
-            return typeof value === "string" && value.substring(1);
+            return value.substring(1);
           case 'object':
             // TODO: Use input inputFormat defined for input instead to determine how to format
             // Remove {} and '' and convert back to : from =>
@@ -442,8 +446,8 @@ export default class Step2Form extends Component {
     // Can modify values here (like make an array into an array)
     switch (type) {
       case 'array':
-        if (!value) { return '%w()'; }
-        return `%w(${value.split(',').map((val) => val.trim()).join(' ')})`;
+        if (!value) { return '[]'; }
+        return `[${value.split(',').map((val) => `"${val.trim()}"`).join(', ')}]`;
       case 'text':
         return value ? `"${value}"` : '""';
       case 'select':
@@ -463,7 +467,7 @@ export default class Step2Form extends Component {
             const keyValue = line.split(':');
             const key = keyValue[0].trim();
             const value = keyValue[1].trim();
-            return `'${key}' => '${value}'`;
+            return `"${key}" => "${value}"`;
           }).join();
           return `{${lines}}`;
         } catch (e) {

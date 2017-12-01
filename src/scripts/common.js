@@ -163,11 +163,11 @@ class HasCode
   end
 
   def match?(cart)
-    return true if cart.discount_code.nil?
+    return false if cart.discount_code.nil?
     entered_code = cart.discount_code.code.downcase
     case @match_condition
       when :is_equal
-        return @invert ^ entered_code == @code
+        return @invert ^ (entered_code == @code)
       when :contains
         return @invert ^ entered_code.include?(@code)
       when :starts_with
@@ -210,7 +210,7 @@ end`,
   end
 
   def match?(line_item)
-    @invert ^ @vendors.include?(line_item.variant.product.vendor)
+    @invert ^ @vendors.include?(line_item.variant.product.vendor.downcase)
   end
 end`,
 
@@ -225,7 +225,7 @@ class VariantSkuSelector
   def match?(line_item)
     variant_skus = line_item.variant.skus.to_a.map(&:downcase)
     case @match_condition
-      when :is_one
+      when :match
         return @invert ^ ((@skus & variant_skus).length > 0)
       when :contains
         return @invert ^ @skus.any? do |required_sku|
@@ -742,7 +742,7 @@ const line_item_qualifiers = [
     }
   },
   {
-    value: "VariantSKUSelector",
+    value: "VariantSkuSelector",
     label: "Variant SKU",
     description: "Selects line items by variant SKU",
     inputs: {
