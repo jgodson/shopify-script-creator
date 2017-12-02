@@ -54,8 +54,8 @@ end`,
 
   ExcludeDiscountCodes: `
 class ExcludeDiscountCodes
-  def initialize(reject, message)
-    @reject = reject
+  def initialize(behaviour, message)
+    @reject = behaviour == :apply_script
     @message = message == "" ? "Discount codes cannot be used with this offer" : message
   end
   
@@ -197,12 +197,22 @@ const CART_QUALIFIERS = [
   ...Common.cart_qualifiers,
   {
     value: "ExcludeDiscountCodes",
-    label: "Has No Discount Codes",
+    label: "Cart Has No Discount Codes",
     description: "Do not allow discount codes and script discount to combine",
     inputs: {
-      reject_discount_code: {
-        type: "boolean",
-        description: "Enable to reject code and apply script. Leave disabled to apply discount code only.",
+      behaviour: {
+        type: "select",
+        description: "Set the behaviour when a discount code is entered",
+        options: [
+          {
+            value: "apply_discount",
+            label: "Apply discount code only"
+          },
+          {
+            value: "apply_script",
+            label: "Reject discount code and apply script"
+          }
+        ]
       },
       rejection_message: {
         type: "text",

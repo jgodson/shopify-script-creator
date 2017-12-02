@@ -395,7 +395,7 @@ ${inputsCode}
     
     return (
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
-        <div className="beta-tag">ALPHA {this.version}</div>
+        <div className="beta-tag"><a href="https://github.com/jgodson/shopify-script-creator/releases">ALPHA {this.version}</a></div>
         <Layout>
           <Layout.Section>
             <ScriptSelector changeType={this.typeChange} currentType={this.state.scriptType} />

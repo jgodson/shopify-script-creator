@@ -42,6 +42,7 @@ export default class Step2Form extends Component {
     this.populateBasedOnExistingInfo = this.populateBasedOnExistingInfo.bind(this);
     this.getInputsForCampaign = this.getInputsForCampaign.bind(this);
     this.checkObjectInput = this.checkObjectInput.bind(this);
+    this.renderForm = this.renderForm.bind(this);
   }
 
   componentDidMount() {
@@ -495,6 +496,23 @@ export default class Step2Form extends Component {
     this.props.showForm(false);
   }
 
+  renderForm() {
+    return [
+      <Card.Section key="campaign-desc" title="Campaign name (optional)">
+        <TextField
+          key="campaign-desc"
+          name="campaign-desc"
+          helpText="Not visible to customers"
+          value={this.state.inputs.campaignLabel}
+          onChange={(val) => this.handleInputChange(val)}
+        />
+      </Card.Section>,
+      <form key="campaign-form" onSubmit={this.buildAndAddCampaign}>
+        {this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
+      </form>
+    ];
+  }
+
   render() {
     this.inputMap = {};
     const campaignSelector = (
@@ -506,17 +524,7 @@ export default class Step2Form extends Component {
         onChange={(val) => this.handleCampaignSelect(val)}
       />
     );
-    const campaignNamer = (
-      <Card.Section title="Campaign name (optional)">
-        <TextField
-          key="campaign-desc"
-          name="campaign-desc"
-          helpText="Not visible to customers"
-          value={this.state.inputs.campaignLabel}
-          onChange={(val) => this.handleInputChange(val)}
-        />
-      </Card.Section>
-    );
+
     const footerActions = {
       secondary: {
         content: "Save",
@@ -543,10 +551,7 @@ export default class Step2Form extends Component {
             {this.props.currentCampaign && <TextStyle variation="subdued"><strong>What it does: </strong>{this.props.currentCampaign.description}</TextStyle>}
           </div>
         </Card.Section>
-          {this.props.currentCampaign && campaignNamer}
-          <form onSubmit={this.buildAndAddCampaign}>
-            {this.props.currentCampaign && this.generateInputsForCampaign(this.props.currentCampaign, this.mainCampaignName)}
-          </form>
+        {this.props.currentCampaign && this.renderForm()}
       </Card>
     )
   }

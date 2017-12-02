@@ -566,7 +566,7 @@ const cart_qualifiers = [
   },
   {
     value: "HasCode",
-    label: "Has Specific Discount Code",
+    label: "Cart Has Discount Code",
     description: "Checks to see if the discount code entered matches conditions",
     inputs: {
       match_type: {

@@ -7,6 +7,10 @@
   margin-top: 0.7rem;
 }
 
+form {
+  border-top: 1px solid #dfe3e8;
+}
+
 /* TODO: Remove when released */
 .beta-tag {
   position: absolute;
@@ -17,4 +21,8 @@
   top: 5px;
   right: 5px;
   text-align: center;
+}
+
+.beta-tag a, .beta-tag a:focus, .beta-tag a:visited {
+  color: inherit;
 }
