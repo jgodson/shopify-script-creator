@@ -43402,7 +43402,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
-  RateNameSelector: "\nclass RateNameSelector\n  def initialize(name, match_type)\n    @name = name.downcase\n    @match_type = match_type\n  end\n  \n  def match?(rate)\n    case @match_type\n      when :partial\n        rate.name.downcase.include?(@name)\n      when :exact\n        rate.name.downcase === @name\n      else\n        raise \"Invalid match type. Must be :partial or :exact\"\n    end\n  end\nend",
+  RateNameSelector: "\n  class RateNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    name = shipping_rate.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
 
   RateSelector: "\nclass RateSelector\n  def initialize(rate_names)\n    @rate_names = rate_names.map { |name| name.downcase! }\n  end\n  \n  def match?(rate)\n    @rate_names.include?(rate.name.downcase)\n  end\nend",
 
@@ -43413,9 +43413,9 @@ var classes = {
   // TODO: Not sure if this is feasable or not (Array of objects). Logix may be too complex
   AddressQualifier: "\n# ----- Qualifying Addresses ----- #\n# Example: {\n#   address1: [\"150 Elgin St\", \"150 Elgin Street\"],\n#   address2: \"8th floor\",\n#   phone: 123-456-7890,\n#   city: \"Ottawa\",\n#   province: \"Ontario\",\n#   country_code: \"CA\",\n#   zip: \"K2P 1L4\",\n#   match_type: :exact\n# }\n# Matches a given address to an array of addresses given\n# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)\n# If no match type is specified, :partial will be the default\n# Only the given paramaters will be compared. Arrays can be used to match different options\nclass AddressQualifier\n  def initialize(addresses)\n    @addresses = addresses\n  end\n  \n  def match?(cart)\n    return false if cart.shipping_address.nil?\n    \n    @addresses.any? do |accepted_address|\n      match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial\n\n      cart.shipping_address.to_hash.all? do |key, value|\n        next true if value.empty?\n        match = true\n        key = key.to_sym\n        value.downcase!\n        \n        unless accepted_address[key].nil?\n          if accepted_address[key].kind_of?(Array)\n            match = accepted_address[key].any? do |potential_address|\n              potential_address.downcase!\n              case match_type\n                when :partial\n                  value.include?(potential_address)\n                when :exact\n                  potential_address == value\n              end\n            end\n          else\n            accepted_address[key].downcase!\n            case match_type\n              when :partial\n                match = value.include?(accepted_address[key])\n              when :exact\n                match = accepted_address[key] == value\n            end\n          end\n        end\n        match\n      end\n    end\n  end\nend",
 
-  ShippingDiscount: "\nclass ShippingDiscount\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector, discount)\n    @qualifier = qualifier\n    @rate_selector = rate_selector\n    @discount = discount\n  end\n  \n  def run(cart, rates)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }\n    rates.each do |rate|\n      next unless @rate_selector.nil? || @rate_selector.match?(rate)\n      @discount.apply(rate)\n    end\n  end\nend",
+  ShippingDiscount: "\nclass ShippingDiscount\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector, discount)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @rate_selector = rate_selector\n    @discount = discount\n  end\n  \n  def run(rates, cart)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }\n    rates.each do |rate|\n      next unless @rate_selector.nil? || @rate_selector.match?(rate)\n      @discount.apply(rate)\n    end\n  end\nend",
 
-  HideRateUnlessConditionsMet: "\nclass HideRateUnlessConditionsMet\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector)\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @rate_selector = rate_selector\n  end\n\n  def run(rates, cart)\n    met = @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    met = met ? @cart_qualifier.nil? || @cart_qualifier.match?(cart) : false\n    met = met ? @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) } : false\n    unless met\n      rates.delete_if do |rate|\n        @rate_selector.match?(rate)\n      end\n    end\n  end\nend"
+  HideRateUnlessConditionsMet: "\nclass HideRateUnlessConditionsMet\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @rate_selector = rate_selector\n  end\n\n  def run(rates, cart)\n    met = @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    met = met ? @cart_qualifier.nil? || @cart_qualifier.match?(cart) : false\n    met = met ? @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) } : false\n    unless met\n      rates.delete_if do |rate|\n        @rate_selector.match?(rate)\n      end\n    end\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.shipping_rates, Input.cart)\nend\n\nOutput.shipping_rates = Input.shipping_rates";
@@ -43429,22 +43429,39 @@ var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.line_it
 var RATE_SELECTORS = [{
   value: "RateNameSelector",
   label: "Rate Name",
-  description: "Selects shipping rates based on the name",
+  description: "Matches shipping rates based on the name",
   inputs: {
     match_type: {
       type: "select",
-      description: "How the rate is matched",
+      description: "Set how the following condition matches",
       options: [{
-        value: "exact",
-        label: "Is equal to"
+        value: "does",
+        label: "Does"
       }, {
-        value: "partial",
-        label: "Contains"
+        value: "does_not",
+        label: "Does not"
       }]
     },
-    rate_name: {
-      type: "text",
-      description: "Name of rate to hide"
+    match_condition: {
+      type: "select",
+      description: "Set how the names are matched",
+      options: [{
+        value: "match",
+        label: "Match one of"
+      }, {
+        value: "contains",
+        label: "Contain one of"
+      }, {
+        value: "starts_with",
+        label: "Start with one of"
+      }, {
+        value: "ends_with",
+        label: "End with one of"
+      }]
+    },
+    rate_names: {
+      type: "array",
+      description: "Seperate individual names with a comma (,)"
     }
   }
 }];
@@ -43579,7 +43596,7 @@ var campaigns = [{
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    rate_to_discount_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR]),
+    rate_to_discount_selector: [].concat(RATE_SELECTORS),
     discount_to_apply: [].concat(DISCOUNTS)
   }
 }, {
@@ -43590,7 +43607,7 @@ var campaigns = [{
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    rate_to_hide_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR])
+    rate_to_hide_selector: [].concat(RATE_SELECTORS)
   }
 }];
 
@@ -43658,16 +43675,16 @@ var GATEWAY_SELECTORS = [{
       description: "Set how the names are matched",
       options: [{
         value: "match",
-        label: "Matches one of"
+        label: "Match one of"
       }, {
         value: "contains",
-        label: "Contains one of"
+        label: "Contain one of"
       }, {
         value: "starts_with",
-        label: "Starts with one of"
+        label: "Start with one of"
       }, {
         value: "ends_with",
-        label: "Ends with one of"
+        label: "End with one of"
       }]
     },
     gateway_names: {
@@ -43772,7 +43789,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.3",
+  currentVersion: "0.0.4",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
