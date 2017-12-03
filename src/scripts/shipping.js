@@ -195,6 +195,11 @@ const LINE_ITEM_QUALIFIERS = [
 
 const RATE_SELECTORS = [
   {
+    value: "none",
+    label: "None",
+    description: "No effects"
+  },
+  {
     value: "RateNameSelector",
     label: "Rate Name",
     description: "Matches shipping rates based on the name",
