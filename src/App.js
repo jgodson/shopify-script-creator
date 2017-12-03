@@ -13,7 +13,7 @@ import Common from './scripts/common';
 
 import Versions from './versions';
 
-class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
@@ -431,5 +431,3 @@ ${inputsCode}
     );
   }
 }
-
-export default App;

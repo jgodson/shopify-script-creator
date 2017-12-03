@@ -106,19 +106,19 @@ const GATEWAY_SELECTORS = [
         options: [
           {
             value: "match",
-            label: "Matches one of"
+            label: "Match one of"
           },
           {
             value: "contains",
-            label: "Contains one of"
+            label: "Contain one of"
           },
           {
             value: "starts_with",
-            label: "Starts with one of"
+            label: "Start with one of"
           },
           {
             value: "ends_with",
-            label: "Ends with one of"
+            label: "End with one of"
           }
         ]
       },

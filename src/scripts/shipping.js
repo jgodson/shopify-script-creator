@@ -2,20 +2,30 @@ import Common from './common';
 
 const classes = {
   RateNameSelector: `
-class RateNameSelector
-  def initialize(name, match_type)
-    @name = name.downcase
-    @match_type = match_type
+  class RateNameSelector
+  def initialize(match_type, match_condition, names)
+    @match_condition = match_condition == :undefined ? :match : match_condition
+    @invert = match_type == :does_not
+    @names = names.map(&:downcase)
   end
-  
-  def match?(rate)
-    case @match_type
-      when :partial
-        rate.name.downcase.include?(@name)
-      when :exact
-        rate.name.downcase === @name
-      else
-        raise "Invalid match type. Must be :partial or :exact"
+
+  def match?(shipping_rate)
+    name = shipping_rate.name.downcase
+    case @match_condition
+      when :match
+        return @invert ^ @names.include?(name)
+      when :contains
+        return @invert ^ @names.any? do |partial_name|
+          name.include?(partial_name)
+        end
+      when :starts_with
+        return @invert ^ @names.any? do |partial_name|
+          name.start_with?(partial_name)
+        end
+      when :ends_with
+        return @invert ^ @names.any? do |partial_name|
+          name.end_with?(partial_name)
+        end
     end
   end
 end`,
@@ -117,15 +127,16 @@ class AddressQualifier
   end
 end`,
 
-  ShippingDiscount : `
+  ShippingDiscount: `
 class ShippingDiscount
   def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector, discount)
-    @qualifier = qualifier
+    @customer_qualifier = customer_qualifier
+    @cart_qualifier = cart_qualifier
     @rate_selector = rate_selector
     @discount = discount
   end
   
-  def run(cart, rates)
+  def run(rates, cart)
     return unless @discount
     return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
@@ -140,6 +151,7 @@ end`,
   HideRateUnlessConditionsMet: `
 class HideRateUnlessConditionsMet
   def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector)
+    @customer_qualifier = customer_qualifier
     @cart_qualifier = cart_qualifier
     @line_item_qualifier = line_item_qualifier
     @rate_selector = rate_selector
@@ -185,28 +197,50 @@ const RATE_SELECTORS = [
   {
     value: "RateNameSelector",
     label: "Rate Name",
-    description: "Selects shipping rates based on the name",
+    description: "Matches shipping rates based on the name",
     inputs: {
       match_type: {
         type: "select",
-        description: "How the rate is matched",
+        description: "Set how the following condition matches",
         options: [
           {
-            value: "exact",
-            label: "Is equal to"
-          }, 
+            value: "does",
+            label: "Does"
+          },
           {
-            value: "partial",
-            label: "Contains"
+            value: "does_not",
+            label: "Does not"
           }
         ]
       },
-      rate_name: {
-        type: "text",
-        description: "Name of rate to hide"
+      match_condition: {
+        type: "select",
+        description: "Set how the names are matched",
+        options: [
+          {
+            value: "match",
+            label: "Match one of"
+          },
+          {
+            value: "contains",
+            label: "Contain one of"
+          },
+          {
+            value: "starts_with",
+            label: "Start with one of"
+          },
+          {
+            value: "ends_with",
+            label: "End with one of"
+          }
+        ]
+      },
+      rate_names: {
+        type: "array",
+        description: "Seperate individual names with a comma (,)"
       }
     }
-  },
+  }
 ];
 
 const DISCOUNTS = [
@@ -344,7 +378,7 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      rate_to_discount_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR],
+      rate_to_discount_selector: [...RATE_SELECTORS],
       discount_to_apply: [...DISCOUNTS]
     }
   },
@@ -356,7 +390,7 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      rate_to_hide_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR]
+      rate_to_hide_selector: [...RATE_SELECTORS]
     }
   }
 ];
