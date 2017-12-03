@@ -41,7 +41,6 @@ export default class Step2Form extends Component {
     this.getInputValue = this.getInputValue.bind(this);
     this.populateBasedOnExistingInfo = this.populateBasedOnExistingInfo.bind(this);
     this.getInputsForCampaign = this.getInputsForCampaign.bind(this);
-    this.checkObjectInput = this.checkObjectInput.bind(this);
     this.renderForm = this.renderForm.bind(this);
   }
 
@@ -85,23 +84,6 @@ export default class Step2Form extends Component {
     this.setState(newState);
   }
 
-  checkObjectInput(evt, pattern) {
-    pattern = new RegExp(pattern);
-    const value = evt.target.value;
-    if (value.trim() === "") { return; }
-    const lines = value.split(',');
-    let valid = true;
-    lines.forEach((line) => {
-      if (!pattern.test(line)) {
-        valid = false;
-      }
-    });
-    if (!valid) {
-      alert("Input value doesn't seem to be in the proper format. Please check again");
-      evt.target.focus();
-    }
-  }
-
   populateBasedOnExistingInfo(existingInfo) {
     if (!existingInfo) { return; }
     const newState = this.state;
@@ -109,11 +91,11 @@ export default class Step2Form extends Component {
     const updateCount = this.updateCount;
     const inputMap = this.inputMap;
     const mainCampaignName = this.mainCampaignName;
+    const campaignInputs = this.props.currentCampaign.inputs;
     if (updateCount === 0) {
       newState.inputs = JSON.parse(JSON.stringify(this.blankInputState));
       newState.inputs.campaignLabel = existingInfo.label
     }
-    const mainCampaign = this.mainCampaignName;
     setValuesForInputs(mainInputs);
     this.updateCount++;
     this.setState(newState);
@@ -125,52 +107,59 @@ export default class Step2Form extends Component {
           case 0:
             // Pick the first set of campaigns
             if (typeof input === "object") {
-              newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}`] = input.name || input;
+              newState.inputs.campaignSelect[`${mainCampaignName}-campaignSelect_${inputIndex}`] = input.name || input;
             }
             break;
           case 1:
             // Pick the second set of campaigns (if there is any)
             if (Array.isArray(input.inputs) && typeof input.inputs[0] === 'object') {
               input.inputs.forEach((secondInput, secondIndex) => {
-                newState.inputs.campaignSelect[`${mainCampaign}-campaignSelect_${inputIndex}-campaignSelect_${secondIndex}`] = secondInput.name;
+                newState.inputs.campaignSelect[`${mainCampaignName}-campaignSelect_${inputIndex}-campaignSelect_${secondIndex}`] = secondInput.name;
               });
             }
             break;
           default:
             // Set the values
-              inputMap[mainCampaignName].forEach((inputName, index) => {
-                  if (inputIndex === index) {
-                    if (isCampaignSelect(inputName)) {
-                      let fields = inputMap[inputName];
-                      if (Array.isArray(fields)) {
-                        fields.forEach((fieldName, fieldIndex) => {
-                          if (!isCampaignSelect(fieldName)) {
-                            const type = getInputType(fieldName);
-                            const value = input.inputs[fieldIndex];
-                            newState.inputs[type][fieldName] = convertInput(value, type);
-                          } else {
-                            const nestedFields = inputMap[fieldName];
-                            if (!nestedFields || nestedFields === 'none') { return; }
-                            nestedFields.forEach((nestedName, nestedIndex) => {
-                              const type = getInputType(nestedName);
-                              const value = input.inputs[fieldIndex].inputs[nestedIndex];
-                              newState.inputs[type][nestedName] = convertInput(value, type);
-                            });
+            inputMap[mainCampaignName].forEach((inputName, index) => {
+              let inputCampaign = null;
+              if (inputIndex === index) {
+                if (isCampaignSelect(inputName)) {
+                  let fields = inputMap[inputName];
+                  if (Array.isArray(fields)) {
+                    fields.forEach((fieldName, fieldIndex) => {
+                      if (!isCampaignSelect(fieldName)) {
+                        const type = getInputType(fieldName);
+                        const value = input.inputs[fieldIndex];
+                        if (type === 'object') {
+                          inputCampaign = newState.inputs.campaignSelect[inputName];
+                        }
+                        newState.inputs[type][fieldName] = convertInput(value, type, inputCampaign, campaignInputs);
+                      } else {
+                        const nestedFields = inputMap[fieldName];
+                        if (!nestedFields || nestedFields === 'none') { return; }
+                        nestedFields.forEach((nestedName, nestedIndex) => {
+                          const type = getInputType(nestedName);
+                          const value = input.inputs[fieldIndex].inputs[nestedIndex];
+                          if (type === 'object') {
+                            inputCampaign = newState.inputs.campaignSelect[fieldName];
                           }
+                          newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
                         });
                       }
-                    } else {
-                      const type = getInputType(inputName);
-                      const value = input;
-                      newState.inputs[type][inputName] = convertInput(value, type);
-                    }
+                    });
                   }
-              });
-            break;
+                } else {
+                  const type = getInputType(inputName);
+                  const value = input;
+                  newState.inputs[type][inputName] = convertInput(value, type, inputCampaign, campaignInputs);
+                }
+              }
+            });
+          break;
         }
       });
 
-      function convertInput(value, type) {
+      function convertInput(value, type, campaignName, campaignInputs) {
         switch (type) {
           case 'array':
             // Remove []. Then split on comma, remove "" and join with comma
@@ -186,20 +175,8 @@ export default class Step2Form extends Component {
             // Remove :
             return value.substring(1);
           case 'object':
-            // TODO: Use input inputFormat defined for input instead to determine how to format
-            // Remove {} and '' and convert back to : from =>
-            value = value.substring(value.length - 1, 0).substring(1);
-            if (value === "") { return value; }
-
-            value = value.split(',').map((line) => {
-              const keyValue = line.split('=>');
-              let key = keyValue[0].trim();
-              key = key.substring(key.length - 1, 0).substring(1);
-              let value = keyValue[1].trim();
-              value = value.substring(value.length - 1, 0).substring(1);
-              return `${key}: ${value}`;
-            }).join(',\n');
-            return value;
+            const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+            return formatObject('input', value, inputFormat, outputFormat);
           default:
             return value;
         }
@@ -344,7 +321,6 @@ export default class Step2Form extends Component {
               multiline={3}
               helpText={input.description}
               value={this.state.inputs[input.type][input.name] || input.value}
-              onBlur={(evt) => this.checkObjectInput(evt, input.pattern)}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
           );
@@ -459,21 +435,13 @@ export default class Step2Form extends Component {
         return parseInt(value) || 0;
       case 'object':
         if (!value) return "{}";
-        // TODO: use format definied for input instead
-        // const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
-        // console.log(inputFormat, outputFormat);
-        // return formatObject('output', value, inputFormat, outputFormat);
         try {
-          const lines = value.split(',').map((line) => {
-            const keyValue = line.split(':');
-            const key = keyValue[0].trim();
-            const value = keyValue[1].trim();
-            return `"${key}" => "${value}"`;
-          }).join();
-          return `{${lines}}`;
-        } catch (e) {
+          const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+          return formatObject('output', value, inputFormat, outputFormat);
+        } catch (error) {
           // Alert user if there was a parsing error (as best we can) and prevent going any further
           alert (`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+          console.warn(error);
           throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
         }
       case 'campaignSelect':

@@ -821,10 +821,8 @@ const line_item_qualifiers = [
       keys_and_values: {
         type: "object",
         description: "Seperate keys and values with : and individual key/values with a , (eg: key1: value1, key2: value2)",
-        inputPattern: '\\s*(?:\\w+\\s*)+:\\s*(?:\\w+\\s*)+,{0,1}',
-        // Future implementation of objects (hopefully)
         inputFormat: "{text}: {text}",
-        outputFormat: "'{text}'=>'{text}'"
+        outputFormat: '"{text}" => "{text}"'
       }
     }
   }

@@ -284,9 +284,9 @@ const CUSTOMER_AND_SELECTOR = {
   label: "Multi-Select - Meets all conditions",
   description: "Qualifies if all of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
-    and_line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
-    and_line_item_qualifier_3: [...CUSTOMER_QUALIFIERS],
+    customer_qualifier_1: [...CUSTOMER_QUALIFIERS],
+    and_customer_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    and_customer_qualifier_3: [...CUSTOMER_QUALIFIERS],
   }
 };
 
@@ -295,9 +295,9 @@ const CUSTOMER_OR_SELECTOR = {
   label: "Multi-Select - Meets any conditions",
   description: "Qualifies if any of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [...CUSTOMER_QUALIFIERS],
-    or_line_item_qualifier_2: [...CUSTOMER_QUALIFIERS],
-    or_line_item_qualifier_3: [...CUSTOMER_QUALIFIERS]
+    customer_qualifier_1: [...CUSTOMER_QUALIFIERS],
+    or_customer_qualifier_2: [...CUSTOMER_QUALIFIERS],
+    or_customer_qualifier_3: [...CUSTOMER_QUALIFIERS]
   }
 };
 
