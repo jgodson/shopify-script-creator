@@ -7,6 +7,10 @@
   margin-top: 0.7rem;
 }
 
+.input-container__single-line {
+  margin-top: 2.4rem;
+}
+
 form {
   border-top: 1px solid #dfe3e8;
 }

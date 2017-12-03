@@ -71,38 +71,50 @@
       value = value.substring(value.length - 1, 0).substring(1);
       if (value === "") { return value; }
 
-      const lines = value.split(',').map((line) => {
+      const lines = value.split('\n').map((line) => {
         const values = line.split('=>').map((value) => value.trim());
         let output = inputFmt;
         for (let index = 0; index < values.length; index++) {
-          // TODO: Will have to modify in the future to account for arrays (key : [value, value2, value3])
-          const type = output.match(/{(\w+)}/)[1];
+          const type = output.match(/{\w+:(\w+)}/)[1];
           if (type === "text") {
             // Remove "" around text
+            values[index] = values[index].replace(',', '');
             values[index] = values[index].substring(values[index].length - 1, 0).substring(1);
+          } else {
+            values[index] = values[index].split(',').map((value) => {
+              // Replace any [] found
+              value = value.replace(/[\[\]]/g, '');
+              // Removes "" around each value in the array
+              value = value.substring(value.length - 1, 0).substring(1);
+              return value.trim();
+            });
+            values[index] = values[index].filter((value) => value !== "").join(', ');
           }
-          output = output.replace(/{\w+}/i, values[index]);
+          output = output.replace(/{\w+:(\w+)}/i, values[index]);
         }
         return output;
-      }).join(',\n');
+      }).join('\n');
       return lines;
     } else {
-      const inputFormatRepl = inputFmt.replace(/{\w+}/gi, '').trim();
+      const inputFormatRepl = inputFmt.replace(/{\w+:(\w+)}/gi, '').trim();
       const splitter = inputFormatRepl[0];
       const requiredInputs = inputFormatRepl.split(splitter).length;
-      const lines = value.split(',').map((line) => {
+      const lines = value.split('\n').map((line) => {
         const values = line.split(splitter).map((value) => value.trim());
         if (values.length !== requiredInputs) {
           throw Error("Number of inputs does not match required input format");
         }
         let output = outputFmt;
         for (let index = 0; index < values.length; index++) {
-          // TODO: Will have to modify in the future to account for arrays (key : [value, value2, value3])
-          // const type = ouput.match(/{(\w+)}/)[1];
+          const type = output.match(/{(\w+)}/)[1];
+          if (type === 'array') {
+            // Add "" around each value in the array
+            values[index] = values[index].split(',').map((value) => `"${value.trim()}"`).join();
+          }
           output = output.replace(/{\w+}/i, values[index]);
         }
         return output;
-      }).join();
+      }).join(',\n');
       return `{${lines}}`;
     }
   }

@@ -190,6 +190,22 @@ class ProductIdSelector
   end
 end`,
 
+  CountryAndProvinceSelector: `
+class CountryAndProvinceSelector
+  def initialize(match_type, country_map)
+    @invert = match_type == :not_one
+    @country_map = country_map
+  end
+
+  def match?(cart)
+    return false if cart.shipping_address.nil?
+    country_code = cart.shipping_address.country_code.upcase
+    province_code = cart.shipping_address.province_code.upcase
+    return @invert unless @country_map.key?(country_code)
+    @invert ^ @country_map[country_code].include?(province_code)
+  end
+end`,
+
   ProductTypeSelector: `
 class ProductTypeSelector
   def initialize(match_type, product_types)
@@ -610,6 +626,34 @@ const cart_qualifiers = [
         description: "Discount code to check for"
       }
     }
+  },
+  {
+    value: "CountryAndProvinceSelector",
+    label: "Shipping Address - Country/Province Selector",
+    description: "Qualifies the cart based on specific country and province codes (Two letters)",
+    newLineEachInput: true,
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how the following countries/provinces are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      countries_and_provinces: {
+        type: "object",
+        description: "Place each country/province combination on a new line. Seperate country codes from province codes with a : (eg: CA: AB, SK, ON, BC)",
+        inputFormat: "{country:text}: {provinces:array}",
+        outputFormat: '"{text}" => [{array}]'
+      }
+    }
   }
 ];
 
@@ -820,8 +864,8 @@ const line_item_qualifiers = [
     inputs: {
       keys_and_values: {
         type: "object",
-        description: "Seperate keys and values with : and individual key/values with a , (eg: key1: value1, key2: value2)",
-        inputFormat: "{text}: {text}",
+        description: "Seperate keys and values with : and individual key/values with a new line (eg: key1: value1)",
+        inputFormat: "{key:text}: {value:text}",
         outputFormat: '"{text}" => "{text}"'
       }
     }

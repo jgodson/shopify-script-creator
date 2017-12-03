@@ -185,7 +185,7 @@ export default class Step2Form extends Component {
   }
 
   generateAdditionalInputs(campaign, mapTo) {
-    if (campaign.inputs[Object.keys(campaign.inputs)[0]].type) {
+    if (campaign.inputs[Object.keys(campaign.inputs)[0]].type && !campaign.newLineEachInput) {
       return (
         <div className="input-container">
           <FormLayout>
@@ -195,8 +195,16 @@ export default class Step2Form extends Component {
           </FormLayout>
         </div>
       );
+    } else if (campaign.newLineEachInput) {
+      return (
+        <div className="input-container__single-line">
+          <FormLayout>
+            {this.generateInputsForCampaign(campaign, mapTo)}
+          </FormLayout>
+        </div>
+      );
     } else {
-      return this.generateInputsForCampaign(campaign, mapTo)
+      return this.generateInputsForCampaign(campaign, mapTo);
     }
   }
 

@@ -42,6 +42,7 @@ class PercentageDiscount
     rate.apply_discount(rate.price * @percent, { message: @message })
   end 
 end`,
+
   FixedDiscount: `
 class FixedDiscount
   def initialize(amount, message)
@@ -55,6 +56,7 @@ class FixedDiscount
   end
 end`,
 
+// TODO: Not sure if this is feasable or not (Array of objects). Logix may be too complex
   AddressQualifier: `
 # ----- Qualifying Addresses ----- #
 # Example: {
@@ -112,19 +114,6 @@ class AddressQualifier
         match
       end
     end
-  end
-end`,
-
-  CountryAndProvinceSelector: `
-# COUNTRY MAP = { "COUNTRY_CODE" => ["PROVINCE_CODE_1", "PROVINCE_CODE_2", etc] }
-class CountryAndProvinceSelector
-  def initialize(country_map)
-    @country_map = country_map
-  end
-
-  def match?(cart)
-    address = cart.shipping_address
-    address && @country_map.key?(address.country_code.upcase) && @country_map[address.country_code.upcase].include?(address.province_code.upcase)
   end
 end`,
 
