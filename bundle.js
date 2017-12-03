@@ -43427,6 +43427,10 @@ var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cart_qualifi
 var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.line_item_qualifiers));
 
 var RATE_SELECTORS = [{
+  value: "none",
+  label: "None",
+  description: "No effects"
+}, {
   value: "RateNameSelector",
   label: "Rate Name",
   description: "Matches shipping rates based on the name",
