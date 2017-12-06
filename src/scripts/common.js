@@ -206,6 +206,20 @@ class CountryAndProvinceSelector
   end
 end`,
 
+  CountryCodeSelector: `
+class CountryCodeSelector
+  def initialize(match_type, country_codes)
+    @invert = match_type == :not_one;
+    @country_codes = country_codes.map(&:upcase)
+  end
+
+  def match?(cart)
+    shipping_address = cart.shipping_address
+    return false if shipping_address.nil?
+    @invert ^ @country_codes.include?(shipping_address.country_code.upcase)
+  end
+end`,
+
   ProductTypeSelector: `
 class ProductTypeSelector
   def initialize(match_type, product_types)
@@ -601,7 +615,7 @@ const cart_qualifiers = [
       },
       match_condition: {
         type: 'select',
-        description: "Set how discount code is matched",
+        description: "Set how the discount code is matched",
         options: [
           {
             value: "is_equal",
@@ -652,6 +666,31 @@ const cart_qualifiers = [
         description: "Place each country/province combination on a new line. Seperate country codes from province codes with a : (eg: CA: AB, SK, ON, BC)",
         inputFormat: "{country:text}: {provinces:array}",
         outputFormat: '"{text}" => [{array}]'
+      }
+    }
+  },
+  {
+    value: "CountryCodeSelector",
+    label: "Shipping Address - Country Code Selector",
+    description: "Qualifies the cart based on the country code of the shipping addresss (Two letters)",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the country codes are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      country_codes: {
+        type: "array",
+        description: "Seperate individual country codes with a comma (,)"
       }
     }
   }

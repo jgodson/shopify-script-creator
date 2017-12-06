@@ -175,6 +175,22 @@ class ConditionalDiscountCodeRejection
     end
     cart.discount_code.reject({message: @message})
   end
+end`,
+
+  TaxDiscount: `
+class TaxDiscount
+  def initialize(amount, message)
+    @amount = amount
+    @message = message
+  end
+
+  def apply(line_item)
+    calculated_tax_fraction = @amount / (100 + @amount)
+    item_tax = line_item.variant.price * calculated_tax_fraction
+    per_item_price = line_item.variant.price - item_tax
+    new_line_price = per_item_price * line_item.quantity
+    line_item.change_line_price(new_line_price, message: @message)
+  end
 end`
 };
 
@@ -270,6 +286,21 @@ const DISCOUNTS = [
       amount: {
         type: "number",
         description: "Total discount to apply"
+      },
+      message: {
+        type: "text",
+        description: "Message to display to customer"
+      }
+    }
+  },
+  {
+    value: "TaxDiscount",
+    label: "Tax Discount",
+    description: "Removes tax from the item price (to be used when tax is included in the price, but not applicable to the customer)",
+    inputs: {
+      tax_amount: {
+        type: "number",
+        description: "Percentage of tax included in the price"
       },
       message: {
         type: "text",
