@@ -94,7 +94,7 @@ export default class App extends Component {
   }
 
   getCampaignInfo(name) {
-    return this.state.availableCampaigns.filter((campaign) => campaign.value === name)[0];
+    return this.state.availableCampaigns.find((campaign) => campaign.value === name);
   }
 
   getCampaignById(id) {
@@ -359,14 +359,14 @@ ${inputsCode}
 
     const secondaryActions = [
       {
-        content: 'Download campaigns',
+        content: 'Export campaigns',
         onAction: this.downloadCampaigns,
-        icon: 'save'
+        icon: 'export'
       },
       {
         content: 'Import campaigns',
         onAction: this.uploadFile,
-        icon: 'notes'
+        icon: 'import'
       }
     ];
 

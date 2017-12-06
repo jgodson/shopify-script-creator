@@ -109,7 +109,8 @@
           const type = output.match(/{(\w+)}/)[1];
           if (type === 'array') {
             // Add "" around each value in the array
-            values[index] = values[index].split(',').map((value) => `"${value.trim()}"`).join();
+            values[index] = values[index].split(',').map((value) => `"${value.trim()}"`);
+            values[index] = values[index].filter((value) => value !== '""').join();
           }
           output = output.replace(/{\w+}/i, values[index]);
         }
