@@ -66,20 +66,31 @@ end`,
 
   ConditionalDiscount: `
 class ConditionalDiscount
-  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount)
+  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount, max_discounts)
     @customer_qualifier = customer_qualifier
     @cart_qualifier = cart_qualifier
     @line_item_qualifier = line_item_qualifier
     @discount = discount
+    @items_to_discount = max_discounts == 0 ? nil : max_discounts
   end
 
   def run(cart)
     return unless @discount
     return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
-    cart.line_items.each do |item|
-      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)
-      @discount.apply(item)
+    applicable_items = cart.line_items.select { |item| @line_item_qualifier.nil? || @line_item_qualifier.match?(item) }
+    applicable_items = applicable_items.sort_by { |item| item.variant.price }
+    applicable_items.each do |item|
+      break if @items_to_discount == 0
+      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)
+        discounted_items = item.split(take: @items_to_discount)
+        @discount.apply(discounted_items)
+        cart.line_items << discounted_items
+        @items_to_discount = 0
+      else
+        @discount.apply(item)
+        @items_to_discount -= item.quantity if !@items_to_discount.nil?
+      end
     end
   end
 end`,
@@ -386,7 +397,11 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       discounted_item_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      discount_to_apply: [...DISCOUNTS]
+      discount_to_apply: [...DISCOUNTS],
+      maximum_discounts: {
+        type: "number",
+        description: "Maximum number of items to discount, 0 for no limit."
+      }
     }
   },
   {
