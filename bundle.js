@@ -43212,7 +43212,7 @@ var classes = {
 
   ExcludeDiscountCodes: "\nclass ExcludeDiscountCodes\n  def initialize(behaviour, message)\n    @reject = behaviour == :apply_script\n    @message = message == \"\" ? \"Discount codes cannot be used with this offer\" : message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend",
 
-  ConditionalDiscount: "\nclass ConditionalDiscount\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n  end\n\n  def run(cart)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    cart.line_items.each do |item|\n      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)\n      @discount.apply(item)\n    end\n  end\nend",
+  ConditionalDiscount: "\nclass ConditionalDiscount\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount, max_discounts)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n    @items_to_discount = max_discounts == 0 ? nil : max_discounts\n  end\n\n  def run(cart)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    applicable_items = cart.line_items.select { |item| @line_item_qualifier.nil? || @line_item_qualifier.match?(item) }\n    applicable_items = applicable_items.sort_by { |item| item.variant.price }\n    applicable_items.each do |item|\n      break if @items_to_discount == 0\n      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)\n        discounted_items = item.split(take: @items_to_discount)\n        @discount.apply(discounted_items)\n        cart.line_items << discounted_items\n        @items_to_discount = 0\n      else\n        @discount.apply(item)\n        @items_to_discount -= item.quantity if !@items_to_discount.nil?\n      end\n    end\n  end\nend",
 
   RejectAllDiscountCodes: "\nclass RejectAllDiscountCodes\n  def initialize(message)\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    if cart.discount_code\n      cart.discount_code.reject({message: @message})\n    end\n  end\nend",
 
@@ -43386,7 +43386,11 @@ var campaigns = [{
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
     discounted_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    discount_to_apply: [].concat(DISCOUNTS)
+    discount_to_apply: [].concat(DISCOUNTS),
+    maximum_discounts: {
+      type: "number",
+      description: "Maximum number of items to discount, 0 for no limit."
+    }
   }
 }, {
   value: "BuyXGetX",
@@ -43925,7 +43929,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.7",
+  currentVersion: "0.0.8",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
