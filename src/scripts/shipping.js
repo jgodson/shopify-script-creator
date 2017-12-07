@@ -2,7 +2,7 @@ import Common from './common';
 
 const classes = {
   RateNameSelector: `
-  class RateNameSelector
+class RateNameSelector
   def initialize(match_type, match_condition, names)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -30,14 +30,45 @@ const classes = {
   end
 end`,
 
-  RateSelector: `
-class RateSelector
-  def initialize(rate_names)
-    @rate_names = rate_names.map { |name| name.downcase! }
+  RateCodeSelector: `
+class RateCodeSelector
+  def initialize(match_type, match_condition, codes)
+    @match_condition = match_condition == :undefined ? :match : match_condition
+    @invert = match_type == :does_not
+    @codes = codes.map(&:downcase)
   end
-  
-  def match?(rate)
-    @rate_names.include?(rate.name.downcase)
+
+  def match?(shipping_rate)
+    code = shipping_rate.code.downcase
+    case @match_condition
+      when :match
+        return @invert ^ @codes.include?(code)
+      when :contains
+        return @invert ^ @codes.any? do |partial_code|
+          code.include?(partial_code)
+        end
+      when :starts_with
+        return @invert ^ @codes.any? do |partial_code|
+          code.start_with?(partial_code)
+        end
+      when :ends_with
+        return @invert ^ @codes.any? do |partial_code|
+          code.end_with?(partial_code)
+        end
+    end
+  end
+end`,
+
+  RateSourceSelector: `
+class RateSourceSelector
+  def initialize(match_type, sources)
+    @invert = match_type == :not_one;
+    @sources = sources.map(&:downcase)
+  end
+
+  def match?(shipping_rate)
+    source = shipping_rate.source.downcase
+    @invert ^ @sources.include?(source)
   end
 end`,
 
@@ -245,6 +276,78 @@ const RATE_SELECTORS = [
         description: "Seperate individual names with a comma (,)"
       }
     }
+  },
+  {
+    value: "RateCodeSelector",
+    label: "Rate Code",
+    description: "Matches shipping rates based on the code",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the following condition matches",
+        options: [
+          {
+            value: "does",
+            label: "Does"
+          },
+          {
+            value: "does_not",
+            label: "Does not"
+          }
+        ]
+      },
+      match_condition: {
+        type: "select",
+        description: "Set how the codes are matched",
+        options: [
+          {
+            value: "match",
+            label: "Match one of"
+          },
+          {
+            value: "contains",
+            label: "Contain one of"
+          },
+          {
+            value: "starts_with",
+            label: "Start with one of"
+          },
+          {
+            value: "ends_with",
+            label: "End with one of"
+          }
+        ]
+      },
+      rate_codes: {
+        type: "array",
+        description: "Seperate individual codes with a comma (,)"
+      }
+    }
+  },
+  {
+    value: "RateSourceSelector",
+    label: "Rate Source",
+    description: "Matches shipping rates based on the source (eg: shopify)",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the sources are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      rate_sources: {
+        type: "array",
+        description: "Seperate individual sources with a comma (,)"
+      }
+    }
   }
 ];
 
@@ -357,9 +460,9 @@ const RATE_AND_SELECTOR = {
   label: "Multi-Select - Meets all conditions",
   description: "Selected if all of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [...RATE_SELECTORS],
-    and_line_item_qualifier_2: [...RATE_SELECTORS],
-    and_line_item_qualifier_3: [...RATE_SELECTORS],
+    rate_selector_1: [...RATE_SELECTORS],
+    and_rate_selector_2: [...RATE_SELECTORS],
+    and_rate_selector_3: [...RATE_SELECTORS],
   }
 };
 
@@ -368,9 +471,9 @@ const RATE_OR_SELECTOR = {
   label: "Multi-Select - Meets any conditions",
   description: "Selected if any of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [...RATE_SELECTORS],
-    or_line_item_qualifier_2: [...RATE_SELECTORS],
-    or_line_item_qualifier_3: [...RATE_SELECTORS]
+    rate_selector_1: [...RATE_SELECTORS],
+    or_rate_selector_2: [...RATE_SELECTORS],
+    or_rate_selector_3: [...RATE_SELECTORS]
   }
 };
 
@@ -383,7 +486,7 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      rate_to_discount_selector: [...RATE_SELECTORS],
+      rate_to_discount_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR],
       discount_to_apply: [...DISCOUNTS]
     }
   },
@@ -395,7 +498,7 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      rate_to_hide_selector: [...RATE_SELECTORS]
+      rate_to_hide_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR]
     }
   }
 ];

@@ -115,7 +115,7 @@
           output = output.replace(/{\w+}/i, values[index]);
         }
         return output;
-      }).join(',\n');
+      }).join();
       return `{${lines}}`;
     }
   }

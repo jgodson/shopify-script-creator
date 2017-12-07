@@ -334,23 +334,23 @@ const CUSTOMER_OR_SELECTOR = {
 
 const LINE_ITEM_AND_SELECTOR = {
   value: "AndSelector",
-  label: "Multi-Select - Meets all condtions",
-  description: "Qualifies if all of the following conditions are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Selected if all of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    and_line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-    and_line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS],
+    line_item_selector_1: [...LINE_ITEM_QUALIFIERS],
+    and_line_item_selector_2: [...LINE_ITEM_QUALIFIERS],
+    and_line_item_selector_3: [...LINE_ITEM_QUALIFIERS],
   }
 };
 
 const LINE_ITEM_OR_SELECTOR = {
   value: "OrSelector",
   label: "Multi-Select - Meets any conditions",
-  description: "Qualifies if any of the following conditions are met",
+  description: "Selected if any of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [...LINE_ITEM_QUALIFIERS],
-    or_line_item_qualifier_2: [...LINE_ITEM_QUALIFIERS],
-    or_line_item_qualifier_3: [...LINE_ITEM_QUALIFIERS]
+    line_item_selector_1: [...LINE_ITEM_QUALIFIERS],
+    or_line_item_selector_2: [...LINE_ITEM_QUALIFIERS],
+    or_line_item_selector_3: [...LINE_ITEM_QUALIFIERS]
   }
 };
 
@@ -385,7 +385,7 @@ const campaigns = [
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
-      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discounted_item_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discount_to_apply: [...DISCOUNTS]
     }
   },
@@ -396,8 +396,8 @@ const campaigns = [
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
-      buy_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      get_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      buy_item_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      get_item_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discount_to_apply: [...DISCOUNTS],
       buy_number: {
         type: "number",

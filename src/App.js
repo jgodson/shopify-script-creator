@@ -28,6 +28,9 @@ export default class App extends Component {
       editCampaignInfo: null
     };
 
+    // Indent level for script output
+    this.IL = 0;
+
     // Versions used for saving script files to detect imcompatabilities
     this.version = Versions.currentVersion;
     this.incompatibleVersions = Versions.incompatibleVersions;
@@ -168,6 +171,9 @@ export default class App extends Component {
     let defaultCode = null;
     const classesUsed = [];
     const allClasses = {};
+    // Reset the indent level
+    this.IL = 0;
+    
     switch(this.state.scriptType) {
       case 'line_item':
         Object.assign(allClasses, Common.classes, LineItemScript.classes);
@@ -186,7 +192,12 @@ export default class App extends Component {
     }
 
     // Generate the campaign initialization code (also finds out what classes are used)
-    let campaigns = this.state.campaigns.map((campaign) => this.generateCode(campaign, classesUsed)).join(',\n');
+    let campaigns = this.state.campaigns.map((campaign) => {
+      this.IL++;
+      const code = this.generateCode(campaign, classesUsed);
+      this.IL--;
+      return code;
+    }).join(',\n');
     // remove the last `,` from the campaigns string (raises syntax error)
     campaigns = campaigns.substring(campaigns.length -1, 0);
 
@@ -214,6 +225,14 @@ export default class App extends Component {
 
   generateCode(campaign, classesUsed) {
     if (campaign.skip) { return; }
+
+    const INDENT = {
+      1: '  ',
+      2: '    ',
+      3: '      ',
+      4: '        '
+    };
+
     addUsedClass(campaign.name);
     if (campaign.dependants) {
       campaign.dependants.forEach((dependant) => addUsedClass(dependant));
@@ -221,21 +240,24 @@ export default class App extends Component {
 
     const inputsCode = campaign.inputs.map((input, index) => {
       if (input.inputs) {
-        return this.generateCode(input, classesUsed);
+        this.IL++;
+        const code = this.generateCode(input, classesUsed);
+        this.IL--;
+        return code;
       } else if (typeof input === "object" && input.name !== "none") {
         addUsedClass(input.name);
-        return `${input.name}.new()`;
+        return `${INDENT[this.IL + 1]}${input.name}.new()`;
       } else if (typeof input === "object" && input.name === 'none') {
-        return 'nil';
+        return `${INDENT[this.IL + 1]}nil`;
       } else {
-        return `${input}`;
+        return `${INDENT[this.IL + 1]}${input}`;
       }
     }).join(',\n');
 
     return `\
-${campaign.name}.new(
+${INDENT[this.IL]}${campaign.name}.new(
 ${inputsCode}
-)`;
+${INDENT[this.IL]})`;
 
     function addUsedClass(className) {
       if (classesUsed.indexOf(className) === -1) {

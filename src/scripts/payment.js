@@ -205,7 +205,7 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      gateway_selector: [...GATEWAY_SELECTORS]
+      gateway_to_remove_selector: [...GATEWAY_SELECTORS]
     }
   }
 ];
