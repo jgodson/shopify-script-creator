@@ -228,7 +228,7 @@ class ProductTypeSelector
   end
 
   def match?(line_item)
-    @invert ^ @product_types.include?(line_item.variant.product.product_type)
+    @invert ^ @product_types.include?(line_item.variant.product.product_type.downcase)
   end
 end`,
 
