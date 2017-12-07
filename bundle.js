@@ -8915,7 +8915,7 @@ var classes = {
 
   CountryCodeSelector: "\nclass CountryCodeSelector\n  def initialize(match_type, country_codes)\n    @invert = match_type == :not_one;\n    @country_codes = country_codes.map(&:upcase)\n  end\n\n  def match?(cart)\n    shipping_address = cart.shipping_address\n    return false if shipping_address.nil?\n    @invert ^ @country_codes.include?(shipping_address.country_code.upcase)\n  end\nend",
 
-  ProductTypeSelector: "\nclass ProductTypeSelector\n  def initialize(match_type, product_types)\n    @invert = match_type == :not_one\n    @product_types = product_types.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @product_types.include?(line_item.variant.product.product_type)\n  end\nend",
+  ProductTypeSelector: "\nclass ProductTypeSelector\n  def initialize(match_type, product_types)\n    @invert = match_type == :not_one\n    @product_types = product_types.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @product_types.include?(line_item.variant.product.product_type.downcase)\n  end\nend",
 
   ProductVendorSelector: "\n  class ProductVendorSelector\n  def initialize(match_type, vendors)\n    @invert = match_type != :is_one\n    @vendors = vendors.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @vendors.include?(line_item.variant.product.vendor.downcase)\n  end\nend",
 
@@ -43844,7 +43844,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.5",
+  currentVersion: "0.0.6",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
