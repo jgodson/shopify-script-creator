@@ -14441,7 +14441,7 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
         output = output.replace(/{\w+}/i, values[index]);
       }
       return output;
-    }).join(',\n');
+    }).join();
     return '{' + _lines + '}';
   }
 }
@@ -31815,6 +31815,9 @@ var App = function (_Component) {
       editCampaignInfo: null
     };
 
+    // Indent level for script output
+    _this.IL = 0;
+
     // Versions used for saving script files to detect imcompatabilities
     _this.version = _versions2.default.currentVersion;
     _this.incompatibleVersions = _versions2.default.incompatibleVersions;
@@ -31983,6 +31986,9 @@ var App = function (_Component) {
       var defaultCode = null;
       var classesUsed = [];
       var allClasses = {};
+      // Reset the indent level
+      this.IL = 0;
+
       switch (this.state.scriptType) {
         case 'line_item':
           Object.assign(allClasses, _common2.default.classes, _lineItem2.default.classes);
@@ -32002,7 +32008,10 @@ var App = function (_Component) {
 
       // Generate the campaign initialization code (also finds out what classes are used)
       var campaigns = this.state.campaigns.map(function (campaign) {
-        return _this2.generateCode(campaign, classesUsed);
+        _this2.IL++;
+        var code = _this2.generateCode(campaign, classesUsed);
+        _this2.IL--;
+        return code;
       }).join(',\n');
       // remove the last `,` from the campaigns string (raises syntax error)
       campaigns = campaigns.substring(campaigns.length - 1, 0);
@@ -32036,6 +32045,14 @@ var App = function (_Component) {
       if (campaign.skip) {
         return;
       }
+
+      var INDENT = {
+        1: '  ',
+        2: '    ',
+        3: '      ',
+        4: '        '
+      };
+
       addUsedClass(campaign.name);
       if (campaign.dependants) {
         campaign.dependants.forEach(function (dependant) {
@@ -32045,18 +32062,21 @@ var App = function (_Component) {
 
       var inputsCode = campaign.inputs.map(function (input, index) {
         if (input.inputs) {
-          return _this3.generateCode(input, classesUsed);
+          _this3.IL++;
+          var code = _this3.generateCode(input, classesUsed);
+          _this3.IL--;
+          return code;
         } else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === "object" && input.name !== "none") {
           addUsedClass(input.name);
-          return input.name + '.new()';
+          return '' + INDENT[_this3.IL + 1] + input.name + '.new()';
         } else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === "object" && input.name === 'none') {
-          return 'nil';
+          return INDENT[_this3.IL + 1] + 'nil';
         } else {
-          return '' + input;
+          return '' + INDENT[_this3.IL + 1] + input;
         }
       }).join(',\n');
 
-      return campaign.name + '.new(\n' + inputsCode + '\n)';
+      return '' + INDENT[this.IL] + campaign.name + '.new(\n' + inputsCode + '\n' + INDENT[this.IL] + ')';
 
       function addUsedClass(className) {
         if (classesUsed.indexOf(className) === -1) {
@@ -43316,23 +43336,23 @@ var CUSTOMER_OR_SELECTOR = {
 
 var LINE_ITEM_AND_SELECTOR = {
   value: "AndSelector",
-  label: "Multi-Select - Meets all condtions",
-  description: "Qualifies if all of the following conditions are met",
+  label: "Multi-Select - Meets all conditions",
+  description: "Selected if all of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    and_line_item_qualifier_2: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    and_line_item_qualifier_3: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS))
+    line_item_selector_1: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
+    and_line_item_selector_2: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
+    and_line_item_selector_3: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS))
   }
 };
 
 var LINE_ITEM_OR_SELECTOR = {
   value: "OrSelector",
   label: "Multi-Select - Meets any conditions",
-  description: "Qualifies if any of the following conditions are met",
+  description: "Selected if any of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    or_line_item_qualifier_2: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    or_line_item_qualifier_3: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS))
+    line_item_selector_1: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
+    or_line_item_selector_2: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
+    or_line_item_selector_3: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS))
   }
 };
 
@@ -43365,7 +43385,7 @@ var campaigns = [{
   inputs: {
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    discounted_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discount_to_apply: [].concat(DISCOUNTS)
   }
 }, {
@@ -43375,8 +43395,8 @@ var campaigns = [{
   inputs: {
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    buy_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    get_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    buy_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    get_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discount_to_apply: [].concat(DISCOUNTS),
     buy_number: {
       type: "number",
@@ -43453,9 +43473,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
-  RateNameSelector: "\n  class RateNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    name = shipping_rate.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
+  RateNameSelector: "\nclass RateNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    name = shipping_rate.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
 
-  RateSelector: "\nclass RateSelector\n  def initialize(rate_names)\n    @rate_names = rate_names.map { |name| name.downcase! }\n  end\n  \n  def match?(rate)\n    @rate_names.include?(rate.name.downcase)\n  end\nend",
+  RateCodeSelector: "\nclass RateCodeSelector\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    code = shipping_rate.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      when :contains\n        return @invert ^ @codes.any? do |partial_code|\n          code.include?(partial_code)\n        end\n      when :starts_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.start_with?(partial_code)\n        end\n      when :ends_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.end_with?(partial_code)\n        end\n    end\n  end\nend",
+
+  RateSourceSelector: "\nclass RateSourceSelector\n  def initialize(match_type, sources)\n    @invert = match_type == :not_one;\n    @sources = sources.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    source = shipping_rate.source.downcase\n    @invert ^ @sources.include?(source)\n  end\nend",
 
   PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100\n    @message = message\n  end\n  \n  def apply(rate)\n    rate.apply_discount(rate.price * @percent, { message: @message })\n  end \nend",
 
@@ -43517,6 +43539,65 @@ var RATE_SELECTORS = [{
     rate_names: {
       type: "array",
       description: "Seperate individual names with a comma (,)"
+    }
+  }
+}, {
+  value: "RateCodeSelector",
+  label: "Rate Code",
+  description: "Matches shipping rates based on the code",
+  inputs: {
+    match_type: {
+      type: "select",
+      description: "Set how the following condition matches",
+      options: [{
+        value: "does",
+        label: "Does"
+      }, {
+        value: "does_not",
+        label: "Does not"
+      }]
+    },
+    match_condition: {
+      type: "select",
+      description: "Set how the codes are matched",
+      options: [{
+        value: "match",
+        label: "Match one of"
+      }, {
+        value: "contains",
+        label: "Contain one of"
+      }, {
+        value: "starts_with",
+        label: "Start with one of"
+      }, {
+        value: "ends_with",
+        label: "End with one of"
+      }]
+    },
+    rate_codes: {
+      type: "array",
+      description: "Seperate individual codes with a comma (,)"
+    }
+  }
+}, {
+  value: "RateSourceSelector",
+  label: "Rate Source",
+  description: "Matches shipping rates based on the source (eg: shopify)",
+  inputs: {
+    match_type: {
+      type: "select",
+      description: "Set how the sources are matched",
+      options: [{
+        value: "is_one",
+        label: "Is one of"
+      }, {
+        value: "not_one",
+        label: "Is not one of"
+      }]
+    },
+    rate_sources: {
+      type: "array",
+      description: "Seperate individual sources with a comma (,)"
     }
   }
 }];
@@ -43626,9 +43707,9 @@ var RATE_AND_SELECTOR = {
   label: "Multi-Select - Meets all conditions",
   description: "Selected if all of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [].concat(RATE_SELECTORS),
-    and_line_item_qualifier_2: [].concat(RATE_SELECTORS),
-    and_line_item_qualifier_3: [].concat(RATE_SELECTORS)
+    rate_selector_1: [].concat(RATE_SELECTORS),
+    and_rate_selector_2: [].concat(RATE_SELECTORS),
+    and_rate_selector_3: [].concat(RATE_SELECTORS)
   }
 };
 
@@ -43637,9 +43718,9 @@ var RATE_OR_SELECTOR = {
   label: "Multi-Select - Meets any conditions",
   description: "Selected if any of the following conditions are met",
   inputs: {
-    line_item_qualifier_1: [].concat(RATE_SELECTORS),
-    or_line_item_qualifier_2: [].concat(RATE_SELECTORS),
-    or_line_item_qualifier_3: [].concat(RATE_SELECTORS)
+    rate_selector_1: [].concat(RATE_SELECTORS),
+    or_rate_selector_2: [].concat(RATE_SELECTORS),
+    or_rate_selector_3: [].concat(RATE_SELECTORS)
   }
 };
 
@@ -43651,7 +43732,7 @@ var campaigns = [{
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    rate_to_discount_selector: [].concat(RATE_SELECTORS),
+    rate_to_discount_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR]),
     discount_to_apply: [].concat(DISCOUNTS)
   }
 }, {
@@ -43662,7 +43743,7 @@ var campaigns = [{
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    rate_to_hide_selector: [].concat(RATE_SELECTORS)
+    rate_to_hide_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR])
   }
 }];
 
@@ -43823,7 +43904,7 @@ var campaigns = [{
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    gateway_selector: [].concat(GATEWAY_SELECTORS)
+    gateway_to_remove_selector: [].concat(GATEWAY_SELECTORS)
   }
 }];
 
@@ -43844,7 +43925,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.6",
+  currentVersion: "0.0.7",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
