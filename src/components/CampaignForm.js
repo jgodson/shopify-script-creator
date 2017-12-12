@@ -23,6 +23,7 @@ export default class Step2Form extends Component {
       number: {},
       array: {},
       object: {},
+      objectArray: {},
       boolean: {},
     }
 
@@ -175,6 +176,7 @@ export default class Step2Form extends Component {
             // Remove :
             return value.substring(1);
           case 'object':
+          case 'objectArray':
             const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
             return formatObject('input', value, inputFormat, outputFormat);
           default:
@@ -334,6 +336,9 @@ export default class Step2Form extends Component {
           );
         }
       },
+      objectArray: {
+        generate: (input) => INPUT_TYPES.object.generate(input)
+      },
       campaignSelect: {
         generate: (input) => {
           let value = this.state.inputs[input.type][input.name];
@@ -445,7 +450,20 @@ export default class Step2Form extends Component {
         if (!value) return "{}";
         try {
           const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
-          return formatObject('output', value, inputFormat, outputFormat);
+          const output = formatObject('output', value, inputFormat, outputFormat);
+          return `{${output}}`;
+        } catch (error) {
+          // Alert user if there was a parsing error (as best we can) and prevent going any further
+          alert (`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+          console.warn(error);
+          throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+        }
+      case 'objectArray':
+        if (!value) return "[]";
+        try {
+          const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+          const output = formatObject('output', value, inputFormat, outputFormat);
+          return `[${output}]`;
         } catch (error) {
           // Alert user if there was a parsing error (as best we can) and prevent going any further
           alert (`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);

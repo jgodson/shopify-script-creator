@@ -67,19 +67,19 @@
 
   function formatObject(inOut, value, inputFmt, outputFmt) {
     if (inOut == 'input') {
-      // Remove {}
+      // Remove {} or []
       value = value.substring(value.length - 1, 0).substring(1);
       if (value === "") { return value; }
 
-      const lines = value.split('\n').map((line) => {
+      const lines = value.split('\t').map((line) => {
         const values = line.split('=>').map((value) => value.trim());
         let output = inputFmt;
         for (let index = 0; index < values.length; index++) {
           const type = output.match(/{\w+:(\w+)}/)[1];
           if (type === "text") {
-            // Remove "" around text
-            values[index] = values[index].replace(',', '');
-            values[index] = values[index].substring(values[index].length - 1, 0).substring(1);
+            // Only grab what's in "". Removes unncessary stuff like :discount or ,
+            const value = values[index].match(/"(.+)"/);
+            values[index] = value ? value[1] : value;
           } else {
             values[index] = values[index].split(',').map((value) => {
               // Replace any [] found
@@ -90,7 +90,12 @@
             });
             values[index] = values[index].filter((value) => value !== "").join(', ');
           }
-          output = output.replace(/{\w+:(\w+)}/i, values[index]);
+          // Skip null inputs, unless it's the last one (optional paramater)
+          if (values[index] === null && (index === values.length - 1)) {
+            output = output.replace(/{\w+:\w+}/i, "");
+          } else if (values[index] !== null) {
+            output = output.replace(/{\w+:\w+}/i, values[index]);
+          }
         }
         return output;
       }).join('\n');
@@ -100,10 +105,22 @@
       const splitter = inputFormatRepl[0];
       const requiredInputs = inputFormatRepl.split(splitter).length;
       const lines = value.split('\n').map((line) => {
-        const values = line.split(splitter).map((value) => value.trim());
+        let values = line.split(splitter).map((value) => value.trim());
+
+        // Only allow blank value as the last input (optional paramater)
+        values = values.filter((value, index) => {
+          if (index !== values.length - 1) {
+            return value !== "";
+          } else {
+            return true;
+          }
+        });
+
+        // Throw an error if we don't have the right number of inputs so the user can correct
         if (values.length !== requiredInputs) {
           throw Error("Number of inputs does not match required input format");
         }
+
         let output = outputFmt;
         for (let index = 0; index < values.length; index++) {
           const type = output.match(/{(\w+)}/)[1];
@@ -115,8 +132,8 @@
           output = output.replace(/{\w+}/i, values[index]);
         }
         return output;
-      }).join();
-      return `{${lines}}`;
+      }).join(',\t');
+      return `${lines}`;
     }
   }
 

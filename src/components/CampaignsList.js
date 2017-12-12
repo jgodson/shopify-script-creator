@@ -24,6 +24,7 @@ export default class Campaigns extends Component {
     let button = null;
     let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount/i) > -1);
     messages = messages && messages.map((campaign) => {
+      if (!campaign.inputs) { return ["", ""] }
       const lastValueIndex = campaign.inputs.length - 1;
       const messageType = campaign.name.search(/(reject|exclude)/i) > -1 ? 'Rejection message' : 'Discount message';
       return [messageType, campaign.inputs[lastValueIndex].replace(/"/g, '').trim()];

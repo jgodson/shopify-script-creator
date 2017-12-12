@@ -643,7 +643,7 @@ const cart_qualifiers = [
       },
       discount_codes: {
         type: "array",
-        description: "Discount codes to check for"
+        description: "Seperate individual codes with a comma (,)"
       }
     }
   },
