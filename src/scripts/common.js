@@ -156,24 +156,30 @@ end`,
 
   HasCode: `
 class HasCode
-  def initialize(match_type, match_condition, code)
+  def initialize(match_type, match_condition, codes)
+    @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
-    @match_condition = match_condition == :undefined ? :is_equal : match_condition
-    @code = code.downcase
+    @codes = codes.map(&:downcase)
   end
 
   def match?(cart)
     return false if cart.discount_code.nil?
-    entered_code = cart.discount_code.code.downcase
+    code = cart.discount_code.code.downcase
     case @match_condition
-      when :is_equal
-        return @invert ^ (entered_code == @code)
+      when :match
+        return @invert ^ @codes.include?(code)
       when :contains
-        return @invert ^ entered_code.include?(@code)
+        return @invert ^ @codes.any? do |partial_code|
+          code.include?(partial_code)
+        end
       when :starts_with
-        return @invert ^ entered_code.start_with?(@code)
+        return @invert ^ @codes.any? do |partial_code|
+          code.start_with?(partial_code)
+        end
       when :ends_with
-        return @invert ^ entered_code.end_with?(@code)
+        return @invert ^ @codes.any? do |partial_code|
+          code.end_with?(partial_code)
+        end
     end
   end
 end`,
@@ -618,26 +624,26 @@ const cart_qualifiers = [
         description: "Set how the discount code is matched",
         options: [
           {
-            value: "is_equal",
-            label: "Equal"
+            value: "match",
+            label: "Match one of"
           },
           {
             value: "contains",
-            label: "Contain"
+            label: "Contain one of"
           },
           {
             value: "starts_with",
-            label: "Start with"
+            label: "Start with one of"
           },
           {
             value: "ends_with",
-            label: "End with"
+            label: "End with one of"
           }
         ]
       },
-      discount_code: {
-        type: "text",
-        description: "Discount code to check for"
+      discount_codes: {
+        type: "array",
+        description: "Discount codes to check for"
       }
     }
   },
@@ -700,7 +706,7 @@ const line_item_qualifiers = [
   {
     value: "none",
     label: "None",
-    description: "No effects"
+    description: "Any item selected/No effect on qualifier"
   },
   {
     value: "ProductIdSelector",

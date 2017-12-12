@@ -202,6 +202,66 @@ class TaxDiscount
     new_line_price = per_item_price * line_item.quantity
     line_item.change_line_price(new_line_price, message: @message)
   end
+end`,
+
+  QuantityLimit: `
+class QuantityLimit
+  def initialize(customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)
+    @limit_by = limit_by == :undefined ? :product : limit_by
+    @customer_qualifier = customer_qualifier
+    @cart_qualifier = cart_qualifier
+    @line_item_selector = line_item_selector
+    @per_item_limit = limit
+  end
+
+  def run(cart)
+    return if !@customer_qualifier.nil? && @customer_qualifier.match?(cart)
+    return if !@cart_qualifier.nil? && @cart_qualifier.match?(cart)
+    item_limits = {}
+    to_delete = []
+    if @per_item_limit == 0
+      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
+    else
+      cart.line_items.each_with_index do |item, index|
+        next unless @line_item_selector.nil? || @line_item_selector.match?(item)
+        key = nil
+        case @limit_by
+          when :product
+            key = item.variant.product.id
+          when :variant
+            key = item.variant.id
+        end
+        
+        if key
+          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)
+          needs_limiting = true if item.quantity > item_limits[key]
+          needs_deleted = true if item_limits[key] <= 0
+          max_amount = item.quantity - item_limits[key]
+          item_limits[key] -= needs_limiting ? max_amount : item.quantity
+        else
+          needs_limiting = true if item.quantity > @per_item_limit
+          max_amount = item.quantity - @per_item_limit
+        end
+        
+        if needs_limiting
+          if needs_deleted
+            to_delete << index
+          else
+            item.split(take: max_amount)
+          end
+        end
+      end
+      
+      if to_delete.length > 0
+        del_index = -1
+        cart.line_items.delete_if do |item|
+          del_index += 1
+          true if to_delete.include?(del_index)
+        end
+      end
+      
+    end
+  end
 end`
 };
 
@@ -464,6 +524,34 @@ const campaigns = [
       message: {
         type: "text",
         description: "Message to display to customer when code is rejected"
+      }
+    }
+  },
+  {
+    value: "QuantityLimit",
+    label: "Quantity Limit",
+    description: "Limit purchasable quantities for items if qualifiers are not met",
+    inputs: {
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      items_to_limit_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      limit_by: {
+        type: "select",
+        description: "Sets how items are limited",
+        options: [
+          {
+            value: "product",
+            label: "Limit by product - Maximum amount of each matching product can be purchased"
+          },
+          {
+            value: "variant",
+            label: "Limit by variant - Maximum amount of each matching variant of a product can be purchased"
+          }
+        ]
+      },
+      maximum_amount: {
+        type: "number",
+        description: "Maximum number of items permitted, 0 will not allow customer to purchase"
       }
     }
   }

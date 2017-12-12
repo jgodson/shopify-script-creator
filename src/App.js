@@ -144,7 +144,7 @@ export default class App extends Component {
     if (campaign.id === null) {
       campaign.id = this.state.currentId;
       newState.currentId = ++campaign.id;
-      newState.campaigns.unshift(campaign);
+      newState.campaigns.splice(newState.campaigns.length - 1, 0, campaign);
     } else {
       const existingId = campaign.id
       const index = this.state.campaigns.findIndex((campaign) => campaign.id === existingId);
