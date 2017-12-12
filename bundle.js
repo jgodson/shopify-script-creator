@@ -8907,7 +8907,7 @@ var classes = {
 
   CustomerAcceptsMarketingQualifier: "\nclass CustomerAcceptsMarketingQualifier\n  def initialize(match_type)\n    @invert = match_type == :does_not\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    return @invert ^ cart.customer.accepts_marketing?\n  end\nend",
 
-  HasCode: "\nclass HasCode\n  def initialize(match_type, match_condition, code)\n    @invert = match_type == :does_not\n    @match_condition = match_condition == :undefined ? :is_equal : match_condition\n    @code = code.downcase\n  end\n\n  def match?(cart)\n    return false if cart.discount_code.nil?\n    entered_code = cart.discount_code.code.downcase\n    case @match_condition\n      when :is_equal\n        return @invert ^ (entered_code == @code)\n      when :contains\n        return @invert ^ entered_code.include?(@code)\n      when :starts_with\n        return @invert ^ entered_code.start_with?(@code)\n      when :ends_with\n        return @invert ^ entered_code.end_with?(@code)\n    end\n  end\nend",
+  HasCode: "\nclass HasCode\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.discount_code.nil?\n    code = cart.discount_code.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      when :contains\n        return @invert ^ @codes.any? do |partial_code|\n          code.include?(partial_code)\n        end\n      when :starts_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.start_with?(partial_code)\n        end\n      when :ends_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.end_with?(partial_code)\n        end\n    end\n  end\nend",
 
   ProductIdSelector: "\nclass ProductIdSelector\n  def initialize(match_type, product_ids)\n    @invert = match_type == :not_one;\n    @product_ids = product_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @product_ids.include?(line_item.variant.product.id)\n  end\nend",
 
@@ -9134,22 +9134,22 @@ var cart_qualifiers = [{
       type: 'select',
       description: "Set how the discount code is matched",
       options: [{
-        value: "is_equal",
-        label: "Equal"
+        value: "match",
+        label: "Match one of"
       }, {
         value: "contains",
-        label: "Contain"
+        label: "Contain one of"
       }, {
         value: "starts_with",
-        label: "Start with"
+        label: "Start with one of"
       }, {
         value: "ends_with",
-        label: "End with"
+        label: "End with one of"
       }]
     },
-    discount_code: {
-      type: "text",
-      description: "Discount code to check for"
+    discount_codes: {
+      type: "array",
+      description: "Seperate individual codes with a comma (,)"
     }
   }
 }, {
@@ -9202,7 +9202,7 @@ var cart_qualifiers = [{
 var line_item_qualifiers = [{
   value: "none",
   label: "None",
-  description: "No effects"
+  description: "Any item selected/No effect on qualifier"
 }, {
   value: "ProductIdSelector",
   label: "Product ID",
@@ -31953,7 +31953,7 @@ var App = function (_Component) {
       if (campaign.id === null) {
         campaign.id = this.state.currentId;
         newState.currentId = ++campaign.id;
-        newState.campaigns.unshift(campaign);
+        newState.campaigns.splice(newState.campaigns.length - 1, 0, campaign);
       } else {
         var existingId = campaign.id;
         var index = this.state.campaigns.findIndex(function (campaign) {
@@ -43220,7 +43220,9 @@ var classes = {
 
   ConditionalDiscountCodeRejection: "\nclass ConditionalDiscountCodeRejection\n  def initialize(match_type, customer_qualifier, cart_qualifier, line_item_selector, message)\n    @invert = match_type == :no_match\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless @customer_qualifier.nil? || (@invert ^ @customer_qualifier.match?(cart))\n    return unless @cart_qualifier.nil? || (@invert ^ @cart_qualifier.match?(cart))\n    return unless @line_item_selector.nil? || @invert ^ cart.line_items.any? do |item|\n      @line_item_selector.match?(item)\n    end\n    cart.discount_code.reject({message: @message})\n  end\nend",
 
-  TaxDiscount: "\nclass TaxDiscount\n  def initialize(amount, message)\n    @amount = amount\n    @message = message\n  end\n\n  def apply(line_item)\n    calculated_tax_fraction = @amount / (100 + @amount)\n    item_tax = line_item.variant.price * calculated_tax_fraction\n    per_item_price = line_item.variant.price - item_tax\n    new_line_price = per_item_price * line_item.quantity\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend"
+  TaxDiscount: "\nclass TaxDiscount\n  def initialize(amount, message)\n    @amount = amount\n    @message = message\n  end\n\n  def apply(line_item)\n    calculated_tax_fraction = @amount / (100 + @amount)\n    item_tax = line_item.variant.price * calculated_tax_fraction\n    per_item_price = line_item.variant.price - item_tax\n    new_line_price = per_item_price * line_item.quantity\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
+
+  QuantityLimit: "\nclass QuantityLimit\n  def initialize(customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    @limit_by = limit_by == :undefined ? :product : limit_by\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return if !@customer_qualifier.nil? && @customer_qualifier.match?(cart)\n    return if !@cart_qualifier.nil? && @cart_qualifier.match?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
@@ -43447,6 +43449,30 @@ var campaigns = [{
     message: {
       type: "text",
       description: "Message to display to customer when code is rejected"
+    }
+  }
+}, {
+  value: "QuantityLimit",
+  label: "Quantity Limit",
+  description: "Limit purchasable quantities for items if qualifiers are not met",
+  inputs: {
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    items_to_limit_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    limit_by: {
+      type: "select",
+      description: "Sets how items are limited",
+      options: [{
+        value: "product",
+        label: "Limit by product - Maximum amount of each matching product can be purchased"
+      }, {
+        value: "variant",
+        label: "Limit by variant - Maximum amount of each matching variant of a product can be purchased"
+      }]
+    },
+    maximum_amount: {
+      type: "number",
+      description: "Maximum number of items permitted, 0 will not allow customer to purchase"
     }
   }
 }];
@@ -43929,7 +43955,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.8",
+  currentVersion: "0.0.9",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
