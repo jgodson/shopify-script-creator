@@ -14381,13 +14381,13 @@ function getObjectFormats(campaignName, inputs) {
 
 function formatObject(inOut, value, inputFmt, outputFmt) {
   if (inOut == 'input') {
-    // Remove {}
+    // Remove {} or []
     value = value.substring(value.length - 1, 0).substring(1);
     if (value === "") {
       return value;
     }
 
-    var lines = value.split('\n').map(function (line) {
+    var lines = value.split('\t').map(function (line) {
       var values = line.split('=>').map(function (value) {
         return value.trim();
       });
@@ -14395,9 +14395,9 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
       for (var index = 0; index < values.length; index++) {
         var type = output.match(/{\w+:(\w+)}/)[1];
         if (type === "text") {
-          // Remove "" around text
-          values[index] = values[index].replace(',', '');
-          values[index] = values[index].substring(values[index].length - 1, 0).substring(1);
+          // Only grab what's in "". Removes unncessary stuff like :discount or ,
+          var _value = values[index].match(/"(.+)"/);
+          values[index] = _value ? _value[1] : _value;
         } else {
           values[index] = values[index].split(',').map(function (value) {
             // Replace any [] found
@@ -14410,7 +14410,10 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
             return value !== "";
           }).join(', ');
         }
-        output = output.replace(/{\w+:(\w+)}/i, values[index]);
+        // Skip null values
+        if (values[index] !== null) {
+          output = output.replace(/{\w+:\w+}/i, values[index]);
+        }
       }
       return output;
     }).join('\n');
@@ -14423,9 +14426,16 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
       var values = line.split(splitter).map(function (value) {
         return value.trim();
       });
+      // Don't allow a blank value
+      values = values.filter(function (value) {
+        return value !== "";
+      });
+
+      // Throw an error if we don't have the right number of inputs so the user can correct
       if (values.length !== requiredInputs) {
         throw Error("Number of inputs does not match required input format");
       }
+
       var output = outputFmt;
       for (var index = 0; index < values.length; index++) {
         var type = output.match(/{(\w+)}/)[1];
@@ -14441,8 +14451,8 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
         output = output.replace(/{\w+}/i, values[index]);
       }
       return output;
-    }).join();
-    return '{' + _lines + '}';
+    }).join(',\t');
+    return '' + _lines;
   }
 }
 
@@ -42077,6 +42087,7 @@ var Step2Form = function (_Component) {
       number: {},
       array: {},
       object: {},
+      objectArray: {},
       boolean: {}
     };
 
@@ -42242,6 +42253,7 @@ var Step2Form = function (_Component) {
               // Remove :
               return value.substring(1);
             case 'object':
+            case 'objectArray':
               var _getObjectFormats = (0, _helpers.getObjectFormats)(campaignName, campaignInputs),
                   _getObjectFormats2 = _slicedToArray(_getObjectFormats, 2),
                   inputFormat = _getObjectFormats2[0],
@@ -42424,6 +42436,11 @@ var Step2Form = function (_Component) {
             });
           }
         },
+        objectArray: {
+          generate: function generate(input) {
+            return INPUT_TYPES.object.generate(input);
+          }
+        },
         campaignSelect: {
           generate: function generate(input) {
             var value = _this3.state.inputs[input.type][input.name];
@@ -42576,7 +42593,24 @@ var Step2Form = function (_Component) {
                 inputFormat = _getObjectFormats4[0],
                 outputFormat = _getObjectFormats4[1];
 
-            return (0, _helpers.formatObject)('output', value, inputFormat, outputFormat);
+            var output = (0, _helpers.formatObject)('output', value, inputFormat, outputFormat);
+            return '{' + output + '}';
+          } catch (error) {
+            // Alert user if there was a parsing error (as best we can) and prevent going any further
+            alert('Error parsing object input for ' + (0, _helpers.splitCamelCase)(campaignName) + '. Make sure your input matches the required format');
+            console.warn(error);
+            throw Error('Error parsing object input for ' + (0, _helpers.splitCamelCase)(campaignName) + '. Make sure your input matches the required format');
+          }
+        case 'objectArray':
+          if (!value) return "[]";
+          try {
+            var _getObjectFormats5 = (0, _helpers.getObjectFormats)(campaignName, campaignInputs),
+                _getObjectFormats6 = _slicedToArray(_getObjectFormats5, 2),
+                _inputFormat = _getObjectFormats6[0],
+                _outputFormat = _getObjectFormats6[1];
+
+            var _output = (0, _helpers.formatObject)('output', value, _inputFormat, _outputFormat);
+            return '[' + _output + ']';
           } catch (error) {
             // Alert user if there was a parsing error (as best we can) and prevent going any further
             alert('Error parsing object input for ' + (0, _helpers.splitCamelCase)(campaignName) + '. Make sure your input matches the required format');
@@ -42898,6 +42932,9 @@ var Campaigns = function (_Component) {
         return input.name && input.name.search(/discount/i) > -1;
       });
       messages = messages && messages.map(function (campaign) {
+        if (!campaign.inputs) {
+          return ["", ""];
+        }
         var lastValueIndex = campaign.inputs.length - 1;
         var messageType = campaign.name.search(/(reject|exclude)/i) > -1 ? 'Rejection message' : 'Discount message';
         return [messageType, campaign.inputs[lastValueIndex].replace(/"/g, '').trim()];
@@ -43206,9 +43243,9 @@ var classes = {
 
   ExcludeReducedItems: "\nclass ExcludeReducedItems\n  def match?(line_item)\n    !line_item.discounted?\n  end\nend",
 
-  PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
+  PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent = 0, message = \"\")\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def set_discount(percent, message)\n    initialize(percent, message)\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
 
-  FixedDiscount: "\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend",
+  FixedDiscount: "\nclass FixedDiscount\n  def initialize(amount = 0, message = \"\")\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def set_discount(amount, message)\n    initialize(amount, message)\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend",
 
   ExcludeDiscountCodes: "\nclass ExcludeDiscountCodes\n  def initialize(behaviour, message)\n    @reject = behaviour == :apply_script\n    @message = message == \"\" ? \"Discount codes cannot be used with this offer\" : message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend",
 
@@ -43222,7 +43259,13 @@ var classes = {
 
   TaxDiscount: "\nclass TaxDiscount\n  def initialize(amount, message)\n    @amount = amount\n    @message = message\n  end\n\n  def apply(line_item)\n    calculated_tax_fraction = @amount / (100 + @amount)\n    item_tax = line_item.variant.price * calculated_tax_fraction\n    per_item_price = line_item.variant.price - item_tax\n    new_line_price = per_item_price * line_item.quantity\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
 
-  QuantityLimit: "\nclass QuantityLimit\n  def initialize(customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    @limit_by = limit_by == :undefined ? :product : limit_by\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return if !@customer_qualifier.nil? && @customer_qualifier.match?(cart)\n    return if !@cart_qualifier.nil? && @cart_qualifier.match?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n  end\nend"
+  QuantityLimit: "\nclass QuantityLimit\n  def initialize(customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    @limit_by = limit_by == :undefined ? :product : limit_by\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return if !@customer_qualifier.nil? && @customer_qualifier.match?(cart)\n    return if !@cart_qualifier.nil? && @cart_qualifier.match?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n  end\nend",
+
+  TieredDiscount: "\nclass TieredDiscount\n  def initialize(customer_qualifier, cart_qualifier, item_selector, discount, tier_type, discount_tiers)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @item_selector = item_selector\n    @discount = discount\n    @tier_type = tier_type == :undefined ? :customer_tag : tier_type\n    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }\n  end\n  \n  def init_discount(amount, message)\n    @discount.set_discount(amount, message)\n  end\n  \n  def run(cart)\n    return if @discount.nil?\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    \n    applicable_items = cart.line_items.select { |item| @item_selector.nil? || @item_selector.match?(item) }\n    case @tier_type\n      when :customer_tag\n        return if cart.customer.nil?\n        customer_tags = cart.customer.tags.map(&:downcase)\n        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }\n        return if qualified_tiers.empty?\n        discount_amount = qualified_tiers.last[:discount].to_i\n        discount_message = qualified_tiers.last[:message]\n      when :cart_subtotal\n        cart_total = cart.subtotal_price\n        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }\n        return if qualified_tiers.empty?\n        discount_amount = qualified_tiers.last[:discount].to_i\n        discount_message = qualified_tiers.last[:message]\n      when :discountable_total\n        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }\n        return if qualified_tiers.empty?\n        discount_amount = qualified_tiers.last[:discount].to_i\n        discount_message = qualified_tiers.last[:message]\n    end\n    \n    # Initalize and apply the provided discount\n    init_discount(discount_amount, discount_message)\n    applicable_items.each { |item| @discount.apply(item) }\n  end\nend",
+
+  DiscountList: "\nclass DiscountList\n\nend",
+
+  DiscountByDiscountCode: "\nclass DiscountBasedOnDiscountCode\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, percent_format, fixed_format)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @percent_format = percent_format\n    @fixed_format = fixed_format\n    # Will be set later after initialize_discount is called\n    @discount = nil\n  end\n\n  def get_discount_type(code)\n    percent_search = @percent_format.split('#')[0]\n    fixed_search  = @fixed_format.split('#')[0]\n    if code.start_with?(percent_search)\n      return :percent\n    elsif code.start_with?(fixed_search)\n      return :fixed\n    end\n    return nil\n  end\n\n  def get_discount_amount(type, code)\n    start_index = nil\n    end_index = nil\n    case type\n      when :percent\n        start_index = @percent_format.index('#')\n        end_index = @percent_format.rindex('#')\n      when :fixed\n        start_index = @fixed_format.index('#')\n        end_index = @fixed_format.rindex('#')\n    end\n    return if start_index == nil\n    length = (end_index - start_index || 0) + 1\n    return code.slice(start_index, length).to_i(base=10)\n  end\n\n  def initialize_discount(code)\n    type = get_discount_type(code)\n    discount_amount = get_discount_amount(type, code)\n    return if type == nil || discount_amount == nil\n    @discount = type == :fixed ? FixedDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)\n  end\n\n  def run(cart)\n    return unless @customer_qualifier.nil? || @customer_qualfier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless cart.discount_code\n    \n    # initialize discount and return if there is no discount to apply\n    initialize_discount(cart.discount_code.code)\n    return unless @discount\n    \n    cart.line_items.each do |item|\n      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)\n      @discount.apply(item)\n    end\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
@@ -43314,6 +43357,21 @@ var DISCOUNTS = [{
   }
 }];
 
+// Discounts for campaigns that set the discount later
+var STRIPPED_DISCOUNTS = [{
+  value: "none",
+  label: "None",
+  description: "No discount"
+}, {
+  value: "PercentageDiscount",
+  label: "Percentage Discount",
+  description: "Discounts the line item by a percentage"
+}, {
+  value: "FixedDiscount",
+  label: "Fixed Discount",
+  description: "Splits the given amount between qualified items"
+}];
+
 var CUSTOMER_AND_SELECTOR = {
   value: "AndSelector",
   label: "Multi-Select - Meets all conditions",
@@ -43397,7 +43455,7 @@ var campaigns = [{
 }, {
   value: "BuyXGetX",
   label: "Buy X Get X Discounted",
-  description: "Buy a certain number of items to receive discouted items",
+  description: "Buy a certain number of items to receive discounted items",
   inputs: {
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
@@ -43473,6 +43531,36 @@ var campaigns = [{
     maximum_amount: {
       type: "number",
       description: "Maximum number of items permitted, 0 will not allow customer to purchase"
+    }
+  }
+}, {
+  value: "TieredDiscount",
+  label: "Tiered Discount",
+  description: "Apply different discounts based on specified conditons",
+  inputs: {
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    discount_type: [].concat(STRIPPED_DISCOUNTS),
+    tier_type: {
+      type: "select",
+      description: "Set what the discount tiers are based on",
+      options: [{
+        value: "customer_tag",
+        label: "Customer Tag"
+      }, {
+        value: "cart_subtotal",
+        label: "Cart Subtotal"
+      }, {
+        value: "discountable_total",
+        label: "Discountable Items Total"
+      }]
+    },
+    discount_tiers: {
+      type: "objectArray",
+      description: "Each tier should be on a new line. (tier : discount_amount : discount_message)",
+      inputFormat: "{tier:text} : {discount:text} : {message:text}",
+      outputFormat: '{:tier => "{text}", :discount => "{text}", :message => "{text}"}'
     }
   }
 }];
@@ -43955,7 +44043,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.9",
+  currentVersion: "0.0.10",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
