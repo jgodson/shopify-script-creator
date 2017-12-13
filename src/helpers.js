@@ -90,10 +90,8 @@
             });
             values[index] = values[index].filter((value) => value !== "").join(', ');
           }
-          // Skip null inputs, unless it's the last one (optional paramater)
-          if (values[index] === null && (index === values.length - 1)) {
-            output = output.replace(/{\w+:\w+}/i, "");
-          } else if (values[index] !== null) {
+          // Skip null values
+          if (values[index] !== null) {
             output = output.replace(/{\w+:\w+}/i, values[index]);
           }
         }
@@ -106,15 +104,8 @@
       const requiredInputs = inputFormatRepl.split(splitter).length;
       const lines = value.split('\n').map((line) => {
         let values = line.split(splitter).map((value) => value.trim());
-
-        // Only allow blank value as the last input (optional paramater)
-        values = values.filter((value, index) => {
-          if (index !== values.length - 1) {
-            return value !== "";
-          } else {
-            return true;
-          }
-        });
+        // Don't allow a blank value
+        values = values.filter((value) => value !== "");
 
         // Throw an error if we don't have the right number of inputs so the user can correct
         if (values.length !== requiredInputs) {

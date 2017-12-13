@@ -274,13 +274,12 @@ end`,
 
   TieredDiscount: `
 class TieredDiscount
-  def initialize(customer_qualifier, cart_qualifier, item_selector, discount, tier_type, maximum_amount, discount_tiers)
+  def initialize(customer_qualifier, cart_qualifier, item_selector, discount, tier_type, discount_tiers)
     @customer_qualifier = customer_qualifier
     @cart_qualifier = cart_qualifier
     @item_selector = item_selector
     @discount = discount
     @tier_type = tier_type == :undefined ? :customer_tag : tier_type
-    @maximum_amount = maximum_amount == 0 ? nil : Money.new(cents: maximum_amount * 100)
     @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }
   end
   
@@ -300,31 +299,92 @@ class TieredDiscount
         customer_tags = cart.customer.tags.map(&:downcase)
         qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }
         return if qualified_tiers.empty?
-        discount_amount = qualified_tiers.last[:discount]
-        # Use given message, or construct a default message
-        message = qualified_tiers.last[:message] == "" || nil
-        discount_message = message || "#{qualified_tiers.last[:discount]}% off"
+        discount_amount = qualified_tiers.last[:discount].to_i
+        discount_message = qualified_tiers.last[:message]
       when :cart_subtotal
         cart_total = cart.subtotal_price
         qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
         return if qualified_tiers.empty?
-        discount_amount = qualified_tiers.last[:discount]
-        # Use given message, or construct a default message
-        message = qualified_tiers.last[:message] == "" || nil
-        discount_message = message || "#{qualified_tiers.last[:discount]}% off orders over $#{qualified_tiers.last[:tier]}"
+        discount_amount = qualified_tiers.last[:discount].to_i
+        discount_message = qualified_tiers.last[:message]
       when :discountable_total
         discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }
         qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }
         return if qualified_tiers.empty?
-        discount_amount = qualified_tiers.last[:discount]
-        # Use given message, or construct a default message
-        message = qualified_tiers.last[:message] == "" || nil
-        discount_message = message || "#{qualified_tiers.last[:discount]}% off when qualified items exceed $#{qualified_tiers.last[:tier]}"
+        discount_amount = qualified_tiers.last[:discount].to_i
+        discount_message = qualified_tiers.last[:message]
     end
     
     # Initalize and apply the provided discount
     init_discount(discount_amount, discount_message)
     applicable_items.each { |item| @discount.apply(item) }
+  end
+end`,
+
+DiscountList: `
+class DiscountList
+
+end`,
+
+  DiscountByDiscountCode: `
+class DiscountBasedOnDiscountCode
+  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, percent_format, fixed_format)
+    @customer_qualifier = customer_qualifier
+    @cart_qualifier = cart_qualifier
+    @line_item_qualifier = line_item_qualifier
+    @percent_format = percent_format
+    @fixed_format = fixed_format
+    # Will be set later after initialize_discount is called
+    @discount = nil
+  end
+
+  def get_discount_type(code)
+    percent_search = @percent_format.split('#')[0]
+    fixed_search  = @fixed_format.split('#')[0]
+    if code.start_with?(percent_search)
+      return :percent
+    elsif code.start_with?(fixed_search)
+      return :fixed
+    end
+    return nil
+  end
+
+  def get_discount_amount(type, code)
+    start_index = nil
+    end_index = nil
+    case type
+      when :percent
+        start_index = @percent_format.index('#')
+        end_index = @percent_format.rindex('#')
+      when :fixed
+        start_index = @fixed_format.index('#')
+        end_index = @fixed_format.rindex('#')
+    end
+    return if start_index == nil
+    length = (end_index - start_index || 0) + 1
+    return code.slice(start_index, length).to_i(base=10)
+  end
+
+  def initialize_discount(code)
+    type = get_discount_type(code)
+    discount_amount = get_discount_amount(type, code)
+    return if type == nil || discount_amount == nil
+    @discount = type == :fixed ? FixedDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)
+  end
+
+  def run(cart)
+    return unless @customer_qualifier.nil? || @customer_qualfier.match?(cart)
+    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
+    return unless cart.discount_code
+    
+    # initialize discount and return if there is no discount to apply
+    initialize_discount(cart.discount_code.code)
+    return unless @discount
+    
+    cart.line_items.each do |item|
+      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)
+      @discount.apply(item)
+    end
   end
 end`
 };
@@ -550,7 +610,7 @@ const campaigns = [
   {
     value: "BuyXGetX",
     label: "Buy X Get X Discounted",
-    description: "Buy a certain number of items to receive discouted items",
+    description: "Buy a certain number of items to receive discounted items",
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
@@ -665,13 +725,9 @@ const campaigns = [
           }
         ]
       },
-      maximum_discount: {
-        type: "number",
-        description: "Set the maximum discount to be applied. 0 for no limit"
-      },
       discount_tiers: {
         type: "objectArray",
-        description: "Set the discount tiers. Each tier should be on a new line. Format is (tier_type : discount_amount : discount_message(optional)).",
+        description: "Each tier should be on a new line. (tier : discount_amount : discount_message)",
         inputFormat: "{tier:text} : {discount:text} : {message:text}",
         outputFormat: '{:tier => "{text}", :discount => "{text}", :message => "{text}"}'
       }
