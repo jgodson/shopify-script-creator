@@ -298,24 +298,18 @@ class TieredDiscount
         return if cart.customer.nil?
         customer_tags = cart.customer.tags.map(&:downcase)
         qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }
-        return if qualified_tiers.empty?
-        discount_amount = qualified_tiers.last[:discount].to_i
-        discount_message = qualified_tiers.last[:message]
       when :cart_subtotal
         cart_total = cart.subtotal_price
         qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
-        return if qualified_tiers.empty?
-        discount_amount = qualified_tiers.last[:discount].to_i
-        discount_message = qualified_tiers.last[:message]
       when :discountable_total
         discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }
         qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }
-        return if qualified_tiers.empty?
-        discount_amount = qualified_tiers.last[:discount].to_i
-        discount_message = qualified_tiers.last[:message]
     end
+
+    return if qualified_tiers.empty?
+    discount_amount = qualified_tiers.last[:discount].to_i
+    discount_message = qualified_tiers.last[:message]
     
-    # Initalize and apply the provided discount
     init_discount(discount_amount, discount_message)
     applicable_items.each { |item| @discount.apply(item) }
   end
