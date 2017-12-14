@@ -24,13 +24,9 @@ end`,
 
   PercentageDiscount: `
 class PercentageDiscount
-  def initialize(percent = 0, message = "")
+  def initialize(percent, message)
     @percent = Decimal.new(percent) / 100.0
     @message = message
-  end
-
-  def set_discount(percent, message)
-    initialize(percent, message)
   end
 
   def apply(line_item)
@@ -42,14 +38,10 @@ end`,
 
   FixedDiscount: `
 class FixedDiscount
-  def initialize(amount = 0, message = "")
+  def initialize(amount, message)
     @amount = Money.new(cents: amount * 100)
     @message = message
     @discount_applied = Money.zero
-  end
-
-  def set_discount(amount, message)
-    initialize(amount, message)
   end
 
   def apply(line_item)
@@ -274,21 +266,24 @@ end`,
 
   TieredDiscount: `
 class TieredDiscount
-  def initialize(customer_qualifier, cart_qualifier, item_selector, discount, tier_type, discount_tiers)
+  def initialize(customer_qualifier, cart_qualifier, item_selector, discount_type, tier_type, discount_tiers)
     @customer_qualifier = customer_qualifier
     @cart_qualifier = cart_qualifier
     @item_selector = item_selector
-    @discount = discount
+    @discount_type = discount_type
     @tier_type = tier_type == :undefined ? :customer_tag : tier_type
     @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }
   end
   
   def init_discount(amount, message)
-    @discount.set_discount(amount, message)
+    if @discount_type == :fixed
+      return FixedDiscount.new(amount, message)
+    else
+      return PercentageDiscount.new(amount, message)
+    end
   end
   
   def run(cart)
-    return if @discount.nil?
     return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
     
@@ -310,52 +305,112 @@ class TieredDiscount
     discount_amount = qualified_tiers.last[:discount].to_i
     discount_message = qualified_tiers.last[:message]
     
-    init_discount(discount_amount, discount_message)
-    applicable_items.each { |item| @discount.apply(item) }
+    discount = init_discount(discount_amount, discount_message)
+    applicable_items.each { |item| discount.apply(item) }
   end
 end`,
 
-DiscountList: `
-class DiscountList
-
-end`,
-
-  DiscountByDiscountCode: `
-class DiscountBasedOnDiscountCode
-  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, percent_format, fixed_format)
+  DiscountCodeList: `
+class DiscountCodeList
+  def initialize(customer_qualifier, cart_qualifier, line_item_selector, discount_list)
     @customer_qualifier = customer_qualifier
     @cart_qualifier = cart_qualifier
-    @line_item_qualifier = line_item_qualifier
+    @line_item_selector = line_item_selector
+    @discount_list = discount_list
+  end
+
+  def init_discount(type, amount, message)
+    if type == :fixed
+      return FixedDiscount.new(amount, message)
+    else
+      return PercentageDiscount.new(amount, message)
+    end
+  end
+
+  def get_discount_code_type(discount_code)
+    case discount_code
+      when CartDiscount::Percentage
+        return :percent
+      when CartDiscount::FixedAmount
+        return :fixed
+      else
+        return nil
+    end
+  end
+
+  def run(cart)
+    return unless cart.discount_code
+    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
+    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
+
+    applied_code = cart.discount_code.code.downcase
+    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }
+    return if applicable_discount.empty?
+    raise "#{applied_code} matches multiple discounts" if applicable_discount.length > 1
+    
+    applicable_discount = applicable_discount.first
+    case applicable_discount[:type].downcase
+      when 'p', 'percent'
+        discount_type = :percent
+      when 'f', 'fixed'
+        discount_type = :fixed
+      when 'c', 'code'
+        discount_type = get_discount_code_type(cart.discount_code)
+    end
+    return if discount_type.nil?
+
+    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)
+
+    cart.line_items.each do |item|
+      next unless @line_item_selector.nil? || @line_item_selector.match?(item)
+      discount.apply(item)
+    end
+  end
+end`,
+
+  DiscountCodePattern: `
+class DiscountCodePattern
+  def initialize(customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)
+    @customer_qualifier = customer_qualifier
+    @cart_qualifier = cart_qualifier
+    @line_item_selector = line_item_selector
     @percent_format = percent_format
     @fixed_format = fixed_format
-    # Will be set later after initialize_discount is called
-    @discount = nil
   end
 
   def get_discount_type(code)
-    percent_search = @percent_format.split('#')[0]
-    fixed_search  = @fixed_format.split('#')[0]
-    if code.start_with?(percent_search)
+    percent_search = @percent_format.split('#').first
+    fixed_search = @fixed_format.split('#').first
+    if code.include?(percent_search)
       return :percent
-    elsif code.start_with?(fixed_search)
+    elsif code.include?(fixed_search)
       return :fixed
     end
     return nil
   end
 
   def get_discount_amount(type, code)
-    start_index = nil
-    end_index = nil
+    start_num = nil
+    end_num = nil
+    start_search = nil
+    
     case type
       when :percent
-        start_index = @percent_format.index('#')
-        end_index = @percent_format.rindex('#')
+        start_num = @percent_format.index('#')
+        end_num = @percent_format.rindex('#')
+        start_search = @percent_format.split('#').first
       when :fixed
-        start_index = @fixed_format.index('#')
-        end_index = @fixed_format.rindex('#')
+        start_num = @fixed_format.index('#')
+        end_num = @fixed_format.rindex('#')
+        start_search = @fixed_format.split('#').first
     end
-    return if start_index == nil
-    length = (end_index - start_index || 0) + 1
+    
+    search_length = start_search.length
+    start_index = code.index(start_search) + search_length
+    return if start_index.nil? || start_num.nil?
+    
+    length = (end_num - start_num || 0) + 1
+    puts code.slice(start_index, length)
     return code.slice(start_index, length).to_i(base=10)
   end
 
@@ -363,21 +418,20 @@ class DiscountBasedOnDiscountCode
     type = get_discount_type(code)
     discount_amount = get_discount_amount(type, code)
     return if type == nil || discount_amount == nil
-    @discount = type == :fixed ? FixedDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)
+    return type == :fixed ? FixedDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)
   end
 
   def run(cart)
+    return unless cart.discount_code
     return unless @customer_qualifier.nil? || @customer_qualfier.match?(cart)
     return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
-    return unless cart.discount_code
     
-    # initialize discount and return if there is no discount to apply
-    initialize_discount(cart.discount_code.code)
-    return unless @discount
+    discount = initialize_discount(cart.discount_code.code)
+    return unless discount
     
     cart.line_items.each do |item|
-      next unless @line_item_qualifier.nil? || @line_item_qualifier.match?(item)
-      @discount.apply(item)
+      next unless @line_item_selector.nil? || @line_item_selector.match?(item)
+      discount.apply(item)
     end
   end
 end`
@@ -498,25 +552,6 @@ const DISCOUNTS = [
     }
   }
 ];
-
-// Discounts for campaigns that set the discount later
-const STRIPPED_DISCOUNTS = [
-  {
-    value: "none",
-    label: "None",
-    description: "No discount"
-  },
-  {
-    value: "PercentageDiscount",
-    label: "Percentage Discount",
-    description: "Discounts the line item by a percentage"
-  },
-  {
-    value: "FixedDiscount",
-    label: "Fixed Discount",
-    description: "Splits the given amount between qualified items"
-  }
-]
 
 const CUSTOMER_AND_SELECTOR = {
   value: "AndSelector",
@@ -700,7 +735,20 @@ const campaigns = [
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
       dicountable_items_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
-      discount_type: [...STRIPPED_DISCOUNTS],
+      discount_type: {
+        type: "select",
+        description: "Discount selected items by the tier amount as a percent or a total fixed amount",
+        options: [
+          {
+            value: "percent",
+            label: "Percentage Discount"
+          },
+          {
+            value: "fixed",
+            label: "Fixed Discount"
+          }
+        ]
+      },
       tier_type: {
         type: "select",
         description: "Set what the discount tiers are based on",
@@ -721,11 +769,48 @@ const campaigns = [
       },
       discount_tiers: {
         type: "objectArray",
-        description: "Each tier should be on a new line. (tier : discount_amount : discount_message)",
+        description: "Each tier should be on a new line. Format: (tier : discount_amount : discount_message)",
         inputFormat: "{tier:text} : {discount:text} : {message:text}",
         outputFormat: '{:tier => "{text}", :discount => "{text}", :message => "{text}"}'
       }
-    }
+    },
+    dependants: ["PercentageDiscount", "FixedDiscount"]
+  },
+  {
+    value: "DiscountCodeList",
+    label: "Discount Code List",
+    description: "Apply different discounts based on discount code entered",
+    inputs: {
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      dicountable_items_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discounts: {
+        type: "objectArray",
+        description: "Each discount should be on a new line. Format: (discount_code : discount_type((f)ixed/(p)ercent/(c)ode) : discount_amount)",
+        inputFormat: "{code:text} : {type:text} : {amount:text}",
+        outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{text}"}'
+      }
+    },
+    dependants: ["PercentageDiscount", "FixedDiscount"]
+  },
+  {
+    value: "DiscountCodePattern",
+    label: "Discount Code Pattern Discount",
+    description: "Apply different discounts based on a pattern in a discount code",
+    inputs: {
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      dicountable_items_selector: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      percent_pattern: {
+        type: "text",
+        description: "Percentage discount pattern (# = will always be a number PD## = PD10ABCDE for 10% discount)"
+      },
+      fixed_pattern: {
+        type: "text",
+        description: "Fixed discount pattern (# = will always be a number FD### = ABCFD075EF for $75 discount)"
+      }
+    },
+    dependants: ["PercentageDiscount", "FixedDiscount"]
   }
 ];
 

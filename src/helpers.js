@@ -124,7 +124,7 @@
         }
         return output;
       }).join(',\t');
-      return `${lines}`;
+      return lines;
     }
   }
 

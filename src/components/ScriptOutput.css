@@ -1,4 +1,8 @@
 #ScriptOutput {
   max-height: 252px !important;
   font-family: monospace;
+  tab-size: 1;
+  -moz-tab-size: 1;
+  white-space: pre;
+  word-wrap: normal;
 }
