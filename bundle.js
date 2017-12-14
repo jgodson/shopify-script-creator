@@ -31856,12 +31856,18 @@ var App = function (_Component) {
   _createClass(App, [{
     key: 'typeChange',
     value: function typeChange(newType) {
+      // Google Analytics
+      gtag('event', 'typeButtonClick');
+
       if (this.state.campaigns.length > 1 || this.state.showForm) {
         var response = confirm("Changing the script type will clear your current campaigns. Are you sure?");
         if (!response) {
           return;
         }
       }
+
+      // Google Analytics
+      gtag('event', 'typeChange', { 'type': newType });
 
       var newState = JSON.parse(JSON.stringify(this.defaultState));
       newState.scriptType = newType;
@@ -31871,8 +31877,14 @@ var App = function (_Component) {
   }, {
     key: 'reset',
     value: function reset() {
+      // Google Analytics
+      gtag('event', 'resetButtonClick');
+
       var response = confirm("Are you sure you want to clear your work and start over?");
       if (response) {
+        // Google Analytics
+        gtag('event', 'reset');
+
         this.setState(JSON.parse(JSON.stringify(this.defaultState)));
       }
     }
@@ -31917,6 +31929,9 @@ var App = function (_Component) {
   }, {
     key: 'editCampaign',
     value: function editCampaign(campaignId) {
+      // Google Analytics
+      gtag('event', 'editButtonClick');
+
       var newState = this.state;
       newState.showForm = true;
       var campaign = this.getCampaignById(campaignId);
@@ -31928,6 +31943,9 @@ var App = function (_Component) {
   }, {
     key: 'removeCampaign',
     value: function removeCampaign(campaignId) {
+      // Google Analytics
+      gtag('event', 'removeButtonClick');
+
       if (this.state.editCampaignInfo && this.state.editCampaignInfo.id === campaignId) {
         alert("You are currently editing this campaign. Save or discard changes first.");
         return;
@@ -31937,6 +31955,9 @@ var App = function (_Component) {
           return;
         }
       }
+
+      // Google Analytics
+      gtag('event', 'removeCampaign');
 
       var newState = this.state;
       var index = this.state.campaigns.findIndex(function (campaign) {
@@ -31959,6 +31980,10 @@ var App = function (_Component) {
   }, {
     key: 'addCampaign',
     value: function addCampaign(campaign) {
+      // Google Analytics
+      var event = campaign.id ? 'editCampaign' : 'addCampaign';
+      gtag('event', event, { 'name': campaign.name });
+
       var newState = this.state;
       if (campaign.id === null) {
         campaign.id = this.state.currentId;
@@ -31979,6 +32004,9 @@ var App = function (_Component) {
   }, {
     key: 'generateScript',
     value: function generateScript() {
+      // Google Analytics
+      gtag('event', 'generateButtonClick', { 'campaigns': this.state.campaigns.length - 1 });
+
       if (this.state.showForm) {
         alert("Save or discard changes to the current campaign first.");
         return;
@@ -32036,6 +32064,9 @@ var App = function (_Component) {
       return output;
 
       function generateClassCode(allClasses, classesUsed) {
+        // Google Analytics
+        gtag('event', 'scriptGenerated', { 'usedClasses': classesUsed });
+
         var code = '';
         classesUsed.forEach(function (className) {
           if (allClasses[className]) {
@@ -32118,6 +32149,9 @@ var App = function (_Component) {
     value: function uploadFile() {
       var _this4 = this;
 
+      // Google Analytics
+      gtag('event', 'importButtonClick');
+
       if (!window.FileReader) {
         alert('Sorry, your browser does not support importing files.');
         return false;
@@ -32130,6 +32164,9 @@ var App = function (_Component) {
         fileInput.style.display = 'none';
         document.body.appendChild(fileInput);
         fileInput.addEventListener('change', function (evt) {
+          // Google Analytics
+          gtag('event', 'importAttempt');
+
           _this4.readFile(evt.target, function (loadedCampaigns) {
             if (loadedCampaigns && loadedCampaigns.length > 0) {
               var newState = JSON.parse(JSON.stringify(_this4.defaultState));
@@ -32140,6 +32177,10 @@ var App = function (_Component) {
                 return a.id - b.id;
               })[0].id + 1;
               newState.currentId = newId;
+
+              // Google Analytics
+              gtag('event', 'importSuccess', { 'campaigns': newState.campaigns.length - 1 });
+
               _this4.setState(newState);
             }
             document.body.removeChild(evt.target);
@@ -32193,6 +32234,9 @@ var App = function (_Component) {
   }, {
     key: 'downloadCampaigns',
     value: function downloadCampaigns() {
+      // Google Analytics
+      gtag('event', 'export', { 'campaigns': this.state.campaigns.length - 1 });
+
       var filename = 'SSC-V' + this.version + '-script-' + parseInt(Math.random() * 100000000) + '.txt';
       var campaigns = this.state.campaigns.filter(function (campaign) {
         return !campaign.skip;
@@ -43096,7 +43140,6 @@ var ScriptOutput = function (_Component) {
     var _this = _possibleConstructorReturn(this, (ScriptOutput.__proto__ || Object.getPrototypeOf(ScriptOutput)).call(this, props));
 
     _this.textfieldId = 'ScriptOutput';
-
     _this.copyOutputCode = _this.copyOutputCode.bind(_this);
     return _this;
   }
@@ -43104,6 +43147,9 @@ var ScriptOutput = function (_Component) {
   _createClass(ScriptOutput, [{
     key: 'copyOutputCode',
     value: function copyOutputCode() {
+      // Google Analytics
+      gtag('event', 'copyButtonClick');
+
       document.querySelector('#' + this.textfieldId).select();
       document.execCommand('selectAll');
       document.execCommand('copy');
@@ -44073,7 +44119,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.11",
+  currentVersion: "0.0.12",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
