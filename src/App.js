@@ -56,10 +56,16 @@ export default class App extends Component {
   }
 
   typeChange(newType) {
+    // Google Analytics
+    gtag('event', 'typeButtonClick');
+
     if (this.state.campaigns.length > 1 || this.state.showForm) {
       const response = confirm("Changing the script type will clear your current campaigns. Are you sure?");
       if (!response) { return; }
     }
+
+    // Google Analytics
+    gtag('event', 'typeChange', {'type' : newType});
 
     const newState = JSON.parse(JSON.stringify(this.defaultState));
     newState.scriptType = newType;
@@ -68,8 +74,14 @@ export default class App extends Component {
   }
 
   reset() {
+    // Google Analytics
+    gtag('event', 'resetButtonClick');
+
     const response = confirm("Are you sure you want to clear your work and start over?");
     if (response) {
+      // Google Analytics
+      gtag('event', 'reset')
+
       this.setState(JSON.parse(JSON.stringify(this.defaultState)));
     }
   }
@@ -105,6 +117,9 @@ export default class App extends Component {
   }
 
   editCampaign(campaignId) {
+    // Google Analytics
+    gtag('event', 'editButtonClick');
+
     const newState = this.state;
     newState.showForm = true;
     const campaign = this.getCampaignById(campaignId);
@@ -115,6 +130,9 @@ export default class App extends Component {
   }
 
   removeCampaign(campaignId) {
+    // Google Analytics
+    gtag('event', 'removeButtonClick');
+
     if (this.state.editCampaignInfo && this.state.editCampaignInfo.id === campaignId) {
       alert("You are currently editing this campaign. Save or discard changes first.");
       return;
@@ -122,6 +140,9 @@ export default class App extends Component {
       const response = confirm("Are you sure you want to remove this campaign?");
       if (!response) { return; }
     }
+
+    // Google Analytics
+    gtag('event', 'removeCampaign');
 
     const newState = this.state;
     const index = this.state.campaigns.findIndex((campaign) => campaign.id === campaignId);
@@ -140,6 +161,10 @@ export default class App extends Component {
   }
 
   addCampaign(campaign) {
+    // Google Analytics
+    const event = campaign.id ? 'editCampaign' : 'addCampaign';
+    gtag('event', event, {'name': campaign.name});
+
     const newState = this.state;
     if (campaign.id === null) {
       campaign.id = this.state.currentId;
@@ -157,6 +182,9 @@ export default class App extends Component {
   }
 
   generateScript() {
+    // Google Analytics
+    gtag('event', 'generateButtonClick', {'campaigns': this.state.campaigns.length - 1});
+
     if (this.state.showForm) {
       alert("Save or discard changes to the current campaign first.");
       return;
@@ -211,6 +239,9 @@ export default class App extends Component {
     return output;
 
     function generateClassCode(allClasses, classesUsed) {
+      // Google Analytics
+      gtag('event', 'scriptGenerated', {'usedClasses': classesUsed});
+
       let code = '';
       classesUsed.forEach((className) => {
         if (allClasses[className]) {
@@ -286,6 +317,9 @@ ${INDENT[this.IL]})`;
   }
 
   uploadFile() {
+    // Google Analytics
+    gtag('event', 'importButtonClick');
+
     if (!window.FileReader) {
       alert('Sorry, your browser does not support importing files.');
       return false;
@@ -298,6 +332,9 @@ ${INDENT[this.IL]})`;
       fileInput.style.display = 'none';
       document.body.appendChild(fileInput);
       fileInput.addEventListener('change', (evt) => {
+        // Google Analytics
+        gtag('event', 'importAttempt');
+
         this.readFile(evt.target, (loadedCampaigns) => {
           if (loadedCampaigns && loadedCampaigns.length > 0) {
             const newState = JSON.parse(JSON.stringify(this.defaultState));
@@ -306,6 +343,10 @@ ${INDENT[this.IL]})`;
             });
             const newId = loadedCampaigns.sort((a, b) => a.id - b.id)[0].id + 1;
             newState.currentId = newId;
+            
+            // Google Analytics
+            gtag('event', 'importSuccess', {'campaigns': newState.campaigns.length - 1});
+
             this.setState(newState);
           }
           document.body.removeChild(evt.target);
@@ -354,6 +395,9 @@ ${INDENT[this.IL]})`;
   }
 
   downloadCampaigns() {
+    // Google Analytics
+    gtag('event', 'export', {'campaigns': this.state.campaigns.length - 1});
+
     const filename = `SSC-V${this.version}-script-${parseInt(Math.random() * 100000000)}.txt`;
     const campaigns = this.state.campaigns.filter((campaign) => !campaign.skip);
     const data = `ShopifyScriptCreatorFile-V${this.version}-${JSON.stringify(campaigns)}`;

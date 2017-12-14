@@ -5,13 +5,14 @@ import styles from './ScriptOutput.css';
 export default class ScriptOutput extends Component {
   constructor(props) {
     super(props);
-
     this.textfieldId = 'ScriptOutput';
-
     this.copyOutputCode = this.copyOutputCode.bind(this);
   }
 
   copyOutputCode() {
+    // Google Analytics
+    gtag('event', 'copyButtonClick');
+
     document.querySelector(`#${this.textfieldId}`).select();
     document.execCommand('selectAll');
     document.execCommand('copy');
