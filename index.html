@@ -9,27 +9,32 @@
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-85041190-3"></script>
   <script>
-    if (window.location.hostname !== "localhost") {
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
+    // Prevent analytics errors and allows debugging on localhost
+    var events = undefined;
+    var interactions = undefined;
+    var gtag = undefined;
+    var dataLayer = undefined;
+
+    if (location.hostname !== "localhost") {
+      dataLayer = dataLayer || [];
+      gtag = function() { dataLayer.push(arguments); };
       gtag('js', new Date());
       gtag('config', 'UA-85041190-3');
     } else {
-      // Prevent analytics errors and allows debugging
-      window.events = [];
-      window.interactions = {};
-      function gtag(type, action, params) {
-        if (window.interactions[action]) {
-          window.interactions[action]++;
+      events = [];
+      interactions = {};
+      gtag = function (type, action, params) {
+        if (interactions[action]) {
+          interactions[action]++;
         } else {
-          window.interactions[action] = 1;
+          interactions[action] = 1;
         }
-        window.events.push({
+        events.push({
           type: type,
           action: action,
           params: params || null
         });
-      }
+      };
     }
   </script>
   

@@ -43667,6 +43667,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
+  AllSelector: "\nclass AllSelector\n  def match?(rate)\n    return true\n  end\nend",
+
   RateNameSelector: "\nclass RateNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    name = shipping_rate.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
 
   RateCodeSelector: "\nclass RateCodeSelector\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    code = shipping_rate.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      when :contains\n        return @invert ^ @codes.any? do |partial_code|\n          code.include?(partial_code)\n        end\n      when :starts_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.start_with?(partial_code)\n        end\n      when :ends_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.end_with?(partial_code)\n        end\n    end\n  end\nend",
@@ -43696,7 +43698,11 @@ var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.line_it
 var RATE_SELECTORS = [{
   value: "none",
   label: "None",
-  description: "No effects"
+  description: "No rates are selected"
+}, {
+  value: "AllSelector",
+  label: "All",
+  description: "All rates are selected"
 }, {
   value: "RateNameSelector",
   label: "Rate Name",
@@ -43921,7 +43927,7 @@ var RATE_OR_SELECTOR = {
 var campaigns = [{
   value: "ShippingDiscount",
   label: "Shipping Discount",
-  description: "Specify conditions to apply a shipping discount",
+  description: "Specify conditions to apply a shipping discount to selected rates",
   inputs: {
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
@@ -43931,8 +43937,8 @@ var campaigns = [{
   }
 }, {
   value: "HideRateUnlessConditionsMet",
-  label: "Hide Rate If Not Qualified",
-  description: "Shipping rate will be hidden unless conditions are met",
+  label: "Hide Rates If Not Qualified",
+  description: "Selected shipping rates will be hidden unless conditions are met",
   inputs: {
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
@@ -43967,6 +43973,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
+  AllSelector: "\n  class AllSelector\n    def match?(gateway)\n      return true\n    end\n  end",
+
   GatewayNameSelector: "\nclass GatewayNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(gateway)\n    name = gateway.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
 
   ConditionallyRemoveGateway: "\nclass ConditionallyRemoveGateway\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, gateway_selector)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @gateway_selector = gateway_selector\n  end\n\n  def run(gateways, cart)\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless @line_item_qualifier.nil? || cart.line_items.any? do |item|\n      @line_item_qualifier.match?(item)\n    end\n    gateways.delete_if do |gateway|\n      @gateway_selector.match?(gateway)\n    end\n  end\nend"
@@ -43984,6 +43992,10 @@ var GATEWAY_SELECTORS = [{
   value: "none",
   label: "None",
   description: "No effects"
+}, {
+  value: "AllSelector",
+  label: "All",
+  description: "Selects all gateways"
 }, {
   value: "GatewayNameSelector",
   label: "Gateway Name",
@@ -44119,7 +44131,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.12",
+  currentVersion: "0.0.13",
   incompatibleVersions: ["0.0.1", "0.0.2"]
 };
 
