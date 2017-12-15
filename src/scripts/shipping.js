@@ -1,6 +1,13 @@
 import Common from './common';
 
 const classes = {
+  AllSelector: `
+class AllSelector
+  def match?(rate)
+    return true
+  end
+end`,
+
   RateNameSelector: `
 class RateNameSelector
   def initialize(match_type, match_condition, names)
@@ -228,7 +235,12 @@ const RATE_SELECTORS = [
   {
     value: "none",
     label: "None",
-    description: "No effects"
+    description: "No rates are selected"
+  },
+  {
+    value: "AllSelector",
+    label: "All",
+    description: "All rates are selected"
   },
   {
     value: "RateNameSelector",
@@ -481,7 +493,7 @@ const campaigns = [
   {
     value: "ShippingDiscount",
     label: "Shipping Discount",
-    description: "Specify conditions to apply a shipping discount",
+    description: "Specify conditions to apply a shipping discount to selected rates",
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
@@ -492,8 +504,8 @@ const campaigns = [
   },
   {
     value: "HideRateUnlessConditionsMet",
-    label: "Hide Rate If Not Qualified",
-    description: "Shipping rate will be hidden unless conditions are met",
+    label: "Hide Rates If Not Qualified",
+    description: "Selected shipping rates will be hidden unless conditions are met",
     inputs: {
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],

@@ -1,6 +1,13 @@
 import Common from './common';
 
 const classes = {
+  AllSelector: `
+  class AllSelector
+    def match?(gateway)
+      return true
+    end
+  end`,
+
   GatewayNameSelector: `
 class GatewayNameSelector
   def initialize(match_type, match_condition, names)
@@ -80,6 +87,11 @@ const GATEWAY_SELECTORS = [
     value: "none",
     label: "None",
     description: "No effects"
+  },
+  {
+    value: "AllSelector",
+    label: "All",
+    description: "Selects all gateways"
   },
   {
     value: "GatewayNameSelector",
