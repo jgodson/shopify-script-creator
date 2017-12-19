@@ -1,33 +1,65 @@
 const classes = {
   AndSelector: `
 class AndSelector
-  def initialize(*selectors)
-    @selectors = selectors
+  def initialize(*conditions)
+    @conditions = conditions.compact
   end
 
   def match?(item)
-    @selectors.all? do |selector|
-      selector.nil? || selector.match?(item) 
+    @conditions.all? do |condition|
+      condition.match?(item) 
     end
   end
 end`,
 
   OrSelector: `
 class OrSelector
-  def initialize(*selectors)
-    @selectors = selectors
+  def initialize(*conditions)
+    @conditions = conditions.compact
   end
 
   def match?(item)
-    @selectors.any? do |selector|
-      next if selector.nil?
-      return selector.match?(item) 
+    @conditions.any? do |condition|
+      condition.match?(item) 
     end
   end
 end`,
 
+  GiftCardSelector: `
+class GiftCardSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :not
+  end
+
+  def match?(line_item)
+    @invert ^ line_item.variant.product.gift_card?
+  end
+end`,
+
+  SaleItemSelector: `
+class SaleItemSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :is
+  end
+
+  def match?(line_item)
+    @invert ^ (line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price)
+  end
+end`,
+
+  ReducedItemSelector: `
+class ReducedItemSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :not
+  end
+
+  def match?(line_item)
+    @invert ^ line_item.discounted?
+  end
+end`,
+
   CustomerEmailQualifier: `
-class CustomerEmailQualifier
+class CustomerEmailQualifier < Qualifier
   def initialize(match_type, match_condition, emails)
     @invert = match_type == :does_not
     @match_condition = match_condition == :undefined ? :match : match_condition
@@ -40,24 +72,14 @@ class CustomerEmailQualifier
     case @match_condition
       when :match
         return @invert ^ @emails.include?(customer_email)
-      when :contains
-        return @invert ^ @emails.any? do |partial|
-          customer_email.include?(partial)
-        end
-      when :starts_with
-        return @invert ^ @emails.any? do |partial|
-          customer_email.start_with?(partial)
-        end
-      when :ends_with
-        return @invert ^ @emails.any? do |partial|
-        customer_email.end_with?(partial)
-      end
+      else
+        return @invert ^ partial_match(@match_condition, customer_email, @emails)
     end
   end
 end`,
 
   CustomerTagQualifier: `
-class CustomerTagQualifier
+class CustomerTagQualifier < Qualifier
   def initialize(match_type, match_condition, tags)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -70,30 +92,14 @@ class CustomerTagQualifier
     case @match_condition
       when :match
         return @invert ^ ((@tags & customer_tags).length > 0)
-      when :contains
-        return @invert ^ @tags.any? do |partial_tag|
-          customer_tags.any? do |customer_tag|
-            customer_tag.include?(partial_tag)
-          end
-        end
-      when :starts_with
-        return @invert ^ @tags.any? do |partial_tag|
-          customer_tags.any? do |customer_tag|
-            customer_tag.start_with?(partial_tag)
-          end
-        end
-      when :ends_with
-        return @invert ^ @tags.any? do |partial_tag|
-          customer_tags.any? do |customer_tag|
-            customer_tag.end_with?(partial_tag)
-          end
-        end
+      else
+        return @invert ^ partial_match(@match_condition, customer_tags, @tags)
     end
   end
 end`,
 
   CustomerOrderCountQualifier: `
-class CustomerOrderCountQualifier
+class CustomerOrderCountQualifier < Qualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type
     @amount = amount
@@ -102,23 +108,12 @@ class CustomerOrderCountQualifier
   def match?(cart)
     return false if cart.customer.nil?
     total = cart.customer.orders_count
-    case @comparison_type
-      when :greater_than
-        return total > @amount
-      when :greater_than_or_equal
-        return total >= @amount
-      when :less_than
-        return total < @amount
-      when :less_than_or_equal
-        return total <= @amount
-      else
-        raise "Invalid comparison type"
-    end
+    
   end
 end`,
 
   CustomerTotalSpentQualifier: `
-class CustomerTotalSpentQualifier
+class CustomerTotalSpentQualifier < Qualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type
     @amount = Money.new(cents: amount * 100)
@@ -127,23 +122,12 @@ class CustomerTotalSpentQualifier
   def match?(cart)
     return false if cart.customer.nil?
     total = cart.customer.total_spent
-    case @comparison_type
-      when :greater_than
-        return total > @amount
-      when :greater_than_or_equal
-        return total >= @amount
-      when :less_than
-        return total < @amount
-      when :less_than_or_equal
-        return total <= @amount
-      else
-        raise "Invalid comparison type"
-    end
+    compare_amounts(total, @comparison_type, @amount)
   end
 end`,
 
   CustomerAcceptsMarketingQualifier: `
-class CustomerAcceptsMarketingQualifier
+class CustomerAcceptsMarketingQualifier < Qualifier
   def initialize(match_type)
     @invert = match_type == :does_not
   end
@@ -154,8 +138,8 @@ class CustomerAcceptsMarketingQualifier
   end
 end`,
 
-  HasCode: `
-class HasCode
+  CodeQualifier: `
+class CodeQualifier < Qualifier
   def initialize(match_type, match_condition, codes)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -168,24 +152,14 @@ class HasCode
     case @match_condition
       when :match
         return @invert ^ @codes.include?(code)
-      when :contains
-        return @invert ^ @codes.any? do |partial_code|
-          code.include?(partial_code)
-        end
-      when :starts_with
-        return @invert ^ @codes.any? do |partial_code|
-          code.start_with?(partial_code)
-        end
-      when :ends_with
-        return @invert ^ @codes.any? do |partial_code|
-          code.end_with?(partial_code)
-        end
+      else
+        return @invert ^ partial_match(@match_condition, code, @codes)
     end
   end
 end`,
 
   ProductIdSelector: `
-class ProductIdSelector
+class ProductIdSelector < Selector
   def initialize(match_type, product_ids)
     @invert = match_type == :not_one;
     @product_ids = product_ids.map { |id| id.to_i }
@@ -196,24 +170,24 @@ class ProductIdSelector
   end
 end`,
 
-  CountryAndProvinceSelector: `
-class CountryAndProvinceSelector
+  CountryAndProvinceQualifier: `
+class CountryAndProvinceQualifier < Qualifier
   def initialize(match_type, country_map)
     @invert = match_type == :not_one
     @country_map = country_map
   end
 
   def match?(cart)
-    return false if cart.shipping_address.nil?
+    return if cart.shipping_address.nil?
     country_code = cart.shipping_address.country_code.upcase
+    return @invert unless @country_map.key?(country_code) && cart.shipping_address.province_code
     province_code = cart.shipping_address.province_code.upcase
-    return @invert unless @country_map.key?(country_code)
     @invert ^ @country_map[country_code].include?(province_code)
   end
 end`,
 
-  CountryCodeSelector: `
-class CountryCodeSelector
+  CountryCodeQualifier: `
+class CountryCodeQualifier < Qualifier
   def initialize(match_type, country_codes)
     @invert = match_type == :not_one;
     @country_codes = country_codes.map(&:upcase)
@@ -227,7 +201,7 @@ class CountryCodeSelector
 end`,
 
   ProductTypeSelector: `
-class ProductTypeSelector
+class ProductTypeSelector < Selector
   def initialize(match_type, product_types)
     @invert = match_type == :not_one
     @product_types = product_types.map(&:downcase)
@@ -239,7 +213,7 @@ class ProductTypeSelector
 end`,
 
   ProductVendorSelector: `
-  class ProductVendorSelector
+class ProductVendorSelector < Selector
   def initialize(match_type, vendors)
     @invert = match_type != :is_one
     @vendors = vendors.map(&:downcase)
@@ -251,7 +225,7 @@ end`,
 end`,
 
   VariantSkuSelector: `
-class VariantSkuSelector
+class VariantSkuSelector < Selector
   def initialize(match_type, match_condition, skus)
     @invert = match_type == :does_not
     @match_condition = match_condition == :undefined ? :match : match_condition
@@ -263,30 +237,14 @@ class VariantSkuSelector
     case @match_condition
       when :match
         return @invert ^ ((@skus & variant_skus).length > 0)
-      when :contains
-        return @invert ^ @skus.any? do |required_sku|
-          variant_skus.any? do |sku|
-            sku.include?(required_sku)
-          end
-        end
-      when :starts_with
-        return @invert ^ @skus.any? do |required_sku|
-          variant_skus.any? do |sku|
-            sku.start_with?(required_sku)
-          end
-        end
-      when :ends_with
-        return @invert ^ @skus.any? do |required_sku|
-          variant_skus.any? do |sku|
-            sku.end_with?(required_sku)
-          end
-        end
+      else
+        return @invert ^ partial_match(@match_condition, variant_skus, @skus)
     end
   end
 end`,
 
   VariantIdSelector: `
-class VariantIdSelector
+class VariantIdSelector < Selector
   def initialize(match_type, variant_ids)
     @invert = match_type == :not_one
     @variant_ids = variant_ids.map { |id| id.to_i }
@@ -298,7 +256,7 @@ class VariantIdSelector
 end`,
 
   ProductTagSelector: `
-class ProductTagSelector
+class ProductTagSelector < Selector
   def initialize(match_type, match_condition, tags)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -310,30 +268,14 @@ class ProductTagSelector
     case @match_condition
       when :match
         return @invert ^ ((@tags & product_tags).length > 0)
-      when :contains
-        return @invert ^ @tags.any? do |required_tag|
-          product_tags.any? do |product_tag|
-            product_tag.include?(required_tag)
-          end
-        end
-      when :starts_with
-        return @invert ^ @tags.any? do |required_tag|
-          product_tags.any? do |product_tag|
-            product_tag.start_with?(required_tag)
-          end
-        end
-      when :ends_with
-        return @invert ^ @tags.any? do |required_tag|
-          product_tags.any? do |product_tag|
-            product_tag.end_with?(required_tag)
-          end
-        end
+      else
+        return @invert ^ partial_match(@match_condition, product_tags, @tags)
     end
   end
 end`,
 
   LineItemPropertiesSelector: `
-class LineItemPropertiesSelector
+class LineItemPropertiesSelector < Selector
   def initialize(target_properties)
     @target_properties = target_properties
   end
@@ -342,13 +284,13 @@ class LineItemPropertiesSelector
     line_item_props = line_item.properties
     @target_properties.all? do |key, value|
       next unless line_item_props.has_key?(key)
-      next true if line_item_props[key].downcase == value.downcase
+      true if line_item_props[key].downcase == value.downcase
     end
   end
 end`,
 
   CartAmountQualifier: `
-class CartAmountQualifier
+class CartAmountQualifier < Qualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type
     @amount = Money.new(cents: amount * 100)
@@ -356,23 +298,116 @@ class CartAmountQualifier
 
   def match?(cart)
     total = cart.subtotal_price
-    case @comparison_type
-      when :greater_than
-        return total > @amount
-      when :greater_than_or_equal
-        return total >= @amount
-      when :less_than
-        return total < @amount
-      when :less_than_or_equal
-        return total <= @amount
-      else
-        raise "Invalid comparison type"
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
+  TotalWeightQualifier: `
+class TotalWeightQualifier < Qualifier
+  def initialize(comparison_type, amount, units)
+    @comparison_type = comparison_type
+    @amount = amount
+    @units = units == :undefined ? :g : units
+  end
+  
+  def g_to_lb(grams)
+    grams * 0.00220462
+  end
+  
+  def g_to_oz(grams)
+    grams * 0.035274
+  end
+  
+  def g_to_kg(grams)
+    grams * 0.001
+  end
+
+  def match?(cart)
+    cart_weight = cart.total_weight
+    case @units
+      when :lb
+        cart_weight = g_to_lb(cart_weight)
+      when :kg
+        cart_weight = g_to_kg(cart_weight)
+      when :oz
+        cart_weight = g_to_oz(cart_weight)
     end
+
+    compare_amounts(total, @comparison_type, @amount)
   end
 end`
 };
 
-const customer_qualifiers = [
+const requiredClasses = `\
+class Campaign
+  def initialize(condition, *qualifiers)
+    @condition = condition == :undefined ? :all? : (condition.to_s + '?').to_sym
+    @qualifiers = qualifiers.compact
+  end
+  
+  def qualifies?(cart)
+    return true if @qualifiers.empty?
+    @qualifiers.send(@condition) do |qualifier|
+      if qualifier.is_a?(Selector)
+        raise "Missing line item match type" if @li_match_type.nil?
+        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }
+      else
+        qualifier.match?(cart)
+      end
+    end
+  end
+end
+
+class Qualifier
+  def partial_match(match_type, item_info, possible_matches)
+    match_type = (match_type.to_s + '?').to_sym
+    if item_info.kind_of?(Array)
+      possible_matches.any? do |possibility|
+        item_info.any? do |search|
+          search.send(match_type, possibility)
+        end
+      end
+    else
+      possible_matches.any? do |possibility|
+        item_info.send(match_type, possibility)
+      end
+    end
+  end
+
+  def compare_amounts(compare, comparison_type, compare_to)
+    case @comparison_type
+      when :greater_than
+        return compare > compare_to
+      when :greater_than_or_equal
+        return compare >= compare_to
+      when :less_than
+        return compare < compare_to
+      when :less_than_or_equal
+        return compare <= compare_to
+      else
+        raise "Invalid comparison type"
+    end
+  end
+end
+
+class Selector
+  def partial_match(match_type, item_info, possible_matches)
+    match_type = (match_type.to_s + '?').to_sym
+    if item_info.kind_of?(Array)
+      possible_matches.any? do |possibility|
+        item_info.any? do |search|
+          search.send(match_type, possibility)
+        end
+      end
+    else
+      possible_matches.any? do |possibility|
+        item_info.send(match_type, possibility)
+      end
+    end
+  end
+end`;
+
+const customerQualifiers = [
   {
     value: "none",
     label: "None",
@@ -406,11 +441,11 @@ const customer_qualifiers = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
@@ -453,11 +488,11 @@ const customer_qualifiers = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
@@ -561,7 +596,7 @@ const customer_qualifiers = [
   }
 ];
 
-const cart_qualifiers = [
+const cartQualifiers = [
   {
     value: "none",
     label: "None",
@@ -601,7 +636,62 @@ const cart_qualifiers = [
     }
   },
   {
-    value: "HasCode",
+    value: "TotalWeightQualifier",
+    label: "Cart Total Weight",
+    description: "Qualifies cart based on total weight of products.",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Weight to compare to"
+      },
+      units: {
+        type: "select",
+        description: "Units for weight",
+        options: [
+          {
+            value: "g",
+            label: "Grams (g)"
+          },
+          {
+            value: "kg",
+            label: "Kilograms (kg)"
+          },
+          {
+            value: "oz",
+            label: "Ounces (oz)"
+          },
+          {
+            value: "lb",
+            label: "Pounds (lb)"
+          },
+        ]
+      }
+    }
+  },
+  {
+    value: "CodeQualifier",
     label: "Cart Has Discount Code",
     description: "Checks to see if the discount code entered matches conditions",
     inputs: {
@@ -628,11 +718,11 @@ const cart_qualifiers = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
@@ -648,8 +738,8 @@ const cart_qualifiers = [
     }
   },
   {
-    value: "CountryAndProvinceSelector",
-    label: "Shipping Address - Country/Province Selector",
+    value: "CountryAndProvinceQualifier",
+    label: "Shipping Address - Country/Province Qualifier",
     description: "Qualifies the cart based on specific country and province codes (Two letters)",
     newLineEachInput: true,
     inputs: {
@@ -676,8 +766,8 @@ const cart_qualifiers = [
     }
   },
   {
-    value: "CountryCodeSelector",
-    label: "Shipping Address - Country Code Selector",
+    value: "CountryCodeQualifier",
+    label: "Shipping Address - Country Code Qualifier",
     description: "Qualifies the cart based on the country code of the shipping addresss (Two letters)",
     inputs: {
       match_type: {
@@ -702,7 +792,7 @@ const cart_qualifiers = [
   }
 ];
 
-const line_item_qualifiers = [
+const lineItemSelectors = [
   {
     value: "none",
     label: "None",
@@ -811,11 +901,11 @@ const line_item_qualifiers = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
@@ -858,11 +948,11 @@ const line_item_qualifiers = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
@@ -914,12 +1004,76 @@ const line_item_qualifiers = [
         outputFormat: '"{text}" => "{text}"'
       }
     }
+  },
+  {
+    value: "GiftCardSelector",
+    label: "Gift Card Selector",
+    description: "Selects line items if they are/are not a Gift Card",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how gift cards are matched",
+        options: [
+          {
+            value: "is",
+            label: "Is a Gift Card"
+          },
+          {
+            value: "not",
+            label: "Is not a Gift Card"
+          }
+        ]
+      }
+    }
+  },
+  {
+    value: "SaleItemSelector",
+    label: "Sale Item Selector",
+    description: "Selects line items if they are/are not on sale",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how sale items are matched",
+        options: [
+          {
+            value: "is",
+            label: "Is on sale"
+          },
+          {
+            value: "not",
+            label: "Is not on sale"
+          }
+        ]
+      }
+    }
+  },
+  {
+    value: "ReducedItemSelector",
+    label: "Discounted Item Selector (discount by scripts)",
+    description: "Selects line items if they have/have not been discounted by a script",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how discounted items are matched",
+        options: [
+          {
+            value: "is",
+            label: "Has been discounted"
+          },
+          {
+            value: "not",
+            label: "Has not been discounted"
+          }
+        ]
+      }
+    }
   }
 ]
 
 export default {
   classes,
-  customer_qualifiers,
-  cart_qualifiers,
-  line_item_qualifiers
+  requiredClasses,
+  customerQualifiers,
+  cartQualifiers,
+  lineItemSelectors
 }

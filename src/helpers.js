@@ -48,11 +48,12 @@
 
     for (let index = 0, length = keys.length; index < length; index++) {
       const key = keys[index];
-      if (!Array.isArray(inputs[key])) { break; }
-      const foundInput = inputs[key].filter((input) => input.value === campaignName);
-      if (foundInput.length > 0) {
-        targetInput = foundInput[0];
-        break;
+      if (Array.isArray(inputs[key])) {
+        const foundInput = inputs[key].filter((input) => input.value === campaignName);
+        if (foundInput.length > 0) {
+          targetInput = foundInput[0];
+          break;
+        }
       }
     }
 
@@ -128,6 +129,23 @@
     }
   }
 
+  // Takes a file version and a minimum version and returns if the file version is later than the minimum version
+  function meetsMinimumVersion(version, minimumVersion) {
+    const [vmajor, vminor, vpatch] = version.split('.').map((num) => +num );
+    const [mvmajor, mvminor, mvpatch] = minimumVersion.split('.').map((num) => +num );
+    // Deal with major version
+    if (vmajor < mvmajor) { return false; }
+    if (vmajor > mvmajor) { return true; }
+    // Deal with minor version
+    if (vminor < mvminor) { return false; }
+    if (vminor > mvminor) { return true; }
+    // Deal with patch version
+    if (vpatch < mvpatch) { return false; }
+    if (vpatch > mvpatch) { return true; }
+    // If they're all equal
+    return true;
+  }
+
 export {
   capitalize,
   splitAndCapitalize,
@@ -135,5 +153,6 @@ export {
   isCampaignSelect,
   getInputType,
   getObjectFormats,
-  formatObject
+  formatObject,
+  meetsMinimumVersion
 }

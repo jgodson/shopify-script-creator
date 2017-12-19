@@ -12,6 +12,7 @@ import PaymentScript from './scripts/payment';
 import Common from './scripts/common';
 
 import Versions from './versions';
+import { meetsMinimumVersion } from './helpers';
 
 export default class App extends Component {
   constructor(props) {
@@ -33,7 +34,7 @@ export default class App extends Component {
 
     // Versions used for saving script files to detect imcompatabilities
     this.version = Versions.currentVersion;
-    this.incompatibleVersions = Versions.incompatibleVersions;
+    this.minimumVersion = Versions.minimumVersion;
 
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
@@ -230,9 +231,8 @@ export default class App extends Component {
     campaigns = campaigns.substring(campaigns.length -1, 0);
 
     // Generate the classes code
-    let output = generateClassCode(allClasses, classesUsed);
-    // Remove first newline 
-    output = output.substring(1);
+    let output = Common.requiredClasses + '\n';
+    output += generateClassCode(allClasses, classesUsed);
 
     // Replace the default code with the campaign initialization code
     output += defaultCode.replace('|', campaigns);
@@ -379,11 +379,11 @@ ${INDENT[this.IL]})`;
       results = file;
       if (results.indexOf(validFileSignature) > -1) {
         const fileVersion = results.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
-        if (this.incompatibleVersions.indexOf(fileVersion) > -1) {
-          alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
-        } else {
+        if (meetsMinimumVersion(fileVersion, this.minimumVersion)) {
           const splitOn = /-V\d+\.\d+\.\d+-/;
           return JSON.parse(results.split(splitOn)[1]);
+        } else {
+          alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
         }
       } else {
         alert('File does not appear to be a valid script creator file');

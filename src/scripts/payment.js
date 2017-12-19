@@ -1,15 +1,15 @@
 import Common from './common';
 
 const classes = {
-  AllSelector: `
-  class AllSelector
+  AllGatewaysSelector: `
+  class AllGatewaysSelector
     def match?(gateway)
       return true
     end
   end`,
 
   GatewayNameSelector: `
-class GatewayNameSelector
+class GatewayNameSelector < Selector
   def initialize(match_type, match_condition, names)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -21,40 +21,22 @@ class GatewayNameSelector
     case @match_condition
       when :match
         return @invert ^ @names.include?(name)
-      when :contains
-        return @invert ^ @names.any? do |partial_name|
-          name.include?(partial_name)
-        end
-      when :starts_with
-        return @invert ^ @names.any? do |partial_name|
-          name.start_with?(partial_name)
-        end
-      when :ends_with
-        return @invert ^ @names.any? do |partial_name|
-          name.end_with?(partial_name)
-        end
+      else
+        return @invert ^ partial_match(@match_condition, name, @names)
     end
   end
 end`,
 
   ConditionallyRemoveGateway: `
-class ConditionallyRemoveGateway
-  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, gateway_selector)
-    @customer_qualifier = customer_qualifier
-    @cart_qualifier = cart_qualifier
-    @line_item_qualifier = line_item_qualifier
+class ConditionallyRemoveGateway < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :undefined ? :any? : (li_match_type.to_s + '?').to_sym
     @gateway_selector = gateway_selector
   end
 
   def run(gateways, cart)
-    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
-    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
-    return unless @line_item_qualifier.nil? || cart.line_items.any? do |item|
-      @line_item_qualifier.match?(item)
-    end
-    gateways.delete_if do |gateway|
-      @gateway_selector.match?(gateway)
-    end
+    gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } unless qualifies?(cart)
   end
 end`
 };
@@ -71,15 +53,15 @@ end
 Output.payment_gateways = Input.payment_gateways`;
 
 const CUSTOMER_QUALIFIERS = [
-  ...Common.customer_qualifiers
+  ...Common.customerQualifiers
 ];
 
 const CART_QUALIFIERS = [
-  ...Common.cart_qualifiers
+  ...Common.cartQualifiers
 ];
 
 const LINE_ITEM_QUALIFIERS = [
-  ...Common.line_item_qualifiers
+  ...Common.lineItemSelectors
 ];
 
 const GATEWAY_SELECTORS = [
@@ -89,7 +71,7 @@ const GATEWAY_SELECTORS = [
     description: "No effects"
   },
   {
-    value: "AllSelector",
+    value: "AllGatewaysSelector",
     label: "All",
     description: "Selects all gateways"
   },
@@ -121,15 +103,15 @@ const GATEWAY_SELECTORS = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -214,8 +196,36 @@ const campaigns = [
     label: "Conditionally Remove Gateways",
     description: "Removes any gateways that the conditions match",
     inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Remove if all qualify"
+          },
+          {
+            value: "any",
+            label: "Remove if any qualify"
+          }
+        ]
+      },
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items match"
+          }
+        ]
+      },
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       gateway_to_remove_selector: [...GATEWAY_SELECTORS]
     }

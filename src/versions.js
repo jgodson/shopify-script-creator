@@ -1,4 +1,4 @@
 export default {
-  currentVersion: "0.0.13",
-  incompatibleVersions: ["0.0.1", "0.0.2"]
+  currentVersion: "0.1.0",
+  minimumVersion: "0.1.0"
 }

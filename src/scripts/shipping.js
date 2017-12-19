@@ -1,15 +1,15 @@
 import Common from './common';
 
 const classes = {
-  AllSelector: `
-class AllSelector
+  AllRatesSelector: `
+class AllRatesSelector
   def match?(rate)
     return true
   end
 end`,
 
   RateNameSelector: `
-class RateNameSelector
+class RateNameSelector < Selector
   def initialize(match_type, match_condition, names)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -21,24 +21,14 @@ class RateNameSelector
     case @match_condition
       when :match
         return @invert ^ @names.include?(name)
-      when :contains
-        return @invert ^ @names.any? do |partial_name|
-          name.include?(partial_name)
-        end
-      when :starts_with
-        return @invert ^ @names.any? do |partial_name|
-          name.start_with?(partial_name)
-        end
-      when :ends_with
-        return @invert ^ @names.any? do |partial_name|
-          name.end_with?(partial_name)
-        end
+      else
+        return @invert ^ partial_match(@match_condition, name, @names)
     end
   end
 end`,
 
   RateCodeSelector: `
-class RateCodeSelector
+class RateCodeSelector < Selector
   def initialize(match_type, match_condition, codes)
     @match_condition = match_condition == :undefined ? :match : match_condition
     @invert = match_type == :does_not
@@ -50,24 +40,14 @@ class RateCodeSelector
     case @match_condition
       when :match
         return @invert ^ @codes.include?(code)
-      when :contains
-        return @invert ^ @codes.any? do |partial_code|
-          code.include?(partial_code)
-        end
-      when :starts_with
-        return @invert ^ @codes.any? do |partial_code|
-          code.start_with?(partial_code)
-        end
-      when :ends_with
-        return @invert ^ @codes.any? do |partial_code|
-          code.end_with?(partial_code)
-        end
+      else
+        return @invert ^ partial_match(@match_condition, code, @codes)
     end
   end
 end`,
 
   RateSourceSelector: `
-class RateSourceSelector
+class RateSourceSelector < Selector
   def initialize(match_type, sources)
     @invert = match_type == :not_one;
     @sources = sources.map(&:downcase)
@@ -104,7 +84,9 @@ class FixedDiscount
   end
 end`,
 
-// TODO: Not sure if this is feasable or not (Array of objects). Logix may be too complex
+// TODO: Not sure if this is feasable or not (object is too big - how would I format this?)
+// [exactly : 150 Elgin St, 150 Elgin Street : 8th floor : 123-456-7890 : Ottawa : Ontario : CA : K2P 1L4]- but every input would be required?
+// I think feasable if I set up a UI to enter instead of the text box and do nil if that one isn't filled in
   AddressQualifier: `
 # ----- Qualifying Addresses ----- #
 # Example: {
@@ -166,19 +148,17 @@ class AddressQualifier
 end`,
 
   ShippingDiscount: `
-class ShippingDiscount
-  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector, discount)
-    @customer_qualifier = customer_qualifier
-    @cart_qualifier = cart_qualifier
+class ShippingDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, discount)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :undefined ? :any? : (li_match_type.to_s + '?').to_sym
     @rate_selector = rate_selector
     @discount = discount
   end
   
   def run(rates, cart)
     return unless @discount
-    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)
-    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)
-    return unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }
+    return unless qualifies?(cart)
     rates.each do |rate|
       next unless @rate_selector.nil? || @rate_selector.match?(rate)
       @discount.apply(rate)
@@ -186,24 +166,16 @@ class ShippingDiscount
   end
 end`,
 
-  HideRateUnlessConditionsMet: `
-class HideRateUnlessConditionsMet
-  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector)
-    @customer_qualifier = customer_qualifier
-    @cart_qualifier = cart_qualifier
-    @line_item_qualifier = line_item_qualifier
+  ConditionallyHideRates: `
+class ConditionallyHideRates < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :undefined ? :any? : (li_match_type.to_s + '?').to_sym
     @rate_selector = rate_selector
   end
 
   def run(rates, cart)
-    met = @customer_qualifier.nil? || @customer_qualifier.match?(cart)
-    met = met ? @cart_qualifier.nil? || @cart_qualifier.match?(cart) : false
-    met = met ? @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) } : false
-    unless met
-      rates.delete_if do |rate|
-        @rate_selector.match?(rate)
-      end
-    end
+    rates.delete_if { |rate| @rate_selector.match?(rate) } if qualifies?(cart)
   end
 end`
 };
@@ -220,15 +192,15 @@ end
 Output.shipping_rates = Input.shipping_rates`;
 
 const CUSTOMER_QUALIFIERS = [
-  ...Common.customer_qualifiers
+  ...Common.customerQualifiers
 ];
 
 const CART_QUALIFIERS = [
-  ...Common.cart_qualifiers
+  ...Common.cartQualifiers
 ];
 
 const LINE_ITEM_QUALIFIERS = [
-  ...Common.line_item_qualifiers
+  ...Common.lineItemSelectors
 ];
 
 const RATE_SELECTORS = [
@@ -238,7 +210,7 @@ const RATE_SELECTORS = [
     description: "No rates are selected"
   },
   {
-    value: "AllSelector",
+    value: "AllRatesSelector",
     label: "All",
     description: "All rates are selected"
   },
@@ -270,15 +242,15 @@ const RATE_SELECTORS = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -317,15 +289,15 @@ const RATE_SELECTORS = [
             label: "Match one of"
           },
           {
-            value: "contains",
+            value: "include",
             label: "Contain one of"
           },
           {
-            value: "starts_with",
+            value: "start_with",
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -495,20 +467,76 @@ const campaigns = [
     label: "Shipping Discount",
     description: "Specify conditions to apply a shipping discount to selected rates",
     inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Discount if all qualify"
+          },
+          {
+            value: "any",
+            label: "Discount if any qualify"
+          }
+        ]
+      },
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items match"
+          }
+        ]
+      },
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       rate_to_discount_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR],
       discount_to_apply: [...DISCOUNTS]
     }
   },
   {
-    value: "HideRateUnlessConditionsMet",
-    label: "Hide Rates If Not Qualified",
-    description: "Selected shipping rates will be hidden unless conditions are met",
+    value: "ConditionallyHideRates",
+    label: "Conditionally Hide Rates",
+    description: "Selected shipping rates will be hidden based on conditions",
     inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Hide if all qualify"
+          },
+          {
+            value: "any",
+            label: "Hide if any qualify"
+          }
+        ]
+      },
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items match"
+          }
+        ]
+      },
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       rate_to_hide_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR]
     }
