@@ -11,7 +11,7 @@ end`,
   RateNameSelector: `
 class RateNameSelector < Selector
   def initialize(match_type, match_condition, names)
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @invert = match_type == :does_not
     @names = names.map(&:downcase)
   end
@@ -30,7 +30,7 @@ end`,
   RateCodeSelector: `
 class RateCodeSelector < Selector
   def initialize(match_type, match_condition, codes)
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @invert = match_type == :does_not
     @codes = codes.map(&:downcase)
   end
@@ -151,7 +151,7 @@ end`,
 class ShippingDiscount < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, discount)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :undefined ? :any? : (li_match_type.to_s + '?').to_sym
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
     @rate_selector = rate_selector
     @discount = discount
   end
@@ -170,7 +170,7 @@ end`,
 class ConditionallyHideRates < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :undefined ? :any? : (li_match_type.to_s + '?').to_sym
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
     @rate_selector = rate_selector
   end
 

@@ -294,7 +294,6 @@ export default class Step2Form extends Component {
               <Select
                 label={input.label}
                 options={input.options}
-                placeholder="Pick one"
                 name={input.name}
                 value={this.state.inputs[input.type][input.name]}
                 onChange={(val) => this.handleInputChange(val, input.type, input.name)}
@@ -314,7 +313,7 @@ export default class Step2Form extends Component {
               name={input.name}
               multiline={3}
               helpText={input.description}
-              value={this.state.inputs[input.type][input.name] || input.value}
+              value={this.state.inputs[input.type][input.name]}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
           );
@@ -330,7 +329,7 @@ export default class Step2Form extends Component {
               name={input.name}
               multiline={3}
               helpText={input.description}
-              value={this.state.inputs[input.type][input.name] || input.value}
+              value={this.state.inputs[input.type][input.name]}
               onChange={(val) => this.handleInputChange(val, input.type, input.name)}
             />
           );
@@ -341,7 +340,7 @@ export default class Step2Form extends Component {
       },
       campaignSelect: {
         generate: (input) => {
-          let value = this.state.inputs[input.type][input.name];
+          let value = this.state.inputs[input.type][input.name] || 'none';
           if (value && typeof value !== 'string') {
             value = value.name;
           }
@@ -365,7 +364,6 @@ export default class Step2Form extends Component {
               <div className="select-wrapper">
                 <Select
                   options={input.options}
-                  placeholder="Pick one"
                   name={input.name}
                   value={value}
                   onChange={(val) => this.handleInputChange(val, input.type, input.name)}
@@ -441,13 +439,13 @@ export default class Step2Form extends Component {
       case 'text':
         return value ? `"${value}"` : '""';
       case 'select':
-        return `:${value}`;
+        return `:${value || 'default'}`;
       case 'boolean':
         return value ? true : false;
       case 'number':
-        return parseInt(value) || 0;
+        return parseInt(value < 0 ? -value : value) || 0;
       case 'object':
-        if (!value) return "{}";
+        if (!value) { return "{}"; }
         try {
           const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
           const output = formatObject('output', value, inputFormat, outputFormat);
@@ -459,7 +457,7 @@ export default class Step2Form extends Component {
           throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
         }
       case 'objectArray':
-        if (!value) return "[]";
+        if (!value) { return "[]"; }
         try {
           const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
           const output = formatObject('output', value, inputFormat, outputFormat);
@@ -471,7 +469,7 @@ export default class Step2Form extends Component {
           throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
         }
       case 'campaignSelect':
-        return value ? value : 'none';
+        return value || 'none';
       default:
         return value;
     }

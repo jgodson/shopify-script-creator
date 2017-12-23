@@ -174,7 +174,7 @@ end`,
 class ConditionalDiscountCodeRejection < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :undefined ? :any? : (li_match_type.to_s + '?').to_sym
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
     @message = message == "" ? "Discount codes are disabled" : message
   end
 
@@ -188,7 +188,7 @@ end`,
 class QuantityLimit < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)
     super(condition, customer_qualifier, cart_qualifier)
-    @limit_by = limit_by == :undefined ? :product : limit_by
+    @limit_by = limit_by == :default ? :product : limit_by
     @line_item_selector = line_item_selector
     @per_item_limit = limit
   end
@@ -248,7 +248,7 @@ class TieredDiscount < Campaign
     super(condition, customer_qualifier, cart_qualifier)
     @item_selector = item_selector
     @discount_type = discount_type
-    @tier_type = tier_type == :undefined ? :customer_tag : tier_type
+    @tier_type = tier_type == :default ? :customer_tag : tier_type
     @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }
   end
   

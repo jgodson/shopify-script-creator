@@ -62,7 +62,7 @@ end`,
 class CustomerEmailQualifier < Qualifier
   def initialize(match_type, match_condition, emails)
     @invert = match_type == :does_not
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @emails = emails.map(&:downcase)
   end
 
@@ -81,7 +81,7 @@ end`,
   CustomerTagQualifier: `
 class CustomerTagQualifier < Qualifier
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end
@@ -141,7 +141,7 @@ end`,
   CodeQualifier: `
 class CodeQualifier < Qualifier
   def initialize(match_type, match_condition, codes)
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @invert = match_type == :does_not
     @codes = codes.map(&:downcase)
   end
@@ -228,7 +228,7 @@ end`,
 class VariantSkuSelector < Selector
   def initialize(match_type, match_condition, skus)
     @invert = match_type == :does_not
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @skus = skus.map(&:downcase)
   end
 
@@ -258,7 +258,7 @@ end`,
   ProductTagSelector: `
 class ProductTagSelector < Selector
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :undefined ? :match : match_condition
+    @match_condition = match_condition == :default ? :match : match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end
@@ -307,7 +307,7 @@ class TotalWeightQualifier < Qualifier
   def initialize(comparison_type, amount, units)
     @comparison_type = comparison_type
     @amount = amount
-    @units = units == :undefined ? :g : units
+    @units = units == :default ? :g : units
   end
   
   def g_to_lb(grams)
@@ -341,7 +341,7 @@ end`
 const requiredClasses = `\
 class Campaign
   def initialize(condition, *qualifiers)
-    @condition = condition == :undefined ? :all? : (condition.to_s + '?').to_sym
+    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym
     @qualifiers = qualifiers.compact
   end
   
