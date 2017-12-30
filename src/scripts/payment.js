@@ -38,6 +38,33 @@ class ConditionallyRemoveGateway < Campaign
   def run(gateways, cart)
     gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } unless qualifies?(cart)
   end
+end`,
+
+  ReorderPaymentGateways: `
+class ReorderPaymentGateways < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, order_from, desired_order)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @reverse = order_from == :last_to_first
+    @desired_order = desired_order.map(&:downcase)
+  end
+
+  def run(gateways, cart)
+    return unless qualifies?(cart)
+    new_order = []
+    leftover_gateways = []
+    gateways.each { |gateway| new_order << gateway.name if @desired_order.include?(gateway.name.downcase) }
+    return if new_order.empty?
+    new_order = new_order.sort_by { |name| @desired_order.index(name.downcase) }
+    gateways.each { |gateway| leftover_gateways << gateway.name unless new_order.include?(gateway.name) }
+    if @reverse
+      new_order.reverse!
+      leftover_gateways.each { |name| new_order.unshift(name) }
+    else
+      leftover_gateways.each { |name| new_order << name }
+    end
+    gateways.sort_by! { |gateway| new_order.index(gateway.name) }
+  end
 end`
 };
 
@@ -228,6 +255,62 @@ const campaigns = [
       },
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       gateway_to_remove_selector: [...GATEWAY_SELECTORS]
+    }
+  },
+  {
+    value: "ReorderPaymentGateways",
+    label: "Reorder Gateways",
+    description: "Payment gateway order will be changed to the specified order",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Reorder if all qualify"
+          },
+          {
+            value: "any",
+            label: "Reorder if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items match"
+          }
+        ]
+      },
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      order_from: {
+        type: "select",
+        description: "Set how the gateways are ordered",
+        options: [
+          {
+            value: "first_to_last",
+            label: "Order from first to last"
+          },
+          {
+            value: "last_to_first",
+            "label": "Order from last to first"
+          }
+        ]
+      },
+      desired_order: {
+        type: "array",
+        description: "Gateways will appear in the order specified (use gateway names seperated by a comma). Only gateways specified will be reordered."
+      }
     }
   }
 ];

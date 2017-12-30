@@ -22,7 +22,7 @@ export default class App extends Component {
       scriptType: 'line_item',
       showForm: false,
       currentCampaign: null,
-      availableCampaigns: this.getCampagins('line_item'),
+      availableCampaigns: this.getCampaigns('line_item'),
       campaigns: [{name: "Create new campaign", skip: true}],
       currentId: 0,
       output: '',
@@ -45,7 +45,7 @@ export default class App extends Component {
     this.editCampaign = this.editCampaign.bind(this);
     this.removeCampaign = this.removeCampaign.bind(this);
     this.updateCurrentCampaign = this.updateCurrentCampaign.bind(this);
-    this.getCampagins = this.getCampagins.bind(this);
+    this.getCampaigns = this.getCampaigns.bind(this);
     this.getCampaignInfo = this.getCampaignInfo.bind(this);
     this.getCampaignById = this.getCampaignById.bind(this);
     this.readFile = this.readFile.bind(this);
@@ -70,7 +70,7 @@ export default class App extends Component {
 
     const newState = JSON.parse(JSON.stringify(this.defaultState));
     newState.scriptType = newType;
-    newState.availableCampaigns = this.getCampagins(newType);
+    newState.availableCampaigns = this.getCampaigns(newType);
     this.setState(newState);
   }
 
@@ -87,7 +87,7 @@ export default class App extends Component {
     }
   }
 
-  getCampagins(type) {
+  getCampaigns(type) {
     switch(type) {
       case 'line_item':
         return LineItemScript.campaigns;
@@ -223,16 +223,16 @@ export default class App extends Component {
     // Generate the campaign initialization code (also finds out what classes are used)
     let campaigns = this.state.campaigns.map((campaign) => {
       this.IL++;
-      const code = this.generateCode(campaign, classesUsed);
+      const code = this.generateCode(campaign, classesUsed, allClasses);
       this.IL--;
       return code;
     }).join(',\n');
     // remove the last `,` from the campaigns string (raises syntax error)
     campaigns = campaigns.substring(campaigns.length -1, 0);
 
-    // Generate the classes code
-    let output = Common.requiredClasses + '\n';
-    output += generateClassCode(allClasses, classesUsed);
+    let output = generateClassCode(allClasses, classesUsed);
+    // Remove first newline
+    output = output.substring(1);
 
     // Replace the default code with the campaign initialization code
     output += defaultCode.replace('|', campaigns);
@@ -254,7 +254,7 @@ export default class App extends Component {
     }
   }
 
-  generateCode(campaign, classesUsed) {
+  generateCode(campaign, classesUsed, allClasses) {
     if (campaign.skip) { return; }
 
     const INDENT = {
@@ -264,19 +264,19 @@ export default class App extends Component {
       4: '        '
     };
 
-    addUsedClass(campaign.name);
+    addUsedClass(campaign.name, allClasses);
     if (campaign.dependants) {
-      campaign.dependants.forEach((dependant) => addUsedClass(dependant));
+      campaign.dependants.forEach((dependant) => addUsedClass(dependant, allClasses));
     }
 
     const inputsCode = campaign.inputs.map((input, index) => {
       if (input.inputs) {
         this.IL++;
-        const code = this.generateCode(input, classesUsed);
+        const code = this.generateCode(input, classesUsed, allClasses);
         this.IL--;
         return code;
       } else if (typeof input === "object" && input.name !== "none") {
-        addUsedClass(input.name);
+        addUsedClass(input.name, allClasses);
         return `${INDENT[this.IL + 1]}${input.name}.new()`;
       } else if (typeof input === "object" && input.name === 'none') {
         return `${INDENT[this.IL + 1]}nil`;
@@ -290,7 +290,16 @@ ${INDENT[this.IL]}${campaign.name}.new(
 ${inputsCode}
 ${INDENT[this.IL]})`;
 
-    function addUsedClass(className) {
+    function addUsedClass(className, allClasses) {
+      // Grab what inherits from the class (if anything)
+      let inheritsFrom = allClasses[className].split('\n')[1];
+      if (inheritsFrom.indexOf('<') > -1) {
+        inheritsFrom = inheritsFrom.split('<')[1].trim();
+        if (classesUsed.indexOf(inheritsFrom) === -1) {
+          classesUsed.push(inheritsFrom);
+        }
+      }
+
       if (classesUsed.indexOf(className) === -1) {
         classesUsed.push(className);
       }
@@ -335,9 +344,14 @@ ${INDENT[this.IL]})`;
         // Google Analytics
         gtag('event', 'importAttempt');
 
-        this.readFile(evt.target, (loadedCampaigns) => {
-          if (loadedCampaigns && loadedCampaigns.length > 0) {
+        this.readFile(evt.target, (results) => {
+          if (results && results.campaigns.length > 0) {
             const newState = JSON.parse(JSON.stringify(this.defaultState));
+            if (results.type !== 'line_item') {
+              newState.scriptType = results.type;
+              newState.availableCampaigns = this.getCampaigns(results.type);
+            }
+            let loadedCampaigns = results.campaigns;
             loadedCampaigns.reverse().forEach((campaign) => {
               newState.campaigns.unshift(campaign);
             });
@@ -376,16 +390,17 @@ ${INDENT[this.IL]})`;
     const validFileSignature = 'ShopifyScriptCreatorFile';
     let results = null;
     if (file && file.length) {
-      results = file;
-      if (results.indexOf(validFileSignature) > -1) {
-        const fileVersion = results.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
+      try {
+        results = JSON.parse(file);
+        if (results.version.indexOf(validFileSignature) < 0) { throw Error; }
+        const fileVersion = results.version.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
         if (meetsMinimumVersion(fileVersion, this.minimumVersion)) {
-          const splitOn = /-V\d+\.\d+\.\d+-/;
-          return JSON.parse(results.split(splitOn)[1]);
+          if (!results.type || !results.campaigns) { throw Error; }
+          return results;
         } else {
           alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
         }
-      } else {
+      } catch (error) {
         alert('File does not appear to be a valid script creator file');
       }
     } else {
@@ -400,8 +415,12 @@ ${INDENT[this.IL]})`;
 
     const filename = `SSC-V${this.version}-script-${parseInt(Math.random() * 100000000)}.txt`;
     const campaigns = this.state.campaigns.filter((campaign) => !campaign.skip);
-    const data = `ShopifyScriptCreatorFile-V${this.version}-${JSON.stringify(campaigns)}`;
-    this.download(data, filename, 'text/plain');
+    const data = {
+      version: `ShopifyScriptCreatorFile-V${this.version}`,
+      type: this.state.scriptType,
+      campaigns: campaigns
+    };
+    this.download(JSON.stringify(data), filename, 'text/plain');
   }
 
   render() {

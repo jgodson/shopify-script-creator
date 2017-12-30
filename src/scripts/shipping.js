@@ -49,13 +49,28 @@ end`,
   RateSourceSelector: `
 class RateSourceSelector < Selector
   def initialize(match_type, sources)
-    @invert = match_type == :not_one;
+    @invert = match_type == :not_one
     @sources = sources.map(&:downcase)
   end
 
   def match?(shipping_rate)
     source = shipping_rate.source.downcase
     @invert ^ @sources.include?(source)
+  end
+end`,
+
+  ReducedRateSelector: `
+class ReducedRateSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :not
+  end
+  
+  def match?(rate)
+    return @invert if rate.instance_variable_get(:@adjustments).empty?
+    return @invert ^ rate.instance_variable_get(:@adjustments).any? do |adjustment|
+      next unless adjustment&.property == :price
+      adjustment.old_value.cents > adjustment.new_value.cents
+    end
   end
 end`,
 
@@ -109,6 +124,7 @@ class AddressQualifier
   end
   
   def match?(cart)
+  # TODO: ADD checks to make sure every field wanted exists
     return false if cart.shipping_address.nil?
     
     @addresses.any? do |accepted_address|
@@ -176,6 +192,50 @@ class ConditionallyHideRates < Campaign
 
   def run(rates, cart)
     rates.delete_if { |rate| @rate_selector.match?(rate) } if qualifies?(cart)
+  end
+end`,
+
+  ChangeRateName: `
+class ChangeRateName < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, new_name)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @rate_selector = rate_selector
+    @new_name = new_name
+  end
+
+  def run(rates, cart)
+    return unless qualifies?(cart) && @rate_selector
+    rates.each do|rate| 
+      rate.change_name(@new_name, {message: ""}) if @rate_selector.match?(rate)
+    end
+  end
+end`,
+
+  ReorderShippingRates: `
+class ReorderShippingRates < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, order_from, desired_order)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @reverse = order_from == :last_to_first
+    @desired_order = desired_order.map(&:downcase)
+  end
+
+  def run(rates, cart)
+    return unless qualifies?(cart)
+    new_rate_order = []
+    leftover_rates = []
+    rates.each { |rate| new_rate_order << rate.name if @desired_order.include?(rate.name.downcase) }
+    return if new_rate_order.empty?
+    new_rate_order = new_rate_order.sort_by { |name| @desired_order.index(name.downcase) }
+    rates.each { |rate| leftover_rates << rate.name unless new_rate_order.include?(rate.name) }
+    if @reverse
+      new_rate_order.reverse!
+      leftover_rates.each { |name| new_rate_order.unshift(name) }
+    else
+      leftover_rates.each { |name| new_rate_order << name }
+    end
+    rates.sort_by! { |rate| new_rate_order.index(rate.name) }
   end
 end`
 };
@@ -330,6 +390,27 @@ const RATE_SELECTORS = [
       rate_sources: {
         type: "array",
         description: "Seperate individual sources with a comma (,)"
+      }
+    }
+  },
+  {
+    value: "ReducedRateSelector",
+    label: "Rate Discounted",
+    description: "Matches shipping rates if they have/have not been discounted",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the rates are matched",
+        options: [
+          {
+            value: "is",
+            label: "Is discounted"
+          },
+          {
+            value: "not",
+            label: "Is not discounted"
+          }
+        ]
       }
     }
   }
@@ -539,6 +620,105 @@ const campaigns = [
       },
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       rate_to_hide_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR]
+    }
+  },
+  {
+    value: "ChangeRateName",
+    label: "Change Name",
+    description: "Selected shipping rate names will be changed",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Change name if all qualify"
+          },
+          {
+            value: "any",
+            label: "Change name if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items match"
+          }
+        ]
+      },
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      rate_to_change_selector: [...RATE_SELECTORS, RATE_AND_SELECTOR, RATE_OR_SELECTOR],
+      new_name: {
+        type: "text",
+        description: "Selected rates will use this name"
+      }
+    }
+  },
+  {
+    value: "ReorderShippingRates",
+    label: "Reorder Rates",
+    description: "Shipping rate order will be changed to the specified order",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Reorder if all qualify"
+          },
+          {
+            value: "any",
+            label: "Reorder if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items match"
+          }
+        ]
+      },
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      order_from: {
+        type: "select",
+        description: "Set how the rates are ordered",
+        options: [
+          {
+            value: "first_to_last",
+            label: "Order from first to last"
+          },
+          {
+            value: "last_to_first",
+            "label": "Order from last to first"
+          }
+        ]
+      },
+      desired_order: {
+        type: "array",
+        description: "Rates will appear in the order specified (use rate names seperated by a comma). Only rates specified will be reordered."
+      }
     }
   }
 ];
