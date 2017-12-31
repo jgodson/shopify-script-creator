@@ -59,7 +59,7 @@ class ReorderPaymentGateways < Campaign
     gateways.each { |gateway| leftover_gateways << gateway.name unless new_order.include?(gateway.name) }
     if @reverse
       new_order.reverse!
-      leftover_gateways.each { |name| new_order.unshift(name) }
+      leftover_gateways.reverse.each { |name| new_order.unshift(name) }
     else
       leftover_gateways.each { |name| new_order << name }
     end

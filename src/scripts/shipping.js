@@ -231,7 +231,7 @@ class ReorderShippingRates < Campaign
     rates.each { |rate| leftover_rates << rate.name unless new_rate_order.include?(rate.name) }
     if @reverse
       new_rate_order.reverse!
-      leftover_rates.each { |name| new_rate_order.unshift(name) }
+      leftover_rates.reverse.each { |name| new_rate_order.unshift(name) }
     else
       leftover_rates.each { |name| new_rate_order << name }
     end
