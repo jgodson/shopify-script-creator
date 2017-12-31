@@ -73,9 +73,9 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(229));
 __export(__webpack_require__(230));
-__export(__webpack_require__(122));
+__export(__webpack_require__(231));
+__export(__webpack_require__(123));
 //# sourceMappingURL=factory.js.map
 
 /***/ }),
@@ -88,17 +88,17 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(9));
-__export(__webpack_require__(291));
+__export(__webpack_require__(8));
 __export(__webpack_require__(292));
 __export(__webpack_require__(293));
-__export(__webpack_require__(308));
+__export(__webpack_require__(294));
 __export(__webpack_require__(309));
 __export(__webpack_require__(310));
 __export(__webpack_require__(311));
 __export(__webpack_require__(312));
 __export(__webpack_require__(313));
 __export(__webpack_require__(314));
+__export(__webpack_require__(315));
 //# sourceMappingURL=applicators.js.map
 
 /***/ }),
@@ -306,7 +306,7 @@ if (process.env.NODE_ENV === 'production') {
 /* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var freeGlobal = __webpack_require__(121);
+var freeGlobal = __webpack_require__(122);
 
 /** Detect free variable `self`. */
 var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
@@ -391,7 +391,7 @@ module.exports = isObject;
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(28),
-    overRest = __webpack_require__(136),
+    overRest = __webpack_require__(137),
     setToString = __webpack_require__(83);
 
 /**
@@ -411,6 +411,72 @@ module.exports = baseRest;
 
 /***/ }),
 /* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Applicator = (function () {
+    function Applicator() {
+    }
+    return Applicator;
+}());
+exports.Applicator = Applicator;
+//# sourceMappingURL=Applicator.js.map
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var store      = __webpack_require__(70)('wks')
+  , uid        = __webpack_require__(47)
+  , Symbol     = __webpack_require__(14).Symbol
+  , USE_SYMBOL = typeof Symbol == 'function';
+
+var $exports = module.exports = function(name){
+  return store[name] || (store[name] =
+    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
+};
+
+$exports.store = store;
+
+/***/ }),
+/* 10 */
+/***/ (function(module, exports) {
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return value != null && typeof value == 'object';
+}
+
+module.exports = isObjectLike;
+
+
+/***/ }),
+/* 11 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -601,72 +667,6 @@ function __makeTemplateObject(cooked, raw) {
 
 
 /***/ }),
-/* 9 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var Applicator = (function () {
-    function Applicator() {
-    }
-    return Applicator;
-}());
-exports.Applicator = Applicator;
-//# sourceMappingURL=Applicator.js.map
-
-/***/ }),
-/* 10 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var store      = __webpack_require__(70)('wks')
-  , uid        = __webpack_require__(47)
-  , Symbol     = __webpack_require__(14).Symbol
-  , USE_SYMBOL = typeof Symbol == 'function';
-
-var $exports = module.exports = function(name){
-  return store[name] || (store[name] =
-    USE_SYMBOL && Symbol[name] || (USE_SYMBOL ? Symbol : uid)('Symbol.' + name));
-};
-
-$exports.store = store;
-
-/***/ }),
-/* 11 */
-/***/ (function(module, exports) {
-
-/**
- * Checks if `value` is object-like. A value is object-like if it's not `null`
- * and has a `typeof` result of "object".
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to check.
- * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
- * @example
- *
- * _.isObjectLike({});
- * // => true
- *
- * _.isObjectLike([1, 2, 3]);
- * // => true
- *
- * _.isObjectLike(_.noop);
- * // => false
- *
- * _.isObjectLike(null);
- * // => false
- */
-function isObjectLike(value) {
-  return value != null && typeof value == 'object';
-}
-
-module.exports = isObjectLike;
-
-
-/***/ }),
 /* 12 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -676,14 +676,14 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(123));
-__export(__webpack_require__(234));
-__export(__webpack_require__(236));
-__export(__webpack_require__(238));
 __export(__webpack_require__(124));
-__export(__webpack_require__(251));
+__export(__webpack_require__(235));
+__export(__webpack_require__(237));
+__export(__webpack_require__(239));
+__export(__webpack_require__(125));
 __export(__webpack_require__(252));
-__export(__webpack_require__(131));
+__export(__webpack_require__(253));
+__export(__webpack_require__(132));
 //# sourceMappingURL=utils.js.map
 
 /***/ }),
@@ -749,7 +749,7 @@ if(typeof __e == 'number')__e = core; // eslint-disable-line no-undef
 /***/ (function(module, exports, __webpack_require__) {
 
 var anObject       = __webpack_require__(27)
-  , IE8_DOM_DEFINE = __webpack_require__(109)
+  , IE8_DOM_DEFINE = __webpack_require__(110)
   , toPrimitive    = __webpack_require__(63)
   , dP             = Object.defineProperty;
 
@@ -770,8 +770,8 @@ exports.f = __webpack_require__(19) ? Object.defineProperty : function definePro
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(36),
-    getRawTag = __webpack_require__(232),
-    objectToString = __webpack_require__(233);
+    getRawTag = __webpack_require__(233),
+    objectToString = __webpack_require__(234);
 
 /** `Object#toString` result references. */
 var nullTag = '[object Null]',
@@ -803,15 +803,15 @@ module.exports = baseGetTag;
 /* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseSetData = __webpack_require__(141),
-    createBind = __webpack_require__(294),
-    createCurry = __webpack_require__(295),
-    createHybrid = __webpack_require__(144),
-    createPartial = __webpack_require__(306),
+var baseSetData = __webpack_require__(142),
+    createBind = __webpack_require__(295),
+    createCurry = __webpack_require__(296),
+    createHybrid = __webpack_require__(145),
+    createPartial = __webpack_require__(307),
     getData = __webpack_require__(88),
-    mergeData = __webpack_require__(307),
-    setData = __webpack_require__(151),
-    setWrapToString = __webpack_require__(152),
+    mergeData = __webpack_require__(308),
+    setData = __webpack_require__(152),
+    setWrapToString = __webpack_require__(153),
     toInteger = __webpack_require__(38);
 
 /** Error message constants. */
@@ -934,7 +934,7 @@ module.exports = function(it, key){
 /***/ (function(module, exports, __webpack_require__) {
 
 // to indexed object, toObject with fallback for non-array-like ES3 strings
-var IObject = __webpack_require__(199)
+var IObject = __webpack_require__(200)
   , defined = __webpack_require__(65);
 module.exports = function(it){
   return IObject(defined(it));
@@ -987,8 +987,8 @@ module.exports = isFunction;
 /* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIsNative = __webpack_require__(258),
-    getValue = __webpack_require__(261);
+var baseIsNative = __webpack_require__(259),
+    getValue = __webpack_require__(262);
 
 /**
  * Gets the native function at `key` of `object`.
@@ -1035,6 +1035,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "hsbToHex", function() { return hsbToHex; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rgbString", function() { return rgbString; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "rgbaString", function() { return rgbaString; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Connected", function() { return Connected$1; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DatePicker", function() { return DatePicker$1; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DescriptionList", function() { return DescriptionList$1; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DisplayText", function() { return DisplayText$1; });
@@ -1081,48 +1082,48 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "useLinkComponent", function() { return useLinkComponent; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__ = __webpack_require__(107);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__ = __webpack_require__(108);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_tslib__ = __webpack_require__(8);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__ = __webpack_require__(185);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_tslib__ = __webpack_require__(185);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__ = __webpack_require__(186);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_babel_runtime_helpers_classCallCheck__ = __webpack_require__(187);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_babel_runtime_helpers_classCallCheck__ = __webpack_require__(188);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_babel_runtime_helpers_classCallCheck___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_babel_runtime_helpers_classCallCheck__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass__ = __webpack_require__(188);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass__ = __webpack_require__(189);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_babel_runtime_helpers_possibleConstructorReturn__ = __webpack_require__(193);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_babel_runtime_helpers_possibleConstructorReturn__ = __webpack_require__(194);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_babel_runtime_helpers_possibleConstructorReturn___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_babel_runtime_helpers_possibleConstructorReturn__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits__ = __webpack_require__(219);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits__ = __webpack_require__(220);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__ = __webpack_require__(108);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__ = __webpack_require__(109);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__ = __webpack_require__(227);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__ = __webpack_require__(228);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__ = __webpack_require__(412);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_toConsumableArray__ = __webpack_require__(413);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_toConsumableArray__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray__ = __webpack_require__(413);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__ = __webpack_require__(423);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_prop_types__ = __webpack_require__(41);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12_prop_types___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_12_prop_types__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__shopify_javascript_utilities_events__ = __webpack_require__(425);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__shopify_javascript_utilities_events__ = __webpack_require__(426);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_13__shopify_javascript_utilities_events___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_13__shopify_javascript_utilities_events__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__shopify_javascript_utilities_fastdom__ = __webpack_require__(427);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__shopify_javascript_utilities_fastdom__ = __webpack_require__(428);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_14__shopify_javascript_utilities_fastdom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_14__shopify_javascript_utilities_fastdom__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math__ = __webpack_require__(428);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math__ = __webpack_require__(429);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__ = __webpack_require__(166);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__ = __webpack_require__(167);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17_lodash_isEqual__ = __webpack_require__(429);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_17_lodash_isEqual__ = __webpack_require__(430);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_17_lodash_isEqual___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_17_lodash_isEqual__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18_lodash_pick__ = __webpack_require__(430);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_18_lodash_pick__ = __webpack_require__(431);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_18_lodash_pick___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_18_lodash_pick__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__shopify_javascript_utilities_focus__ = __webpack_require__(434);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__shopify_javascript_utilities_focus__ = __webpack_require__(435);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_19__shopify_javascript_utilities_focus___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_19__shopify_javascript_utilities_focus__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__ = __webpack_require__(167);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__ = __webpack_require__(168);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21_react_transition_group__ = __webpack_require__(435);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_21_react_transition_group__ = __webpack_require__(436);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_21_react_transition_group___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_21_react_transition_group__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__shopify_javascript_utilities_geometry__ = __webpack_require__(442);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__shopify_javascript_utilities_geometry__ = __webpack_require__(443);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_22__shopify_javascript_utilities_geometry___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_22__shopify_javascript_utilities_geometry__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23_react_dom__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_23_react_dom___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_23_react_dom__);
@@ -1258,7 +1259,7 @@ var Keys;
 function Image$1(_a) {
     var sourceSet = _a.sourceSet,
         source = _a.source,
-        rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["sourceSet", "source"]);
+        rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["sourceSet", "source"]);
 
     var finalSourceSet = sourceSet ? sourceSet.map(function (_ref) {
         var subSource = _ref.source,
@@ -1410,7 +1411,7 @@ var UnstyledLink$1 = function (_React$PureComponent) {
             var _a = this.props,
                 external = _a.external,
                 url = _a.url,
-                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["external", "url"]);
+                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["external", "url"]);
             var target = external ? '_blank' : undefined;
             var rel = external ? 'noopener noreferrer' : undefined;
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('a', Object.assign({ target: target }, rest, { href: url, rel: rel }, unstyled.props));
@@ -1662,18 +1663,18 @@ function Spinner$1(_ref) {
 var styles$4 = {
   "Button": "Polaris-Button",
   "disabled": "Polaris-Button--disabled",
+  "Content": "Polaris-Button__Content",
+  "Icon": "Polaris-Button__Icon",
+  "Spinner": "Polaris-Button__Spinner",
   "primary": "Polaris-Button--primary",
   "destructive": "Polaris-Button--destructive",
   "outline": "Polaris-Button--outline",
   "loading": "Polaris-Button--loading",
-  "Spinner": "Polaris-Button__Spinner",
   "plain": "Polaris-Button--plain",
-  "Content": "Polaris-Button__Content",
   "fullWidth": "Polaris-Button--fullWidth",
   "sizeSlim": "Polaris-Button--sizeSlim",
   "sizeLarge": "Polaris-Button--sizeLarge",
   "iconOnly": "Polaris-Button--iconOnly",
-  "Icon": "Polaris-Button__Icon",
   "skeletonShimmerAnimation": "Polaris-Button--skeletonShimmerAnimation",
 };
 
@@ -1747,18 +1748,19 @@ function Button$1(_ref) {
 function buttonsFrom(actions) {
     var overrides = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
-    if (actions.length != null) {
+    if (Array.isArray(actions)) {
         return actions.map(function (action, index) {
             return buttonFrom(action, overrides, index);
         });
     } else {
-        return buttonFrom(actions, overrides);
+        var action = actions;
+        return buttonFrom(action, overrides);
     }
 }
 function buttonFrom(_a, overrides, key) {
     var content = _a.content,
         onAction = _a.onAction,
-        action = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["content", "onAction"]);
+        action = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["content", "onAction"]);
 
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Button$1, Object.assign({ key: key, children: content, onClick: onAction }, action, overrides));
 }
@@ -1812,8 +1814,8 @@ var Item = function (_React$PureComponent) {
     return Item;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item.prototype, "handleFocus", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item.prototype, "handleBlur", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item.prototype, "handleFocus", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item.prototype, "handleBlur", null);
 
 function ButtonGroup$1(_ref) {
     var children = _ref.children,
@@ -2234,7 +2236,7 @@ function Item$3(_ref) {
     ) : content;
     var control = url ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         UnstyledLink$1,
-        { url: url, className: styles$13.Item },
+        { url: url, onClick: onAction, className: styles$13.Item },
         contentElement
     ) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'button',
@@ -2248,34 +2250,27 @@ function Item$3(_ref) {
     );
 }
 
-function ActionList$1(_ref) {
-    var items = _ref.items,
-        _ref$sections = _ref.sections,
-        sections = _ref$sections === undefined ? [] : _ref$sections;
+function Section$1(_ref) {
+    var section = _ref.section,
+        hasMultipleSections = _ref.hasMultipleSections,
+        onActionAnyItem = _ref.onActionAnyItem;
 
-    var finalSections = [];
-    if (items) {
-        finalSections = [{ items: items }].concat(sections);
-    } else if (sections) {
-        finalSections = sections;
-    }
-    var hasMultipleSections = finalSections.length > 1;
-    var Element = hasMultipleSections ? 'ul' : 'div';
-    var sectionMarkup = finalSections.map(function (section, index) {
-        return renderSection(section, hasMultipleSections, index);
-    });
-    return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-        Element,
-        { className: styles$13.ActionList },
-        sectionMarkup
-    );
-}
-function renderSection(section, hasMultipleSections, index) {
-    var SectionElement = hasMultipleSections ? 'li' : 'div';
+    var handleAction = function handleAction(itemOnAction) {
+        return function () {
+            if (itemOnAction) {
+                itemOnAction();
+            }
+            if (onActionAnyItem) {
+                onActionAnyItem();
+            }
+        };
+    };
     var actionMarkup = section.items.map(function (_a) {
         var content = _a.content,
-            item = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["content"]);
-        return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Item$3, Object.assign({ key: content, content: content }, item));
+            onAction = _a.onAction,
+            item = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["content", "onAction"]);
+
+        return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Item$3, Object.assign({ key: content, content: content, onAction: handleAction(onAction) }, item));
     });
     var className = section.title ? null : styles$13['Section-withoutTitle'];
     var titleMarkup = section.title ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -2283,15 +2278,44 @@ function renderSection(section, hasMultipleSections, index) {
         { className: styles$13.Title },
         section.title
     ) : null;
-    return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-        SectionElement,
-        { key: section.title || index, className: className },
+    var sectionMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        'div',
+        { className: className },
         titleMarkup,
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'ul',
             { className: styles$13.Actions },
             actionMarkup
         )
+    );
+    return hasMultipleSections ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        'li',
+        null,
+        sectionMarkup
+    ) : sectionMarkup;
+}
+
+function ActionList$1(_ref) {
+    var items = _ref.items,
+        _ref$sections = _ref.sections,
+        sections = _ref$sections === undefined ? [] : _ref$sections,
+        onActionAnyItem = _ref.onActionAnyItem;
+
+    var finalSections = [];
+    if (items) {
+        finalSections = [{ items: items }].concat(__WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray___default()(sections));
+    } else if (sections) {
+        finalSections = sections;
+    }
+    var hasMultipleSections = finalSections.length > 1;
+    var Element = hasMultipleSections ? 'ul' : 'div';
+    var sectionMarkup = finalSections.map(function (section, index) {
+        return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Section$1, { key: section.title || index, section: section, onActionAnyItem: onActionAnyItem, hasMultipleSections: hasMultipleSections });
+    });
+    return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        Element,
+        { className: styles$13.ActionList },
+        sectionMarkup
     );
 }
 
@@ -2520,15 +2544,19 @@ function secondaryActionFrom(action) {
 
 var styles$17 = {
   "TextContainer": "Polaris-TextContainer",
+  "spacingTight": "Polaris-TextContainer--spacingTight",
+  "spacingLoose": "Polaris-TextContainer--spacingLoose",
   "skeletonShimmerAnimation": "Polaris-TextContainer--skeletonShimmerAnimation",
 };
 
 function TextContainer$1(_ref) {
-    var children = _ref.children;
+    var spacing = _ref.spacing,
+        children = _ref.children;
 
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$17.TextContainer, spacing && styles$17[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('spacing', spacing)]);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$17.TextContainer },
+        { className: className },
         children
     );
 }
@@ -2680,19 +2708,22 @@ var styles$21 = {
   "Checkbox": "Polaris-Checkbox",
   "error": "Polaris-Checkbox--error",
   "Input": "Polaris-Checkbox__Input",
+  "Input-checked": "Polaris-Checkbox__Input--checked",
   "Backdrop": "Polaris-Checkbox__Backdrop",
+  "Input-indeterminate": "Polaris-Checkbox__Input--indeterminate",
   "Icon": "Polaris-Checkbox__Icon",
   "skeletonShimmerAnimation": "Polaris-Checkbox--skeletonShimmerAnimation",
 };
 
-var getUniqueID = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('Checkbox');
+var getUniqueID = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('Checkbox');
 function Checkbox$1(_ref) {
     var _ref$id = _ref.id,
         id = _ref$id === undefined ? getUniqueID() : _ref$id,
         label = _ref.label,
         labelHidden = _ref.labelHidden,
         helpText = _ref.helpText,
-        checked = _ref.checked,
+        _ref$checked = _ref.checked,
+        checked = _ref$checked === undefined ? false : _ref$checked,
         error = _ref.error,
         disabled = _ref.disabled,
         onChange = _ref.onChange,
@@ -2716,19 +2747,29 @@ function Checkbox$1(_ref) {
     if (helpText) {
         describedBy.push(helpTextID(id));
     }
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$21.Checkbox, error && styles$21.error);
+    var wrapperClassName = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$21.Checkbox, error && styles$21.error);
+    var isChecked = checked === 'indeterminate' ? false : checked;
+    var isIndeterminate = checked === 'indeterminate';
+    var indeterminateAttributes = isIndeterminate ? {
+        indeterminate: 'true',
+        'aria-checked': 'mixed'
+    } : {
+        'aria-checked': isChecked
+    };
+    var iconSource = isIndeterminate ? 'subtract' : 'checkmark';
+    var inputClassName = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$21.Input, isChecked && styles$21['Input-checked'], isIndeterminate && styles$21['Input-indeterminate']);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         Choice$1,
         { id: id, label: label, labelHidden: labelHidden, helpText: helpText, error: error },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { className: className },
-            Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('input', { id: id, name: name, value: value, type: 'checkbox', checked: checked, disabled: disabled, className: styles$21.Input, onChange: handleChange, onFocus: onFocus, onBlur: onBlur, 'aria-invalid': error != null, 'aria-describedby': describedBy.length ? describedBy.join(' ') : undefined }),
+            { className: wrapperClassName },
+            Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('input', Object.assign({ id: id, name: name, value: value, type: 'checkbox', checked: isChecked, disabled: disabled, className: inputClassName, onChange: handleChange, onFocus: onFocus, onBlur: onBlur, 'aria-invalid': error != null, 'aria-describedby': describedBy.length ? describedBy.join(' ') : undefined, role: 'checkbox' }, indeterminateAttributes)),
             Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$21.Backdrop }),
             Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
                 { className: styles$21.Icon },
-                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'checkmark' })
+                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: iconSource })
             )
         )
     );
@@ -2742,7 +2783,7 @@ var styles$22 = {
   "skeletonShimmerAnimation": "Polaris-RadioButton--skeletonShimmerAnimation",
 };
 
-var getUniqueID$2 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('RadioButton');
+var getUniqueID$2 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('RadioButton');
 function RadioButton$1(_ref) {
     var label = _ref.label,
         labelHidden = _ref.labelHidden,
@@ -2788,7 +2829,7 @@ var styles$23 = {
   "skeletonShimmerAnimation": "Polaris-ChoiceList--skeletonShimmerAnimation",
 };
 
-var getUniqueID$1 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('ChoiceList');
+var getUniqueID$1 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('ChoiceList');
 function ChoiceList$1(_ref) {
     var title = _ref.title,
         titleHidden = _ref.titleHidden,
@@ -2796,7 +2837,7 @@ function ChoiceList$1(_ref) {
         choices = _ref.choices,
         selected = _ref.selected,
         _ref$onChange = _ref.onChange,
-        onChange = _ref$onChange === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _ref$onChange,
+        onChange = _ref$onChange === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _ref$onChange,
         _ref$name = _ref.name,
         name = _ref$name === undefined ? getUniqueID$1() : _ref$name;
 
@@ -2844,7 +2885,7 @@ function updateSelectedChoices(_ref3, checked, selected) {
     var allowMultiple = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
 
     if (checked) {
-        return allowMultiple ? [].concat(__WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_toConsumableArray___default()(selected), [value]) : [value];
+        return allowMultiple ? [].concat(__WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray___default()(selected), [value]) : [value];
     }
     return selected.filter(function (selectedChoice) {
         return selectedChoice !== value;
@@ -2936,7 +2977,6 @@ var Collapsible$1 = function (_React$Component) {
                             animationState: 'opening',
                             height: _this2.heightNode ? _this2.heightNode.scrollHeight : 0
                         });
-                        break;
                 }
             });
         }
@@ -3006,9 +3046,9 @@ var Collapsible$1 = function (_React$Component) {
 
 Collapsible$1.contextTypes = CONTEXT_TYPES;
 Collapsible$1.childContextTypes = CONTEXT_TYPES;
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Collapsible$1.prototype, "bindNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Collapsible$1.prototype, "bindHeightNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Collapsible$1.prototype, "handleTransitionEnd", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Collapsible$1.prototype, "bindNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Collapsible$1.prototype, "bindHeightNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Collapsible$1.prototype, "handleTransitionEnd", null);
 function collapsibleHeight(open, animationState, height) {
     if (animationState === 'idle' && open) {
         return open ? 'auto' : null;
@@ -3124,7 +3164,6 @@ function rgbToHsb(color) {
             break;
         case b:
             huePercentage = (r - g) / delta + 4;
-            break;
     }
     var hue = Math.round(huePercentage / 6 * 360);
     return {
@@ -3331,12 +3370,12 @@ var Slidable = function (_React$PureComponent) {
     return Slidable;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "setDraggerNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "setNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "startDrag", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "handleDragEnd", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "handleMove", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "handleDraggerMove", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "setDraggerNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "setNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "startDrag", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "handleDragEnd", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "handleMove", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Slidable.prototype, "handleDraggerMove", null);
 
 var VERTICAL_PADDING = 13;
 
@@ -3410,16 +3449,16 @@ var HuePicker = function (_React$PureComponent) {
     return HuePicker;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], HuePicker.prototype, "setSliderHeight", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], HuePicker.prototype, "setDraggerHeight", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], HuePicker.prototype, "handleChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], HuePicker.prototype, "setSliderHeight", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], HuePicker.prototype, "setDraggerHeight", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], HuePicker.prototype, "handleChange", null);
 function offsetForHue(hue, sliderHeight, draggerHeight) {
     var slidableArea = sliderHeight - (draggerHeight + VERTICAL_PADDING);
     return Object(__WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math__["clamp"])(hue / 360 * slidableArea + VERTICAL_PADDING, 0, sliderHeight - draggerHeight);
 }
 function hueForOffset(offset, sliderHeight) {
     var selectionHeight = offset - VERTICAL_PADDING;
-    var slidableArea = sliderHeight - 2 * VERTICAL_PADDING;
+    var slidableArea = sliderHeight - VERTICAL_PADDING * 2;
     return Object(__WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math__["clamp"])(selectionHeight / slidableArea * 360, 0, 360);
 }
 
@@ -3499,12 +3538,12 @@ var AlphaPicker = function (_React$PureComponent) {
     return AlphaPicker;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], AlphaPicker.prototype, "setSliderHeight", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], AlphaPicker.prototype, "setDraggerHeight", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], AlphaPicker.prototype, "handleChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], AlphaPicker.prototype, "setSliderHeight", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], AlphaPicker.prototype, "setDraggerHeight", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], AlphaPicker.prototype, "handleChange", null);
 function alphaForOffset(offset, sliderHeight) {
     var selectionHeight = offset - VERTICAL_PADDING$1;
-    var slidableArea = sliderHeight - 2 * VERTICAL_PADDING$1;
+    var slidableArea = sliderHeight - VERTICAL_PADDING$1 * 2;
     return Object(__WEBPACK_IMPORTED_MODULE_15__shopify_javascript_utilities_math__["clamp"])(1 - selectionHeight / slidableArea, 0, 1);
 }
 function offsetForAlpha(alpha, sliderHeight, draggerHeight) {
@@ -3641,12 +3680,104 @@ var ColorPicker$1 = function (_React$PureComponent) {
     return ColorPicker;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "setColorNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "handleHueChange", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "handleAlphaChange", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "handleDraggerMove", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "setColorNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "handleHueChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "handleAlphaChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ColorPicker$1.prototype, "handleDraggerMove", null);
 
 var styles$26 = {
+  "Connected": "Polaris-Connected",
+  "Item": "Polaris-Connected__Item",
+  "Item-primary": "Polaris-Connected__Item--primary",
+  "Item-connection": "Polaris-Connected__Item--connection",
+  "Item-focused": "Polaris-Connected__Item--focused",
+  "skeletonShimmerAnimation": "Polaris-Connected--skeletonShimmerAnimation",
+};
+
+var Position;
+(function (Position) {
+    Position[Position["Left"] = 0] = "Left";
+    Position[Position["Primary"] = 1] = "Primary";
+    Position[Position["Right"] = 2] = "Right";
+})(Position || (Position = {}));
+
+var Item$4 = function (_React$PureComponent) {
+    __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(Item, _React$PureComponent);
+
+    function Item() {
+        __WEBPACK_IMPORTED_MODULE_4_babel_runtime_helpers_classCallCheck___default()(this, Item);
+
+        var _this = __WEBPACK_IMPORTED_MODULE_6_babel_runtime_helpers_possibleConstructorReturn___default()(this, (Item.__proto__ || Object.getPrototypeOf(Item)).apply(this, arguments));
+
+        _this.state = { focused: false };
+        return _this;
+    }
+
+    __WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass___default()(Item, [{
+        key: 'render',
+        value: function render() {
+            var focused = this.state.focused;
+            var _props = this.props,
+                children = _props.children,
+                position = _props.position;
+
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$26.Item, focused && styles$26['Item-focused'], position === Position.Primary ? styles$26['Item-primary'] : styles$26['Item-connection']);
+            return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+                'div',
+                { onBlur: this.handleBlur, onFocus: this.handleFocus, className: className },
+                children
+            );
+        }
+    }, {
+        key: 'handleBlur',
+        value: function handleBlur() {
+            this.setState({ focused: false });
+        }
+    }, {
+        key: 'handleFocus',
+        value: function handleFocus() {
+            this.setState({ focused: true });
+        }
+    }]);
+
+    return Item;
+}(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
+
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$4.prototype, "handleBlur", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$4.prototype, "handleFocus", null);
+
+function Connected$1(_ref) {
+    var children = _ref.children,
+        left = _ref.left,
+        right = _ref.right;
+
+    if (left == null && right == null) {
+        return __WEBPACK_IMPORTED_MODULE_0_react__["Children"].only(children);
+    }
+    var leftConnectionMarkup = left ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        Item$4,
+        { position: Position.Left },
+        left
+    ) : null;
+    var rightConnectionMarkup = right ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        Item$4,
+        { position: Position.Right },
+        right
+    ) : null;
+    return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        'div',
+        { className: styles$26.Connected },
+        leftConnectionMarkup,
+        Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+            Item$4,
+            { position: Position.Primary },
+            children
+        ),
+        rightConnectionMarkup
+    );
+}
+
+var styles$27 = {
   "DatePicker": "Polaris-DatePicker",
   "MonthContainer": "Polaris-DatePicker__MonthContainer",
   "Month": "Polaris-DatePicker__Month",
@@ -3693,9 +3824,9 @@ var Day = function (_React$PureComponent) {
                 focused = _props.focused,
                 onClick = _props.onClick,
                 _props$onHover = _props.onHover,
-                onHover = _props$onHover === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props$onHover,
+                onHover = _props$onHover === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props$onHover,
                 _props$onFocus = _props.onFocus,
-                onFocus = _props$onFocus === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props$onFocus,
+                onFocus = _props$onFocus === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props$onFocus,
                 selected = _props.selected,
                 inRange = _props.inRange,
                 inHoveringRange = _props.inHoveringRange,
@@ -3703,11 +3834,11 @@ var Day = function (_React$PureComponent) {
 
             var handleHover = onHover.bind(null, day);
             if (!day) {
-                return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$26.EmptyDay, onMouseOver: handleHover });
+                return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$27.EmptyDay, onMouseOver: handleHover });
             }
-            var handleClick = onClick && !disabled ? onClick.bind(null, day) : __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"];
+            var handleClick = onClick && !disabled ? onClick.bind(null, day) : __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"];
             var today = Object(__WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__["isSameDay"])(new Date(), day);
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$26.Day, selected && styles$26['Day-selected'], disabled && styles$26['Day-disabled'], today && styles$26['Day-today'], (inRange || inHoveringRange) && !disabled && styles$26['Day-inRange']);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$27.Day, selected && styles$27['Day-selected'], disabled && styles$27['Day-disabled'], today && styles$27['Day-today'], (inRange || inHoveringRange) && !disabled && styles$27['Day-inRange']);
             var date = day.getDate();
             var tabIndex = (focused || selected || today || date === 1) && !disabled ? 0 : -1;
             var ariaLabel = ['' + (today ? 'Today ' : ''), __WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__["Months"][day.getMonth()] + ' ', date + ' ', '' + day.getFullYear()].join('');
@@ -3727,14 +3858,14 @@ var Day = function (_React$PureComponent) {
     return Day;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Day.prototype, "setNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Day.prototype, "setNode", null);
 
 function Weekday(_ref) {
     var label = _ref.label,
         title = _ref.title,
         current = _ref.current;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$26.Weekday, current && styles$26['Weekday-current']);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$27.Weekday, current && styles$27['Weekday-current']);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
         { 'aria-label': __WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__["Weekdays"][label], className: className },
@@ -3751,11 +3882,11 @@ function Month(_ref) {
         disableDatesAfter = _ref.disableDatesAfter,
         allowRange = _ref.allowRange,
         _ref$onChange = _ref.onChange,
-        onChange = _ref$onChange === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _ref$onChange,
+        onChange = _ref$onChange === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _ref$onChange,
         _ref$onHover = _ref.onHover,
-        onHover = _ref$onHover === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _ref$onHover,
+        onHover = _ref$onHover === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _ref$onHover,
         _ref$onFocus = _ref.onFocus,
-        onFocus = _ref$onFocus === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _ref$onFocus,
+        onFocus = _ref$onFocus === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _ref$onFocus,
         month = _ref.month,
         year = _ref.year;
 
@@ -3763,7 +3894,7 @@ function Month(_ref) {
         return false;
     };
     var current = new Date().getMonth() === month;
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$26.Title, current && styles$26['Month-current']);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$27.Title, current && styles$27['Month-current']);
     var weeks = Object(__WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__["getWeeksForMonth"])(month, year);
     var weekdays = WEEKDAYS.map(function (weekday) {
         return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Weekday, { key: weekday, title: Object(__WEBPACK_IMPORTED_MODULE_16__shopify_javascript_utilities_dates__["abbreviationForWeekday"])(weekday), current: current && new Date().getDay() === weekday, label: weekday });
@@ -3782,13 +3913,13 @@ function Month(_ref) {
     var weeksMarkup = weeks.map(function (week, index) {
         return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { role: 'row', className: styles$26.Week, key: index },
+            { role: 'row', className: styles$27.Week, key: index },
             week.map(renderWeek)
         );
     });
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { role: 'grid', className: styles$26.Month },
+        { role: 'grid', className: styles$27.Month },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
             { className: className },
@@ -3798,7 +3929,7 @@ function Month(_ref) {
         ),
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { role: 'rowheader', className: styles$26.WeekHeadings },
+            { role: 'rowheader', className: styles$27.WeekHeadings },
             weekdays
         ),
         weeksMarkup
@@ -3859,16 +3990,16 @@ var DatePicker$1 = function (_React$PureComponent) {
             var secondDatePicker = multiMonth ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Month, { onFocus: this.handleFocus, focusedDate: focusDate, month: showNextMonth, year: showNextYear, selected: range, hoverDate: hoverDate, onChange: this.handleDateSelection, onHover: this.handleHover, disableDatesBefore: disableDatesBefore, disableDatesAfter: disableDatesAfter, allowRange: allowRange }) : null;
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$26.DatePicker, onKeyDown: handleKeyDown, onKeyUp: this.handleKeyUp },
+                { className: styles$27.DatePicker, onKeyDown: handleKeyDown, onKeyUp: this.handleKeyUp },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$26.Header },
+                    { className: styles$27.Header },
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Button$1, { plain: true, icon: 'arrowLeft', accessibilityLabel: 'Show previous month, ' + previousMonthName + ' ' + showPreviousYear, onClick: this.handleMonthChangeClick.bind(null, showPreviousMonth, showPreviousYear) }),
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Button$1, { plain: true, icon: 'arrowRight', accessibilityLabel: 'Show next month, ' + nextMonth + ' ' + nextYear, onClick: this.handleMonthChangeClick.bind(null, showNextMonth, showNextYear) })
                 ),
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$26.MonthContainer },
+                    { className: styles$27.MonthContainer },
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Month, { onFocus: this.handleFocus, focusedDate: focusDate, month: month, year: year, selected: range, hoverDate: hoverDate, onChange: this.handleDateSelection, onHover: this.handleHover, disableDatesBefore: disableDatesBefore, disableDatesAfter: disableDatesAfter, allowRange: allowRange }),
                     secondDatePicker
                 )
@@ -3943,7 +4074,7 @@ var DatePicker$1 = function (_React$PureComponent) {
         value: function handleDateSelection(selected) {
             var endDate = selected.end;
             var _props$onChange = this.props.onChange,
-                onChange = _props$onChange === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props$onChange;
+                onChange = _props$onChange === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props$onChange;
 
             this.setState({
                 hoverDate: endDate,
@@ -3976,12 +4107,12 @@ var DatePicker$1 = function (_React$PureComponent) {
     return DatePicker;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleFocus", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleKeyUp", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "setFocusDateAndHandleMonthChange", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleDateSelection", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleMonthChangeClick", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleHover", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleFocus", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleKeyUp", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "setFocusDateAndHandleMonthChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleDateSelection", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleMonthChangeClick", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], DatePicker$1.prototype, "handleHover", null);
 function handleKeyDown(event) {
     var key = event.key;
 
@@ -3991,7 +4122,7 @@ function handleKeyDown(event) {
     }
 }
 
-var styles$27 = {
+var styles$28 = {
   "DescriptionList": "Polaris-DescriptionList",
   "Term": "Polaris-DescriptionList__Term",
   "Description": "Polaris-DescriptionList__Description",
@@ -4004,24 +4135,24 @@ function DescriptionList$1(_ref) {
     var terms = items.reduce(function (allTerms, _ref2) {
         var term = _ref2.term,
             description = _ref2.description;
-        return [].concat(__WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_toConsumableArray___default()(allTerms), [Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
+        return [].concat(__WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray___default()(allTerms), [Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'dt',
-            { key: term + '-term', className: styles$27.Term },
+            { key: term + '-term', className: styles$28.Term },
             term
         ), Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'dd',
-            { key: term + '-description', className: styles$27.Description },
+            { key: term + '-description', className: styles$28.Description },
             description
         )]);
     }, []);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'dl',
-        { className: styles$27.DescriptionList },
+        { className: styles$28.DescriptionList },
         terms
     );
 }
 
-var styles$28 = {
+var styles$29 = {
   "DisplayText": "Polaris-DisplayText",
   "sizeSmall": "Polaris-DisplayText--sizeSmall",
   "sizeMedium": "Polaris-DisplayText--sizeMedium",
@@ -4037,7 +4168,7 @@ function DisplayText$1(_ref) {
         _ref$size = _ref.size,
         size = _ref$size === undefined ? 'medium' : _ref$size;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$28.DisplayText, size && styles$28[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('size', size)]);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$29.DisplayText, size && styles$29[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('size', size)]);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         Element,
         { className: className },
@@ -4045,7 +4176,7 @@ function DisplayText$1(_ref) {
     );
 }
 
-var styles$29 = {
+var styles$30 = {
   "EmptyState": "Polaris-EmptyState",
   "imageContained": "Polaris-EmptyState--imageContained",
   "Image": "Polaris-EmptyState__Image",
@@ -4079,21 +4210,21 @@ var EmptyState$1 = function (_React$PureComponent) {
           action = _props.action,
           secondaryAction = _props.secondaryAction;
 
-      var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$29.EmptyState, imageContained && styles$29.imageContained);
-      var imageMarkup = largeImage ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Image$1, { alt: '', role: 'presentation', className: styles$29.Image, source: largeImage, sourceSet: [{ source: image, descriptor: '568w' }, { source: largeImage, descriptor: '1136w' }], sizes: '(max-width: 568px) 60vw' }) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Image$1, { role: 'presentation', alt: '', className: styles$29.Image, source: image });
+      var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$30.EmptyState, imageContained && styles$30.imageContained);
+      var imageMarkup = largeImage ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Image$1, { alt: '', role: 'presentation', className: styles$30.Image, source: largeImage, sourceSet: [{ source: image, descriptor: '568w' }, { source: largeImage, descriptor: '1136w' }], sizes: '(max-width: 568px) 60vw' }) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Image$1, { role: 'presentation', alt: '', className: styles$30.Image, source: image });
       var secondaryActionMarkup = secondaryAction ? buttonFrom(secondaryAction, { plain: true }) : null;
       return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
         { className: className },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
           'div',
-          { className: styles$29.Section },
+          { className: styles$30.Section },
           Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { className: styles$29.DetailsContainer },
+            { className: styles$30.DetailsContainer },
             Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
               'div',
-              { className: styles$29.Details },
+              { className: styles$30.Details },
               Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 TextContainer$1,
                 null,
@@ -4104,13 +4235,13 @@ var EmptyState$1 = function (_React$PureComponent) {
                 ),
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                   'div',
-                  { className: styles$29.Content },
+                  { className: styles$30.Content },
                   children
                 )
               ),
               Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$29.Actions },
+                { className: styles$30.Actions },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                   ButtonGroup$1,
                   null,
@@ -4122,7 +4253,7 @@ var EmptyState$1 = function (_React$PureComponent) {
           ),
           Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { className: styles$29.ImageContainer },
+            { className: styles$30.ImageContainer },
             imageMarkup
           )
         )
@@ -4133,7 +4264,7 @@ var EmptyState$1 = function (_React$PureComponent) {
   return EmptyState;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-var styles$30 = {
+var styles$31 = {
   "FooterHelp": "Polaris-FooterHelp",
   "Content": "Polaris-FooterHelp__Content",
   "Icon": "Polaris-FooterHelp__Icon",
@@ -4146,25 +4277,25 @@ function FooterHelp$1(_ref) {
 
   return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'div',
-    { className: styles$30.FooterHelp },
+    { className: styles$31.FooterHelp },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
       'div',
-      { className: styles$30.Content },
+      { className: styles$31.Content },
       Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$30.Icon },
+        { className: styles$31.Icon },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'help', color: 'teal', backdrop: true })
       ),
       Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$30.Text },
+        { className: styles$31.Text },
         children
       )
     )
   );
 }
 
-var styles$31 = {
+var styles$32 = {
   "FormLayout": "Polaris-FormLayout",
   "condensed": "Polaris-FormLayout--condensed",
   "Item": "Polaris-FormLayout__Item",
@@ -4174,22 +4305,22 @@ var styles$31 = {
   "skeletonShimmerAnimation": "Polaris-FormLayout--skeletonShimmerAnimation",
 };
 
-function Item$4(props) {
+function Item$6(props) {
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$31.Item },
+        { className: styles$32.Item },
         props.children
     );
 }
 
-var getUniqueID$3 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('FormLayoutGroup');
+var getUniqueID$3 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('FormLayoutGroup');
 function Group(_ref) {
     var children = _ref.children,
         condensed = _ref.condensed,
         title = _ref.title,
         helpText = _ref.helpText;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(condensed && styles$31.condensed);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(condensed && styles$32.condensed);
     var id = getUniqueID$3();
     var helpTextElement = null;
     var helpTextID = void 0;
@@ -4199,7 +4330,7 @@ function Group(_ref) {
         helpTextID = id + 'HelpText';
         helpTextElement = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { id: helpTextID, className: styles$31.HelpText },
+            { id: helpTextID, className: styles$32.HelpText },
             helpText
         );
     }
@@ -4207,12 +4338,12 @@ function Group(_ref) {
         titleID = id + 'Title';
         titleElement = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { id: titleID, className: styles$31.Title },
+            { id: titleID, className: styles$32.Title },
             title
         );
     }
     var itemsMarkup = __WEBPACK_IMPORTED_MODULE_0_react__["Children"].map(children, function (child) {
-        return Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["wrapWithComponent"])(child, Item$4);
+        return Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["wrapWithComponent"])(child, Item$6);
     });
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
@@ -4220,7 +4351,7 @@ function Group(_ref) {
         titleElement,
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { className: styles$31.Items },
+            { className: styles$32.Items },
             itemsMarkup
         ),
         helpTextElement
@@ -4243,7 +4374,7 @@ var FormLayout$1 = function (_React$PureComponent) {
 
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$31.FormLayout },
+                { className: styles$32.FormLayout },
                 __WEBPACK_IMPORTED_MODULE_0_react__["Children"].map(children, wrapChildren)
             );
         }
@@ -4258,10 +4389,10 @@ function wrapChildren(child, index) {
         return child;
     }
     var props = { key: index };
-    return Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["wrapWithComponent"])(child, Item$4, props);
+    return Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["wrapWithComponent"])(child, Item$6, props);
 }
 
-var styles$32 = {
+var styles$33 = {
   "KeyboardKey": "Polaris-KeyboardKey",
   "skeletonShimmerAnimation": "Polaris-KeyboardKey--skeletonShimmerAnimation",
 };
@@ -4273,7 +4404,7 @@ function KeyboardKey$1(_ref) {
     key = key.length > 1 ? key.toLowerCase() : key.toUpperCase();
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'kbd',
-        { className: styles$32.KeyboardKey },
+        { className: styles$33.KeyboardKey },
         key
     );
 }
@@ -4320,9 +4451,9 @@ var KeypressListener$1 = function (_React$Component) {
     return KeypressListener;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], KeypressListener$1.prototype, "handleKeyEvent", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], KeypressListener$1.prototype, "handleKeyEvent", null);
 
-var styles$33 = {
+var styles$34 = {
   "Label": "Polaris-Label",
   "hidden": "Polaris-Label--hidden",
   "Text": "Polaris-Label__Text",
@@ -4337,19 +4468,19 @@ function Label$1(_ref) {
         id = _ref.id,
         hidden = _ref.hidden;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$33.Label, hidden && styles$33.hidden);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$34.Label, hidden && styles$34.hidden);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
         { className: className },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'label',
-            { id: labelID(id), htmlFor: id, className: styles$33.Text },
+            { id: labelID(id), htmlFor: id, className: styles$34.Text },
             children
         )
     );
 }
 
-var styles$34 = {
+var styles$35 = {
   "hidden": "Polaris-Labelled--hidden",
   "LabelWrapper": "Polaris-Labelled__LabelWrapper",
   "HelpText": "Polaris-Labelled__HelpText",
@@ -4366,28 +4497,28 @@ function Labelled$1(_a) {
         helpText = _a.helpText,
         children = _a.children,
         labelHidden = _a.labelHidden,
-        rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["id", "label", "error", "action", "helpText", "children", "labelHidden"]);
+        rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["id", "label", "error", "action", "helpText", "children", "labelHidden"]);
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(labelHidden && styles$34.hidden);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(labelHidden && styles$35.hidden);
     var actionMarkup = action ? buttonFrom(action, { plain: true }) : null;
     var helpTextMarkup = helpText ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$34.HelpText, id: helpTextID$1(id) },
+        { className: styles$35.HelpText, id: helpTextID$1(id) },
         helpText
     ) : null;
     var errorMarkup = typeof error === 'string' ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { id: errorID$1(id), className: styles$34.Error },
+        { id: errorID$1(id), className: styles$35.Error },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'div',
-            { className: styles$34.ErrorIcon },
+            { className: styles$35.ErrorIcon },
             Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'alert' })
         ),
         error
     ) : null;
     var labelMarkup = label ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$34.LabelWrapper },
+        { className: styles$35.LabelWrapper },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             Label$1,
             Object.assign({ id: id }, rest, { hidden: false }),
@@ -4411,10 +4542,11 @@ function helpTextID$1(id) {
     return id + 'HelpText';
 }
 
-var styles$35 = {
+var styles$36 = {
   "Layout": "Polaris-Layout",
   "Section": "Polaris-Layout__Section",
   "Section-secondary": "Polaris-Layout__Section--secondary",
+  "Section-fullWidth": "Polaris-Layout__Section--fullWidth",
   "AnnotatedSection": "Polaris-Layout__AnnotatedSection",
   "AnnotationWrapper": "Polaris-Layout__AnnotationWrapper",
   "AnnotationContent": "Polaris-Layout__AnnotationContent",
@@ -4422,11 +4554,12 @@ var styles$35 = {
   "skeletonShimmerAnimation": "Polaris-Layout--skeletonShimmerAnimation",
 };
 
-function Section$1(_ref) {
+function Section$2(_ref) {
     var children = _ref.children,
-        secondary = _ref.secondary;
+        secondary = _ref.secondary,
+        fullWidth = _ref.fullWidth;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$35.Section, secondary && styles$35['Section-secondary']);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$36.Section, secondary && styles$36['Section-secondary'], fullWidth && styles$36['Section-fullWidth']);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
         { className: className },
@@ -4446,13 +4579,13 @@ function AnnotatedSection(props) {
   ) : description;
   return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'div',
-    { className: styles$35.AnnotatedSection },
+    { className: styles$36.AnnotatedSection },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
       'div',
-      { className: styles$35.AnnotationWrapper },
+      { className: styles$36.AnnotationWrapper },
       Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$35.Annotation },
+        { className: styles$36.Annotation },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
           TextContainer$1,
           null,
@@ -4466,7 +4599,7 @@ function AnnotatedSection(props) {
       ),
       Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$35.AnnotationContent },
+        { className: styles$36.AnnotationContent },
         children
       )
     )
@@ -4490,13 +4623,13 @@ var Layout$1 = function (_React$Component) {
                 sectioned = _props.sectioned;
 
             var content = sectioned ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-                Section$1,
+                Section$2,
                 null,
                 children
             ) : children;
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$35.Layout },
+                { className: styles$36.Layout },
                 content
             );
         }
@@ -4506,9 +4639,9 @@ var Layout$1 = function (_React$Component) {
 }(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
 
 Layout$1.AnnotatedSection = AnnotatedSection;
-Layout$1.Section = Section$1;
+Layout$1.Section = Section$2;
 
-var styles$36 = {
+var styles$37 = {
   "Link": "Polaris-Link",
   "skeletonShimmerAnimation": "Polaris-Link--skeletonShimmerAnimation",
 };
@@ -4521,16 +4654,16 @@ function Link$1(_ref) {
 
   return url ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     UnstyledLink$1,
-    { className: styles$36.Link, url: url, external: external },
+    { className: styles$37.Link, url: url, external: external },
     children
   ) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'button',
-    { onClick: onClick, className: styles$36.Link },
+    { onClick: onClick, className: styles$37.Link },
     children
   );
 }
 
-var styles$37 = {
+var styles$38 = {
   "List": "Polaris-List",
   "typeBullet": "Polaris-List--typeBullet",
   "Item": "Polaris-List__Item",
@@ -4538,12 +4671,12 @@ var styles$37 = {
   "skeletonShimmerAnimation": "Polaris-List--skeletonShimmerAnimation",
 };
 
-function Item$5(_ref) {
+function Item$7(_ref) {
     var children = _ref.children;
 
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'li',
-        { className: styles$37.Item },
+        { className: styles$38.Item },
         children
     );
 }
@@ -4565,7 +4698,7 @@ var ContentList = function (_React$PureComponent) {
                 _props$type = _props.type,
                 type = _props$type === undefined ? 'bullet' : _props$type;
 
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$37.List, type && styles$37[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('type', type)]);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$38.List, type && styles$38[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('type', type)]);
             var ListElement = type === 'bullet' ? 'ul' : 'ol';
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 ListElement,
@@ -4578,9 +4711,9 @@ var ContentList = function (_React$PureComponent) {
     return ContentList;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-ContentList.Item = Item$5;
+ContentList.Item = Item$7;
 
-var styles$38 = {
+var styles$39 = {
   "Breadcrumb": "Polaris-Breadcrumbs__Breadcrumb",
   "Icon": "Polaris-Breadcrumbs__Icon",
   "Content": "Polaris-Breadcrumbs__Content",
@@ -4613,15 +4746,15 @@ var Breadcrumbs$1 = function (_React$PureComponent) {
                 { role: 'navigation' },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     UnstyledLink$1,
-                    { key: content, url: url, className: styles$38.Breadcrumb, onMouseUp: handleMouseUpByBlurring },
+                    { key: content, url: url, className: styles$39.Breadcrumb, onMouseUp: handleMouseUpByBlurring },
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'span',
-                        { className: styles$38.Icon },
+                        { className: styles$39.Icon },
                         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'chevronLeft' })
                     ),
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'span',
-                        { className: styles$38.Content },
+                        { className: styles$39.Content },
                         content
                     )
                 )
@@ -4632,7 +4765,7 @@ var Breadcrumbs$1 = function (_React$PureComponent) {
     return Breadcrumbs;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-var styles$39 = {
+var styles$40 = {
   "Pagination": "Polaris-Pagination",
   "plain": "Polaris-Pagination--plain",
   "Button": "Polaris-Pagination__Button",
@@ -4655,23 +4788,23 @@ function Pagination$1(_ref) {
   } else {
     label = 'Pagination';
   }
-  var className = Object(__WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__["classNames"])(styles$39.Pagination, plain && styles$39.plain);
+  var className = Object(__WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__["classNames"])(styles$40.Pagination, plain && styles$40.plain);
   var previousButton = previousURL ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     UnstyledLink$1,
-    { className: styles$39.Button, url: previousURL, onMouseUp: handleMouseUpByBlurring, 'aria-label': 'Previous' },
+    { className: styles$40.Button, url: previousURL, onMouseUp: handleMouseUpByBlurring, 'aria-label': 'Previous' },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'arrowLeft' })
   ) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'button',
-    { onClick: onPrevious, onMouseUp: handleMouseUpByBlurring, className: styles$39.Button, 'aria-label': 'Previous', disabled: !hasPrevious },
+    { onClick: onPrevious, onMouseUp: handleMouseUpByBlurring, className: styles$40.Button, 'aria-label': 'Previous', disabled: !hasPrevious },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'arrowLeft' })
   );
   var nextButton = nextURL ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     UnstyledLink$1,
-    { className: styles$39.Button, url: nextURL, onMouseUp: handleMouseUpByBlurring, 'aria-label': 'Next' },
+    { className: styles$40.Button, url: nextURL, onMouseUp: handleMouseUpByBlurring, 'aria-label': 'Next' },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'arrowRight' })
   ) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'button',
-    { onClick: onNext, onMouseUp: handleMouseUpByBlurring, className: styles$39.Button, 'aria-label': 'Next', disabled: !hasNext },
+    { onClick: onNext, onMouseUp: handleMouseUpByBlurring, className: styles$40.Button, 'aria-label': 'Next', disabled: !hasNext },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'arrowRight' })
   );
   return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -4682,7 +4815,7 @@ function Pagination$1(_ref) {
   );
 }
 
-var styles$40 = {
+var styles$41 = {
   "Scrollable": "Polaris-Scrollable",
   "horizontal": "Polaris-Scrollable--horizontal",
   "vertical": "Polaris-Scrollable--vertical",
@@ -4764,8 +4897,8 @@ var Scrollable$1 = function (_React$Component) {
                 vertical = _a$vertical === undefined ? true : _a$vertical,
                 shadow = _a.shadow,
                 hint = _a.hint,
-                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["children", "className", "horizontal", "vertical", "shadow", "hint"]);
-            var finalClassName = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(className, styles$40.Scrollable, vertical && styles$40.vertical, horizontal && styles$40.horizontal, topShadow && styles$40.hasTopShadow, bottomShadow && styles$40.hasBottomShadow);
+                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["children", "className", "horizontal", "vertical", "shadow", "hint"]);
+            var finalClassName = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(className, styles$41.Scrollable, vertical && styles$41.vertical, horizontal && styles$41.horizontal, topShadow && styles$41.hasTopShadow, bottomShadow && styles$41.hasBottomShadow);
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
                 Object.assign({ className: finalClassName }, scrollable.props, rest, { ref: this.setScrollArea }),
@@ -4872,11 +5005,11 @@ var Scrollable$1 = function (_React$Component) {
     return Scrollable;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "setScrollArea", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "handleScroll", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"], Object(__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["debounce"])(50, { trailing: true })], Scrollable$1.prototype, "handleResize", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "scrollHint", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "scrollStep", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "setScrollArea", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "handleScroll", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"], Object(__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["debounce"])(50, { trailing: true })], Scrollable$1.prototype, "handleResize", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "scrollHint", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Scrollable$1.prototype, "scrollStep", null);
 function prevent(evt) {
     evt.preventDefault();
 }
@@ -4933,7 +5066,7 @@ function rectIsOutsideOfRect(inner, outer) {
     return center.y < outer.top || center.y > outer.top + outer.height;
 }
 
-var styles$41 = {
+var styles$42 = {
   "PositionedOverlay": "Polaris-PositionedOverlay",
   "calculating": "Polaris-PositionedOverlay--calculating",
   "skeletonShimmerAnimation": "Polaris-PositionedOverlay--skeletonShimmerAnimation",
@@ -4965,7 +5098,17 @@ var PositionedOverlay$1 = function (_React$PureComponent) {
         key: 'componentDidMount',
         value: function componentDidMount() {
             this.scrollableContainer = Scrollable$1.forNode(this.props.activator);
+            if (this.scrollableContainer) {
+                this.scrollableContainer.addEventListener('scroll', this.handleMeasurement);
+            }
             this.handleMeasurement();
+        }
+    }, {
+        key: 'componentWillUnmount',
+        value: function componentWillUnmount() {
+            if (this.scrollableContainer) {
+                this.scrollableContainer.removeEventListener('scroll', this.handleMeasurement);
+            }
         }
     }, {
         key: 'componentWillReceiveProps',
@@ -5004,9 +5147,8 @@ var PositionedOverlay$1 = function (_React$PureComponent) {
             };
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$41.PositionedOverlay, style: style, ref: this.setOverlay },
+                { className: styles$42.PositionedOverlay, style: style, ref: this.setOverlay },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(EventListener$1, { event: 'resize', handler: this.handleMeasurement }),
-                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(EventListener$1, { event: 'scroll', handler: this.handleMeasurement }),
                 render(this.overlayDetails())
             );
         }
@@ -5089,9 +5231,9 @@ var PositionedOverlay$1 = function (_React$PureComponent) {
     return PositionedOverlay;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PositionedOverlay$1.prototype, "overlayDetails", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PositionedOverlay$1.prototype, "setOverlay", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PositionedOverlay$1.prototype, "handleMeasurement", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PositionedOverlay$1.prototype, "overlayDetails", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PositionedOverlay$1.prototype, "setOverlay", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PositionedOverlay$1.prototype, "handleMeasurement", null);
 function intersectionWithViewport(rect) {
     var viewport = windowRect();
     return new __WEBPACK_IMPORTED_MODULE_22__shopify_javascript_utilities_geometry__["Rect"]({
@@ -5102,11 +5244,11 @@ function intersectionWithViewport(rect) {
     });
 }
 function getMarginsForNode(node) {
-    var styles$$1 = window.getComputedStyle(node);
+    var nodeStyles = window.getComputedStyle(node);
     return {
-        activator: parseFloat(styles$$1.marginTop || ''),
-        container: parseFloat(styles$$1.marginBottom || ''),
-        horizontal: parseFloat(styles$$1.marginLeft || '')
+        activator: parseFloat(nodeStyles.marginTop || ''),
+        container: parseFloat(nodeStyles.marginBottom || ''),
+        horizontal: parseFloat(nodeStyles.marginLeft || '')
     };
 }
 function getZIndexForLayerFromNode(node) {
@@ -5126,7 +5268,7 @@ function isDocument(node) {
     return node === document;
 }
 
-var styles$42 = {
+var styles$43 = {
   "Popover": "Polaris-Popover",
   "fullWidth": "Polaris-Popover--fullWidth",
   "Content": "Polaris-Popover__Content",
@@ -5142,12 +5284,12 @@ var styles$42 = {
   "skeletonShimmerAnimation": "Polaris-Popover--skeletonShimmerAnimation",
 };
 
-function Section$2(_ref) {
+function Section$3(_ref) {
     var children = _ref.children;
 
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$42.Section },
+        { className: styles$43.Section },
         children
     );
 }
@@ -5157,8 +5299,8 @@ function Pane(_ref) {
         sectioned = _ref.sectioned,
         children = _ref.children;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$42.Pane, fixed && styles$42['Pane-fixed']);
-    var content = sectioned ? Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["wrapWithComponent"])(children, Section$2) : children;
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$43.Pane, fixed && styles$43['Pane-fixed']);
+    var content = sectioned ? Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["wrapWithComponent"])(children, Section$3) : children;
     return fixed ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
         { className: className },
@@ -5197,7 +5339,7 @@ var PopoverOverlay = function (_React$PureComponent) {
                 active = _props.active,
                 preventAutofocus = _props.preventAutofocus;
 
-            if (!active || preventAutofocus || !active || active === wasActive) {
+            if (!active || preventAutofocus || active === wasActive) {
                 return;
             }
             if (this.contentNode == null) {
@@ -5218,7 +5360,7 @@ var PopoverOverlay = function (_React$PureComponent) {
 
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 __WEBPACK_IMPORTED_MODULE_21_react_transition_group__["Transition"],
-                { 'in': active, timeout: 500 },
+                { 'in': active, timeout: 500, mountOnEnter: true, unmountOnExit: true },
                 this.renderOverlay
             );
         }
@@ -5232,9 +5374,6 @@ var PopoverOverlay = function (_React$PureComponent) {
                 _props2$preferredPosi = _props2.preferredPosition,
                 preferredPosition = _props2$preferredPosi === undefined ? 'below' : _props2$preferredPosi;
 
-            if (transitionStatus === 'exited') {
-                return null;
-            }
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(PositionedOverlay$1, { fullWidth: fullWidth, active: active, activator: activator, preferredPosition: preferredPosition, render: this.renderPopover.bind(this, transitionStatus), onScrollOut: this.handleScrollOut });
         }
     }, {
@@ -5251,13 +5390,13 @@ var PopoverOverlay = function (_React$PureComponent) {
                 sectioned = _props3.sectioned,
                 fullWidth = _props3.fullWidth;
 
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$42.Popover, transitionStatus && animationVariations(transitionStatus), positioning === 'above' && styles$42.positionedAbove, fullWidth && styles$42.fullWidth, measuring && styles$42.measuring);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$43.Popover, transitionStatus && animationVariations(transitionStatus), positioning === 'above' && styles$43.positionedAbove, fullWidth && styles$43.fullWidth, measuring && styles$43.measuring);
             this.transitionStatus = transitionStatus;
-            var tipMarkup = !measuring ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { style: { left: activatorRect.center.x - left }, className: styles$42.Tip }) : null;
+            var tipMarkup = !measuring ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { style: { left: activatorRect.center.x - left }, className: styles$43.Tip }) : null;
             var contentStyles = measuring ? undefined : { height: desiredHeight };
             var content = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { id: id, tabIndex: -1, className: styles$42.Content, style: contentStyles, ref: this.setContentNode },
+                { id: id, tabIndex: -1, className: styles$43.Content, style: contentStyles, ref: this.setContentNode },
                 renderPopoverContent(children, { sectioned: sectioned })
             );
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -5267,13 +5406,13 @@ var PopoverOverlay = function (_React$PureComponent) {
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(EventListener$1, { event: 'touchstart', handler: this.handleClick }),
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(KeypressListener$1, { keyCode: Keys.ESCAPE, handler: this.handleEscape }),
                 tipMarkup,
-                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$42.FocusTracker, tabIndex: 0, onFocus: this.handleFocusFirstItem }),
+                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$43.FocusTracker, tabIndex: 0, onFocus: this.handleFocusFirstItem }),
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$42.Wrapper },
+                    { className: styles$43.Wrapper },
                     content
                 ),
-                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$42.FocusTracker, tabIndex: 0, onFocus: this.handleFocusLastItem })
+                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$43.FocusTracker, tabIndex: 0, onFocus: this.handleFocusLastItem })
             );
         }
     }, {
@@ -5290,7 +5429,9 @@ var PopoverOverlay = function (_React$PureComponent) {
                 activator = _props4.activator,
                 onClose = _props4.onClose;
 
-            if (contentNode != null && Object(__WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__["nodeContainsDescendant"])(contentNode, target) || Object(__WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__["nodeContainsDescendant"])(activator, target) || this.transitionStatus !== 'entered') {
+            var isDescendant = contentNode != null && Object(__WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__["nodeContainsDescendant"])(contentNode, target);
+            var isActivatorDescendant = Object(__WEBPACK_IMPORTED_MODULE_20__shopify_javascript_utilities_dom__["nodeContainsDescendant"])(activator, target);
+            if (isDescendant || isActivatorDescendant || this.transitionStatus !== 'entered') {
                 return;
             }
             onClose(CloseSource.Click);
@@ -5320,14 +5461,14 @@ var PopoverOverlay = function (_React$PureComponent) {
     return PopoverOverlay;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "renderOverlay", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "renderPopover", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "setContentNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleClick", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleScrollOut", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleEscape", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleFocusFirstItem", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleFocusLastItem", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "renderOverlay", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "renderPopover", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "setContentNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleClick", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleScrollOut", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleEscape", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleFocusFirstItem", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], PopoverOverlay.prototype, "handleFocusLastItem", null);
 function renderPopoverContent(children, props) {
     var childrenArray = __WEBPACK_IMPORTED_MODULE_0_react__["Children"].toArray(children);
     if (Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["isElementOfType"])(childrenArray[0], Pane)) {
@@ -5338,13 +5479,13 @@ function renderPopoverContent(children, props) {
 function animationVariations(status) {
     switch (status) {
         case 'exiting':
-            return styles$42.exiting;
+            return styles$43.exiting;
         default:
             return null;
     }
 }
 
-var getUniqueID$4 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('Popover');
+var getUniqueID$4 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('Popover');
 var Popover$1 = function (_React$PureComponent) {
     __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(Popover, _React$PureComponent);
 
@@ -5378,7 +5519,7 @@ var Popover$1 = function (_React$PureComponent) {
                 onClose = _a.onClose,
                 activator = _a.activator,
                 activatorWrapper = _a.activatorWrapper,
-                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["children", "onClose", "activator", "activatorWrapper"]);
+                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["children", "onClose", "activator", "activatorWrapper"]);
             if (this.activatorNode == null) {
                 return null;
             }
@@ -5444,15 +5585,16 @@ var Popover$1 = function (_React$PureComponent) {
     return Popover;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 Popover$1.Pane = Pane;
-Popover$1.Section = Section$2;
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Popover$1.prototype, "handleClose", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Popover$1.prototype, "setActivator", null);
-Popover$1 = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["layeredComponent"])({ idPrefix: 'Popover' })], Popover$1);
+Popover$1.Section = Section$3;
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Popover$1.prototype, "handleClose", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Popover$1.prototype, "setActivator", null);
+Popover$1 = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["layeredComponent"])({ idPrefix: 'Popover' })], Popover$1);
 var Popover$2 = Popover$1;
 
-var styles$43 = {
+var styles$44 = {
   "Page": "Polaris-Page",
   "fullWidth": "Polaris-Page--fullWidth",
+  "singleColumn": "Polaris-Page--singleColumn",
   "Content": "Polaris-Page__Content",
   "Header": "Polaris-Page__Header",
   "Header-hasPagination": "Polaris-Page__Header--hasPagination",
@@ -5491,17 +5633,17 @@ function Action(_ref) {
 
     var iconMarkup = icon ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'span',
-        { className: styles$43.ActionIcon },
+        { className: styles$44.ActionIcon },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: icon })
     ) : null;
     var disclosureIconMarkup = disclosure ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'span',
-        { className: styles$43.ActionIcon },
+        { className: styles$44.ActionIcon },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'caretDown' })
     ) : null;
     var contentMarkup = iconMarkup || disclosureIconMarkup ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'span',
-        { className: styles$43.ActionContent },
+        { className: styles$44.ActionContent },
         iconMarkup,
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             'span',
@@ -5513,11 +5655,11 @@ function Action(_ref) {
     if (url) {
         return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             UnstyledLink$1,
-            { key: children, external: external, url: url, onMouseUp: handleMouseUpByBlurring, className: styles$43.Action, 'aria-label': accessibilityLabel },
+            { key: children, external: external, url: url, onMouseUp: handleMouseUpByBlurring, className: styles$44.Action, 'aria-label': accessibilityLabel },
             contentMarkup
         );
     }
-    var className = Object(__WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__["classNames"])(styles$43.Action, disabled && styles$43.disabled, icon && children == null && styles$43.iconOnly);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_3__shopify_react_utilities__["classNames"])(styles$44.Action, disabled && styles$44.disabled, icon && children == null && styles$44.iconOnly);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'button',
         { key: children, className: className, onClick: onAction, onMouseUp: handleMouseUpByBlurring, 'aria-label': accessibilityLabel, type: 'button', disabled: disabled },
@@ -5551,34 +5693,34 @@ var Header$1 = function (_React$PureComponent) {
                 separator = _props.separator,
                 secondaryActions = _props.secondaryActions;
 
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$43.Header, pagination && styles$43['Header-hasPagination'], separator && styles$43['Header-hasSeparator'], breadcrumbs && breadcrumbs.length && styles$43['Header-hasBreadcrumbs'], this.hasRollup && styles$43['Header-hasRollup'], secondaryActions && secondaryActions.length && styles$43['Header-hasSecondaryActions']);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$44.Header, pagination && styles$44['Header-hasPagination'], separator && styles$44['Header-hasSeparator'], breadcrumbs && breadcrumbs.length && styles$44['Header-hasBreadcrumbs'], this.hasRollup && styles$44['Header-hasRollup'], secondaryActions && secondaryActions.length && styles$44['Header-hasSecondaryActions']);
             var breadcrumbMarkup = breadcrumbs.length > 0 ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Breadcrumbs$1, { breadcrumbs: breadcrumbs }) : null;
             var primaryActionMarkup = primaryAction ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.PrimaryAction },
+                { className: styles$44.PrimaryAction },
                 buttonsFrom(primaryAction, { primary: true })
             ) : null;
             var paginationMarkup = pagination ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.Pagination },
+                { className: styles$44.Pagination },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Pagination$1, Object.assign({}, pagination, { plain: true }))
             ) : null;
             var nonPrimaryActionsMarkup = this.renderSecondaryActions();
             var actionsMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.Actions },
+                { className: styles$44.Actions },
                 primaryActionMarkup,
                 nonPrimaryActionsMarkup
             );
             var navigationMarkup = breadcrumbMarkup || paginationMarkup ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.Navigation },
+                { className: styles$44.Navigation },
                 breadcrumbMarkup,
                 paginationMarkup
             ) : null;
             var titleMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.Title },
+                { className: styles$44.Title },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     DisplayText$1,
                     { size: 'large', element: 'h1' },
@@ -5591,10 +5733,10 @@ var Header$1 = function (_React$PureComponent) {
                 navigationMarkup,
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$43.MainContent },
+                    { className: styles$44.MainContent },
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'div',
-                        { className: styles$43.TitleAndActions },
+                        { className: styles$44.TitleAndActions },
                         titleMarkup,
                         actionsMarkup
                     ),
@@ -5634,12 +5776,12 @@ var Header$1 = function (_React$PureComponent) {
 
                 var detailsMarkup = details ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$43.Details },
+                    { className: styles$44.Details },
                     details
                 ) : null;
                 return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$43.ActionGroup, key: 'ActionGroup-' + title },
+                    { className: styles$44.ActionGroup, key: 'ActionGroup-' + title },
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         Popover$2,
                         { key: title, active: title === openActionGroup, onClose: _this2.handleActionGroupClose.bind(_this2, title), activator: Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -5647,14 +5789,14 @@ var Header$1 = function (_React$PureComponent) {
                                 { disclosure: true, icon: icon, onAction: _this2.handleActionGroupOpen.bind(_this2, title) },
                                 title
                             ) },
-                        Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(ActionList$1, { items: actions }),
+                        Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(ActionList$1, { items: actions, onActionAnyItem: _this2.handleActionGroupClose.bind(_this2, title) }),
                         detailsMarkup
                     )
                 );
             }) : null;
             var rollupMarkup = this.hasRollup ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.Rollup },
+                { className: styles$44.Rollup },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     Popover$2,
                     { active: rollupOpen, onClose: this.handleRollupToggle, activator: Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -5662,16 +5804,16 @@ var Header$1 = function (_React$PureComponent) {
                             { disclosure: true, onClick: this.handleRollupToggle },
                             'Actions'
                         ) },
-                    Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(ActionList$1, { items: secondaryActions, sections: actionGroups.map(convertActionGroupToActionListSection) })
+                    Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(ActionList$1, { items: secondaryActions, sections: actionGroups.map(convertActionGroupToActionListSection), onActionAnyItem: this.handleRollupToggle })
                 )
             ) : null;
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$43.SecondaryActions },
+                { className: styles$44.SecondaryActions },
                 rollupMarkup,
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$43.IndividualActions },
+                    { className: styles$44.IndividualActions },
                     secondaryActionMarkup,
                     actionGroupsMarkup
                 )
@@ -5714,7 +5856,7 @@ var Header$1 = function (_React$PureComponent) {
     return Header;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Header$1.prototype, "handleRollupToggle", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Header$1.prototype, "handleRollupToggle", null);
 function convertActionGroupToActionListSection(_ref4) {
     var title = _ref4.title,
         actions = _ref4.actions;
@@ -5724,7 +5866,7 @@ function convertActionGroupToActionListSection(_ref4) {
 function secondaryActionsFrom(actions) {
     return actions.map(function (_a, index) {
         var content = _a.content,
-            action = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["content"]);
+            action = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["content"]);
         return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             Action,
             Object.assign({}, action, { key: 'Action-' + (content || index) }),
@@ -5770,8 +5912,9 @@ var Page$1 = function (_React$PureComponent) {
             var _a = this.props,
                 children = _a.children,
                 fullWidth = _a.fullWidth,
-                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["children", "fullWidth"]);
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$43.Page, fullWidth && styles$43.fullWidth);
+                singleColumn = _a.singleColumn,
+                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["children", "fullWidth", "singleColumn"]);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$44.Page, fullWidth && styles$44.fullWidth, singleColumn && styles$44.singleColumn);
             var headerMarkup = this.context.easdk || !this.hasHeaderContent() ? null : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Header$1, rest);
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
@@ -5779,7 +5922,7 @@ var Page$1 = function (_React$PureComponent) {
                 headerMarkup,
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$43.Content },
+                    { className: styles$44.Content },
                     children
                 )
             );
@@ -5811,7 +5954,7 @@ var Page$1 = function (_React$PureComponent) {
 
 Page$1.contextTypes = { easdk: __WEBPACK_IMPORTED_MODULE_12_prop_types__["object"] };
 
-var styles$44 = {
+var styles$45 = {
   "PageActions": "Polaris-PageActions",
   "skeletonShimmerAnimation": "Polaris-PageActions--skeletonShimmerAnimation",
 };
@@ -5829,7 +5972,7 @@ function PageActions$1(_ref) {
     var distribution = secondaryActionsMarkup ? 'equalSpacing' : 'trailing';
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$44.PageActions },
+        { className: styles$45.PageActions },
         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
             Stack$1,
             { distribution: distribution, spacing: 'tight' },
@@ -5839,7 +5982,7 @@ function PageActions$1(_ref) {
     );
 }
 
-var styles$45 = {
+var styles$46 = {
   "Thumbnail": "Polaris-Thumbnail",
   "sizeSmall": "Polaris-Thumbnail--sizeSmall",
   "sizeMedium": "Polaris-Thumbnail--sizeMedium",
@@ -5854,15 +5997,15 @@ function Thumbnail$1(_ref) {
         _ref$size = _ref.size,
         size = _ref$size === undefined ? 'medium' : _ref$size;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$45.Thumbnail, size && styles$45[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('size', size)]);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$46.Thumbnail, size && styles$46[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('size', size)]);
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'span',
         { className: className },
-        Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Image$1, { alt: alt, source: source, className: styles$45.Image })
+        Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Image$1, { alt: alt, source: source, className: styles$46.Image })
     );
 }
 
-var styles$46 = {
+var styles$47 = {
   "ResourceList": "Polaris-ResourceList",
   "ItemWrapper": "Polaris-ResourceList__ItemWrapper",
   "Item": "Polaris-ResourceList__Item",
@@ -5894,9 +6037,9 @@ var styles$46 = {
   "skeletonShimmerAnimation": "Polaris-ResourceList--skeletonShimmerAnimation",
 };
 
-var getUniqueID$5 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('ResourceListItem');
+var getUniqueID$5 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('ResourceListItem');
 
-var Item$6 = function (_React$PureComponent) {
+var Item$8 = function (_React$PureComponent) {
     __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(Item, _React$PureComponent);
 
     function Item() {
@@ -5933,22 +6076,22 @@ var Item$6 = function (_React$PureComponent) {
 
             var attributeTwoMarkup = attributeTwo ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$46.AttributeTwo },
+                { className: styles$47.AttributeTwo },
                 attributeTwo
             ) : null;
             var badgeMarkup = badges ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$46.Badge },
+                { className: styles$47.Badge },
                 badges.map(renderBadge)
             ) : null;
             var attributeThreeMarkup = attributeThree ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$46.AttributeThree },
+                { className: styles$47.AttributeThree },
                 attributeThree
             ) : null;
             var exceptionsMarkup = exceptions ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'ul',
-                { className: styles$46.ExceptionList },
+                { className: styles$47.ExceptionList },
                 exceptions.map(renderException)
             ) : null;
             var mediaSize = null;
@@ -5965,18 +6108,18 @@ var Item$6 = function (_React$PureComponent) {
                 }
                 mediaMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$46.Media },
+                    { className: styles$47.Media },
                     media
                 );
             }
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$46.Item, url && styles$46['Item-link'], focused && styles$46['Item-focused'], persistActions && styles$46['Item-persistActions'], mediaType && styles$46[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('Item-media', mediaType)], mediaSize && styles$46[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('Item-size', mediaSize)]);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$47.Item, url && styles$47['Item-link'], focused && styles$47['Item-focused'], persistActions && styles$47['Item-persistActions'], mediaType && styles$47[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('Item-media', mediaType)], mediaSize && styles$47[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('Item-size', mediaSize)]);
             var actionsMarkup = null;
             var disclosureMarkup = null;
             if (actions) {
                 if (persistActions) {
                     actionsMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'div',
-                        { className: styles$46.Actions },
+                        { className: styles$47.Actions },
                         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                             ButtonGroup$1,
                             null,
@@ -5985,7 +6128,7 @@ var Item$6 = function (_React$PureComponent) {
                     );
                     disclosureMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'div',
-                        { className: styles$46.Disclosure },
+                        { className: styles$47.Disclosure },
                         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                             Popover$2,
                             { activator: Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Button$1, { 'aria-label': 'Actions dropdown', onClick: this.handleClick, plain: true, icon: 'horizontalDots' }), onClose: this.handleCloseRequest, active: actionsMenuVisible },
@@ -5995,7 +6138,7 @@ var Item$6 = function (_React$PureComponent) {
                 } else {
                     actionsMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'div',
-                        { className: styles$46.Actions },
+                        { className: styles$47.Actions },
                         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                             ButtonGroup$1,
                             { segmented: true },
@@ -6006,17 +6149,17 @@ var Item$6 = function (_React$PureComponent) {
             }
             var containerMarkup = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$46.Container, id: this.id },
+                { className: styles$47.Container, id: this.id },
                 mediaMarkup,
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
-                    { className: styles$46.Content },
+                    { className: styles$47.Content },
                     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                         'div',
-                        { className: styles$46.Attributes },
+                        { className: styles$47.Attributes },
                         Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                             'p',
-                            { className: styles$46.AttributeOne },
+                            { className: styles$47.AttributeOne },
                             attributeOne
                         ),
                         attributeTwoMarkup,
@@ -6031,7 +6174,7 @@ var Item$6 = function (_React$PureComponent) {
             return url ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
                 { ref: this.setNode, className: className, onFocus: this.handleFocus, onBlur: this.handleBlur, onMouseEnter: this.mouseEnter, onMouseLeave: this.mouseLeave },
-                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(UnstyledLink$1, { 'aria-describedby': this.id, className: styles$46.Link, url: url }),
+                Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(UnstyledLink$1, { 'aria-describedby': this.id, className: styles$47.Link, url: url }),
                 containerMarkup
             ) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
@@ -6081,13 +6224,13 @@ var Item$6 = function (_React$PureComponent) {
     return Item;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "setNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "handleFocus", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "handleBlur", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "mouseEnter", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "mouseLeave", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "handleClick", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$6.prototype, "handleCloseRequest", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "setNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "handleFocus", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "handleBlur", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "mouseEnter", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "mouseLeave", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "handleClick", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "handleCloseRequest", null);
 function renderBadge(badge) {
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         Badge$1,
@@ -6100,15 +6243,15 @@ function renderException(exception, index) {
         title = exception.title,
         description = exception.description;
 
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$46.ExceptionItem, status && styles$46[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('ExceptionItem-status', status)]);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$47.ExceptionItem, status && styles$47[Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["variationName"])('ExceptionItem-status', status)]);
     var titleMarkup = title != null ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$46.Title },
+        { className: styles$47.Title },
         title
     ) : null;
     var descriptionMarkup = description != null ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
         'div',
-        { className: styles$46.Description },
+        { className: styles$47.Description },
         description
     ) : null;
     return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -6135,18 +6278,22 @@ var ResourceList$1 = function (_React$PureComponent) {
 
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'ul',
-                { className: styles$46.ResourceList },
+                { className: styles$47.ResourceList },
                 items.map(this.renderItem)
             );
         }
     }, {
         key: 'renderItem',
         value: function renderItem(item, index) {
-            var renderItem = this.props.renderItem;
+            var _props = this.props,
+                renderItem = _props.renderItem,
+                _props$idForItem = _props.idForItem,
+                idForItem = _props$idForItem === undefined ? defaultIdForItem : _props$idForItem;
 
+            var key = idForItem(item, index);
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'li',
-                { key: index, className: styles$46.ItemWrapper },
+                { key: key, className: styles$47.ItemWrapper },
                 renderItem(item, index)
             );
         }
@@ -6155,10 +6302,13 @@ var ResourceList$1 = function (_React$PureComponent) {
     return ResourceList;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-ResourceList$1.Item = Item$6;
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ResourceList$1.prototype, "renderItem", null);
+ResourceList$1.Item = Item$8;
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], ResourceList$1.prototype, "renderItem", null);
+function defaultIdForItem(item, index) {
+    return item.hasOwnProperty('id') ? item.id : index;
+}
 
-var styles$47 = {
+var styles$48 = {
   "Select": "Polaris-Select",
   "disabled": "Polaris-Select--disabled",
   "Backdrop": "Polaris-Select__Backdrop",
@@ -6170,7 +6320,7 @@ var styles$47 = {
 };
 
 var PLACEHOLDER_VALUE = '__placeholder__';
-var getUniqueID$6 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('Select');
+var getUniqueID$6 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('Select');
 function Select$1(_ref) {
     var _ref$id = _ref.id,
         id = _ref$id === undefined ? getUniqueID$6() : _ref$id,
@@ -6196,7 +6346,7 @@ function Select$1(_ref) {
         optionsMarkup = groups.map(renderGroup);
     }
     var isPlaceholder = value == null && placeholder != null;
-    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$47.Select, error && styles$47.error, disabled && styles$47.disabled, isPlaceholder && styles$47.placeholder);
+    var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$48.Select, error && styles$48.error, disabled && styles$48.disabled, isPlaceholder && styles$48.placeholder);
     var handleChange = onChange ? function (event) {
         return onChange(event.currentTarget.value, id);
     } : undefined;
@@ -6220,16 +6370,16 @@ function Select$1(_ref) {
             { className: className },
             Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'select',
-                { id: id, name: name, defaultValue: defaultValue, value: finalValue, className: styles$47.Input, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: handleChange, 'aria-invalid': Boolean(error), 'aria-describedby': describedBy.length ? describedBy.join(' ') : undefined },
+                { id: id, name: name, defaultValue: defaultValue, value: finalValue, className: styles$48.Input, disabled: disabled, onFocus: onFocus, onBlur: onBlur, onChange: handleChange, 'aria-invalid': Boolean(error), 'aria-describedby': describedBy.length ? describedBy.join(' ') : undefined },
                 placeholderOption,
                 optionsMarkup
             ),
             Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
-                { className: styles$47.Icon },
+                { className: styles$48.Icon },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'arrowUpDown' })
             ),
-            Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$47.Backdrop })
+            Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])('div', { className: styles$48.Backdrop })
         )
     );
 }
@@ -6279,7 +6429,7 @@ function SettingToggle$1(_ref) {
     );
 }
 
-var styles$48 = {
+var styles$49 = {
   "Tabs": "Polaris-Tabs",
   "fitted": "Polaris-Tabs--fitted",
   "TabContainer": "Polaris-Tabs__TabContainer",
@@ -6297,7 +6447,7 @@ var styles$48 = {
   "skeletonShimmerAnimation": "Polaris-Tabs--skeletonShimmerAnimation",
 };
 
-var Item$8 = function (_React$PureComponent) {
+var Item$10 = function (_React$PureComponent) {
     __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(Item, _React$PureComponent);
 
     function Item() {
@@ -6337,10 +6487,10 @@ var Item$8 = function (_React$PureComponent) {
                 children = _props.children,
                 panelID = _props.panelID,
                 _props$onClick = _props.onClick,
-                onClick = _props$onClick === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props$onClick,
+                onClick = _props$onClick === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props$onClick,
                 accessibilityLabel = _props.accessibilityLabel;
 
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$48.Item);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$49.Item);
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'li',
                 { role: 'presentation' },
@@ -6361,7 +6511,7 @@ var Item$8 = function (_React$PureComponent) {
     return Item;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$8.prototype, "setFocusedNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$10.prototype, "setFocusedNode", null);
 
 var List$2 = function (_React$PureComponent) {
     __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(List, _React$PureComponent);
@@ -6379,23 +6529,19 @@ var List$2 = function (_React$PureComponent) {
                 focusIndex = _props.focusIndex,
                 disclosureTabs = _props.disclosureTabs,
                 _props$onClick = _props.onClick,
-                onClick = _props$onClick === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props$onClick;
+                onClick = _props$onClick === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props$onClick;
 
-            var tabs = disclosureTabs.map(function (_ref, index) {
-                var id = _ref.id,
-                    panelID = _ref.panelID,
-                    title = _ref.title,
-                    accessibilityLabel = _ref.accessibilityLabel;
-
+            var tabs = disclosureTabs.map(function (tab, index) {
+                var tabContent = getTabContent(tab);
                 return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-                    Item$8,
-                    { key: id, id: id, panelID: panelID, focused: index === focusIndex, accessibilityLabel: accessibilityLabel, onClick: onClick.bind(null, id) },
-                    title
+                    Item$10,
+                    { key: tab.id, id: tab.id, panelID: tab.panelID, focused: index === focusIndex, accessibilityLabel: tab.accessibilityLabel, onClick: onClick.bind(null, tab.id) },
+                    tabContent
                 );
             });
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'ul',
-                { className: styles$48.List, onKeyDown: handleKeyDown$2, onKeyUp: this.handleKeypress },
+                { className: styles$49.List, onKeyDown: handleKeyDown$2, onKeyUp: this.handleKeypress },
                 tabs
             );
         }
@@ -6403,7 +6549,7 @@ var List$2 = function (_React$PureComponent) {
         key: 'handleKeypress',
         value: function handleKeypress(event) {
             var _props$onKeyPress = this.props.onKeyPress,
-                onKeyPress = _props$onKeyPress === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props$onKeyPress;
+                onKeyPress = _props$onKeyPress === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props$onKeyPress;
 
             onKeyPress(event);
         }
@@ -6412,7 +6558,7 @@ var List$2 = function (_React$PureComponent) {
     return List;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], List$2.prototype, "handleKeypress", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], List$2.prototype, "handleKeypress", null);
 function handleKeyDown$2(event) {
     var key = event.key;
 
@@ -6496,7 +6642,7 @@ var Tab = function (_React$PureComponent) {
                 accessibilityLabel = _props3.accessibilityLabel;
 
             var handleClick = onClick && onClick.bind(null, id);
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$48.Tab, selected && styles$48['Tab-selected']);
+            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$49.Tab, selected && styles$49['Tab-selected']);
             var tabIndex = void 0;
             if (selected && !siblingTabHasFocus && !measuring) {
                 tabIndex = 0;
@@ -6510,7 +6656,7 @@ var Tab = function (_React$PureComponent) {
                 { id: id, url: url, role: 'tab', tabIndex: tabIndex, onClick: handleClick, className: className, 'aria-selected': selected, 'aria-controls': panelID, 'aria-label': accessibilityLabel, onMouseUp: handleMouseUpByBlurring },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'span',
-                    { className: styles$48.Title },
+                    { className: styles$49.Title },
                     children
                 )
             ) : Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -6518,13 +6664,13 @@ var Tab = function (_React$PureComponent) {
                 { id: id, role: 'tab', tabIndex: tabIndex, className: className, onClick: handleClick, 'aria-selected': selected, 'aria-controls': panelID, 'aria-label': accessibilityLabel, onMouseUp: handleMouseUpByBlurring },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'span',
-                    { className: styles$48.Title },
+                    { className: styles$49.Title },
                     children
                 )
             );
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'li',
-                { role: 'presentation', className: styles$48.TabContainer, ref: this.setNode },
+                { role: 'presentation', className: styles$49.TabContainer, ref: this.setNode },
                 markup
             );
         }
@@ -6538,7 +6684,7 @@ var Tab = function (_React$PureComponent) {
     return Tab;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tab.prototype, "setNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tab.prototype, "setNode", null);
 function focusPanelID(panelID) {
     var panel = document.getElementById(panelID);
     if (panel) {
@@ -6586,13 +6732,14 @@ var TabMeasurer = function (_React$PureComponent) {
                 siblingTabHasFocus = _props.siblingTabHasFocus;
 
             var tabsMarkup = tabs.map(function (tab, index) {
+                var tabContent = getTabContent(tab);
                 return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     Tab,
-                    { measuring: true, key: '' + index + tab.id + 'Hidden', id: tab.id + 'Measurer', siblingTabHasFocus: siblingTabHasFocus, focused: index === tabToFocus, selected: index === selected, onClick: __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"], url: tab.url },
-                    tab.title
+                    { measuring: true, key: '' + index + tab.id + 'Hidden', id: tab.id + 'Measurer', siblingTabHasFocus: siblingTabHasFocus, focused: index === tabToFocus, selected: index === selected, onClick: __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"], url: tab.url },
+                    tabContent
                 );
             });
-            var classname = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$48.Tabs, styles$48.TabMeasurer);
+            var classname = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$49.Tabs, styles$49.TabMeasurer);
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'div',
                 { className: classname, ref: this.setContainerNode },
@@ -6632,8 +6779,8 @@ var TabMeasurer = function (_React$PureComponent) {
     return TabMeasurer;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TabMeasurer.prototype, "setContainerNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TabMeasurer.prototype, "handleMeasurement", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TabMeasurer.prototype, "setContainerNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TabMeasurer.prototype, "handleMeasurement", null);
 
 function Panel(_ref) {
   var id = _ref.id,
@@ -6642,7 +6789,7 @@ function Panel(_ref) {
 
   return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'div',
-    { className: styles$48.Panel, id: id, role: 'tabpanel', 'aria-labelledby': tabID, tabIndex: -1 },
+    { className: styles$49.Panel, id: id, role: 'tabpanel', 'aria-labelledby': tabID, tabIndex: -1 },
     children
   );
 }
@@ -6718,11 +6865,11 @@ var Tabs$1 = function (_React$PureComponent) {
                 return _this2.renderTabMarkup(tabs[tabIndex], tabIndex);
             });
             var disclosureActivatorVisible = visibleTabs.length < tabs.length;
-            var classname = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$48.Tabs, fitted && styles$48.fitted, disclosureActivatorVisible && styles$48.fillSpace);
-            var disclosureTabClassName = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$48.DisclosureTab, disclosureActivatorVisible && styles$48['DisclosureTab-visible']);
+            var classname = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$49.Tabs, fitted && styles$49.fitted, disclosureActivatorVisible && styles$49.fillSpace);
+            var disclosureTabClassName = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$49.DisclosureTab, disclosureActivatorVisible && styles$49['DisclosureTab-visible']);
             var activator = Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 'button',
-                { tabIndex: -1, className: styles$48.DisclosureActivator, onClick: this.handleDisclosureActivatorClick },
+                { tabIndex: -1, className: styles$49.DisclosureActivator, onClick: this.handleDisclosureActivatorClick },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'horizontalDots' })
             );
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -6780,10 +6927,11 @@ var Tabs$1 = function (_React$PureComponent) {
             var selected = this.props.selected;
             var tabToFocus = this.state.tabToFocus;
 
+            var tabContent = getTabContent(tab);
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 Tab,
                 { key: index + '-' + tab.id, id: tab.id, siblingTabHasFocus: tabToFocus > -1, focused: index === tabToFocus, selected: index === selected, onClick: this.handleTabClick, panelID: tab.panelID || tab.id + '-panel', accessibilityLabel: tab.accessibilityLabel, url: tab.url },
-                tab.title
+                tabContent
             );
         }
     }, {
@@ -6796,7 +6944,7 @@ var Tabs$1 = function (_React$PureComponent) {
             // move the focus to it
 
             var target = event.target;
-            if (target.classList.contains(styles$48.Tab) || target.classList.contains(styles$48.Item)) {
+            if (target.classList.contains(styles$49.Tab) || target.classList.contains(styles$49.Item)) {
                 var tabToFocus = -1;
                 tabs.every(function (tab, index) {
                     if (tab.id === target.id) {
@@ -6808,7 +6956,7 @@ var Tabs$1 = function (_React$PureComponent) {
                 this.setState({ tabToFocus: tabToFocus });
                 return;
             }
-            if (target.classList.contains(styles$48.DisclosureActivator)) {
+            if (target.classList.contains(styles$49.DisclosureActivator)) {
                 return;
             }
             // If we are coming in from somewhere other than another tab, focus the
@@ -6819,7 +6967,7 @@ var Tabs$1 = function (_React$PureComponent) {
                 return;
             }
             var relatedTarget = event.relatedTarget;
-            if (!relatedTarget.classList.contains(styles$48.Tab) && !relatedTarget.classList.contains(styles$48.Item) && !relatedTarget.classList.contains(styles$48.DisclosureActivator)) {
+            if (!relatedTarget.classList.contains(styles$49.Tab) && !relatedTarget.classList.contains(styles$49.Item) && !relatedTarget.classList.contains(styles$49.DisclosureActivator)) {
                 this.setState({ tabToFocus: selected });
             }
         }
@@ -6833,7 +6981,7 @@ var Tabs$1 = function (_React$PureComponent) {
             }
             var target = event.relatedTarget;
             // If we are going to anywhere other than another tab, lose the last focused tab
-            if (!target.classList.contains(styles$48.Tab) && !target.classList.contains(styles$48.Item)) {
+            if (!target.classList.contains(styles$49.Tab) && !target.classList.contains(styles$49.Item)) {
                 this.setState({ tabToFocus: -1 });
             }
         }
@@ -6882,7 +7030,7 @@ var Tabs$1 = function (_React$PureComponent) {
             var _props4 = this.props,
                 tabs = _props4.tabs,
                 _props4$onSelect = _props4.onSelect,
-                onSelect = _props4$onSelect === undefined ? __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"] : _props4$onSelect;
+                onSelect = _props4$onSelect === undefined ? __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"] : _props4$onSelect;
 
             var tab = tabs.find(function (aTab) {
                 return aTab.id === id;
@@ -6899,14 +7047,14 @@ var Tabs$1 = function (_React$PureComponent) {
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
 Tabs$1.Panel = Panel;
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleKeyPress", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "renderTabMarkup", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleFocus", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleBlur", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleDisclosureActivatorClick", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleClose", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleMeasurement", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleTabClick", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleKeyPress", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "renderTabMarkup", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleFocus", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleBlur", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleDisclosureActivatorClick", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleClose", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleMeasurement", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tabs$1.prototype, "handleTabClick", null);
 function handleKeyDown$1(event) {
     var key = event.key;
 
@@ -6925,7 +7073,7 @@ function getVisibleAndHiddenTabIndices(tabs, selected, disclosureWidth, tabWidth
     var visibleTabs = [];
     var hiddenTabs = [];
     if (containerWidth > sumTabWidths) {
-        visibleTabs.push.apply(visibleTabs, __WEBPACK_IMPORTED_MODULE_11_babel_runtime_helpers_toConsumableArray___default()(arrayOfTabIndices));
+        visibleTabs.push.apply(visibleTabs, __WEBPACK_IMPORTED_MODULE_10_babel_runtime_helpers_toConsumableArray___default()(arrayOfTabIndices));
     } else {
         visibleTabs.push(selected);
         var newTabWidth = tabWidths[selected];
@@ -6945,8 +7093,20 @@ function getVisibleAndHiddenTabIndices(tabs, selected, disclosureWidth, tabWidth
         hiddenTabs: hiddenTabs
     };
 }
+function getTabContent(tab) {
+    if (isTabWithTitle(tab)) {
+        // tslint:disable-next-line no-console
+        console.warn('The `title` property on Tabs has been deprecated. Use `content` instead.');
+        return tab.title;
+    } else {
+        return tab.content;
+    }
+}
+function isTabWithTitle(tab) {
+    return tab.hasOwnProperty('title');
+}
 
-var styles$49 = {
+var styles$50 = {
   "Tag": "Polaris-Tag",
   "Button": "Polaris-Tag__Button",
   "skeletonShimmerAnimation": "Polaris-Tag--skeletonShimmerAnimation",
@@ -6958,7 +7118,7 @@ function Tag$1(_ref) {
 
   return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
     'span',
-    { className: styles$49.Tag },
+    { className: styles$50.Tag },
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
       'span',
       null,
@@ -6966,102 +7126,10 @@ function Tag$1(_ref) {
     ),
     Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
       'button',
-      { 'aria-label': 'Remove', className: styles$49.Button, onClick: onRemove, onMouseUp: handleMouseUpByBlurring },
+      { 'aria-label': 'Remove', className: styles$50.Button, onClick: onRemove, onMouseUp: handleMouseUpByBlurring },
       Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(Icon$1, { source: 'cancelSmall' })
     )
   );
-}
-
-var styles$50 = {
-  "Connected": "Polaris-Connected",
-  "Item": "Polaris-Connected__Item",
-  "Item-primary": "Polaris-Connected__Item--primary",
-  "Item-connection": "Polaris-Connected__Item--connection",
-  "Item-focused": "Polaris-Connected__Item--focused",
-  "skeletonShimmerAnimation": "Polaris-Connected--skeletonShimmerAnimation",
-};
-
-var Position;
-(function (Position) {
-    Position[Position["Left"] = 0] = "Left";
-    Position[Position["Primary"] = 1] = "Primary";
-    Position[Position["Right"] = 2] = "Right";
-})(Position || (Position = {}));
-
-var Item$10 = function (_React$PureComponent) {
-    __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(Item, _React$PureComponent);
-
-    function Item() {
-        __WEBPACK_IMPORTED_MODULE_4_babel_runtime_helpers_classCallCheck___default()(this, Item);
-
-        var _this = __WEBPACK_IMPORTED_MODULE_6_babel_runtime_helpers_possibleConstructorReturn___default()(this, (Item.__proto__ || Object.getPrototypeOf(Item)).apply(this, arguments));
-
-        _this.state = { focused: false };
-        return _this;
-    }
-
-    __WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass___default()(Item, [{
-        key: 'render',
-        value: function render() {
-            var focused = this.state.focused;
-            var _props = this.props,
-                children = _props.children,
-                position = _props.position;
-
-            var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$50.Item, focused && styles$50['Item-focused'], position === Position.Primary ? styles$50['Item-primary'] : styles$50['Item-connection']);
-            return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-                'div',
-                { onBlur: this.handleBlur, onFocus: this.handleFocus, className: className },
-                children
-            );
-        }
-    }, {
-        key: 'handleBlur',
-        value: function handleBlur() {
-            this.setState({ focused: false });
-        }
-    }, {
-        key: 'handleFocus',
-        value: function handleFocus() {
-            this.setState({ focused: true });
-        }
-    }]);
-
-    return Item;
-}(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
-
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$10.prototype, "handleBlur", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Item$10.prototype, "handleFocus", null);
-
-function Connected$1(_ref) {
-    var children = _ref.children,
-        left = _ref.left,
-        right = _ref.right;
-
-    if (left == null && right == null) {
-        return __WEBPACK_IMPORTED_MODULE_0_react__["Children"].only(children);
-    }
-    var leftConnectionMarkup = left ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-        Item$10,
-        { position: Position.Left },
-        left
-    ) : null;
-    var rightConnectionMarkup = right ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-        Item$10,
-        { position: Position.Right },
-        right
-    ) : null;
-    return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-        'div',
-        { className: styles$50.Connected },
-        leftConnectionMarkup,
-        Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
-            Item$10,
-            { position: Position.Primary },
-            children
-        ),
-        rightConnectionMarkup
-    );
 }
 
 var styles$51 = {
@@ -7160,9 +7228,9 @@ var Resizer = function (_React$PureComponent) {
     return Resizer;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Resizer.prototype, "handleHeightCheck", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Resizer.prototype, "setContentNode", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Resizer.prototype, "setMinimumLinesNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Resizer.prototype, "handleHeightCheck", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Resizer.prototype, "setContentNode", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Resizer.prototype, "setMinimumLinesNode", null);
 var ENTITIES_TO_REPLACE = {
     '&': '&amp;',
     '<': '&lt;',
@@ -7217,7 +7285,7 @@ function Spinner$2(_ref) {
   );
 }
 
-var getUniqueID$7 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('TextField');
+var getUniqueID$7 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('TextField');
 
 var TextField$1 = function (_React$PureComponent) {
     __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(TextField, _React$PureComponent);
@@ -7236,6 +7304,15 @@ var TextField$1 = function (_React$PureComponent) {
     }
 
     __WEBPACK_IMPORTED_MODULE_5_babel_runtime_helpers_createClass___default()(TextField, [{
+        key: 'componentDidUpdate',
+        value: function componentDidUpdate(_ref) {
+            var focused = _ref.focused;
+
+            if (this.input && focused !== this.props.focused && this.props.focused === true) {
+                this.input.focus();
+            }
+        }
+    }, {
         key: 'componentWillReceiveProps',
         value: function componentWillReceiveProps(newProps) {
             this.setState({
@@ -7269,7 +7346,8 @@ var TextField$1 = function (_React$PureComponent) {
                 onFocus = _a.onFocus,
                 onBlur = _a.onBlur,
                 autoComplete = _a.autoComplete,
-                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__rest"])(_a, ["id", "value", "placeholder", "disabled", "readOnly", "autoFocus", "type", "name", "error", "multiline", "connectedRight", "connectedLeft", "label", "labelAction", "labelHidden", "helpText", "prefix", "suffix", "onFocus", "onBlur", "autoComplete"]);var height = this.state.height;
+                focused = _a.focused,
+                rest = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["b" /* __rest */])(_a, ["id", "value", "placeholder", "disabled", "readOnly", "autoFocus", "type", "name", "error", "multiline", "connectedRight", "connectedLeft", "label", "labelAction", "labelHidden", "helpText", "prefix", "suffix", "onFocus", "onBlur", "autoComplete", "focused"]);var height = this.state.height;
 
             var className = Object(__WEBPACK_IMPORTED_MODULE_1__shopify_react_utilities_styles__["classNames"])(styles$51.TextField, Boolean(value) && styles$51.hasValue, disabled && styles$51.disabled, readOnly && styles$51.readOnly, error && styles$51.error, multiline && styles$51.multiline, this.state.focus && styles$51.focus);
             var prefixMarkup = prefix ? Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
@@ -7392,13 +7470,13 @@ var TextField$1 = function (_React$PureComponent) {
     return TextField;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "setInput", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleNumberChange", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleExpandingResize", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleChange", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleFocus", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleBlur", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleClick", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "setInput", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleNumberChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleExpandingResize", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleChange", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleFocus", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleBlur", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TextField$1.prototype, "handleClick", null);
 function normalizeAutoComplete(autoComplete) {
     if (autoComplete == null) {
         return autoComplete;
@@ -7481,13 +7559,13 @@ var TooltipOverlay = function (_React$PureComponent) {
     return TooltipOverlay;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
 
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TooltipOverlay.prototype, "renderOverlay", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TooltipOverlay.prototype, "renderTooltip", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TooltipOverlay.prototype, "renderOverlay", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], TooltipOverlay.prototype, "renderTooltip", null);
 function calculateTipPosition(activatorRectXAxisCenter, left) {
     return { left: activatorRectXAxisCenter - left };
 }
 
-var getUniqueID$8 = Object(__WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["createUniqueIDFactory"])('TooltipContent');
+var getUniqueID$8 = Object(__WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["createUniqueIDFactory"])('TooltipContent');
 var Tooltip$1 = function (_React$PureComponent) {
     __WEBPACK_IMPORTED_MODULE_7_babel_runtime_helpers_inherits___default()(Tooltip, _React$PureComponent);
 
@@ -7531,7 +7609,7 @@ var Tooltip$1 = function (_React$PureComponent) {
 
             return Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                 TooltipOverlay,
-                { id: id, preferredPosition: preferredPosition, activator: activatorNode, active: active || this.state.active, onClose: __WEBPACK_IMPORTED_MODULE_10__shopify_javascript_utilities_other__["noop"], light: light },
+                { id: id, preferredPosition: preferredPosition, activator: activatorNode, active: active || this.state.active, onClose: __WEBPACK_IMPORTED_MODULE_11__shopify_javascript_utilities_other__["noop"], light: light },
                 Object(__WEBPACK_IMPORTED_MODULE_0_react__["createElement"])(
                     'div',
                     { className: styles$52.Label },
@@ -7600,12 +7678,12 @@ var Tooltip$1 = function (_React$PureComponent) {
 
     return Tooltip;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["PureComponent"]);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "setActivator", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleFocus", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleBlur", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleMouseEnter", null);
-Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleMouseLeave", null);
-Tooltip$1 = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["__decorate"])([Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["layeredComponent"])({ idPrefix: 'Tooltip' })], Tooltip$1);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "setActivator", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleFocus", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleBlur", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleMouseEnter", null);
+Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([__WEBPACK_IMPORTED_MODULE_9__shopify_javascript_utilities_decorators__["autobind"]], Tooltip$1.prototype, "handleMouseLeave", null);
+Tooltip$1 = Object(__WEBPACK_IMPORTED_MODULE_2_tslib__["a" /* __decorate */])([Object(__WEBPACK_IMPORTED_MODULE_8__shopify_react_utilities_components__["layeredComponent"])({ idPrefix: 'Tooltip' })], Tooltip$1);
 var Tooltip$2 = Tooltip$1;
 
 var styles$53 = {
@@ -8203,7 +8281,7 @@ module.exports = isIndex;
 /* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var toFinite = __webpack_require__(290);
+var toFinite = __webpack_require__(291);
 
 /**
  * Converts `value` to an integer.
@@ -8313,11 +8391,11 @@ if (process.env.NODE_ENV !== 'production') {
   // By explicitly using `prop-types` you are opting into new development behavior.
   // http://fb.me/prop-types-in-prod
   var throwOnDirectAccess = true;
-  module.exports = __webpack_require__(423)(isValidElement, throwOnDirectAccess);
+  module.exports = __webpack_require__(424)(isValidElement, throwOnDirectAccess);
 } else {
   // By explicitly using `prop-types` you are opting into new production behavior.
   // http://fb.me/prop-types-in-prod
-  module.exports = __webpack_require__(424)();
+  module.exports = __webpack_require__(425)();
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
@@ -8478,7 +8556,7 @@ module.exports = function(exec){
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.14 / 15.2.3.14 Object.keys(O)
-var $keys       = __webpack_require__(115)
+var $keys       = __webpack_require__(116)
   , enumBugKeys = __webpack_require__(71);
 
 module.exports = Object.keys || function keys(O){
@@ -8499,8 +8577,8 @@ module.exports = function(key){
 /* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayLikeKeys = __webpack_require__(243),
-    baseKeys = __webpack_require__(249),
+var arrayLikeKeys = __webpack_require__(244),
+    baseKeys = __webpack_require__(250),
     isArrayLike = __webpack_require__(49);
 
 /**
@@ -8593,11 +8671,11 @@ module.exports = nativeCreate;
 /* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var listCacheClear = __webpack_require__(266),
-    listCacheDelete = __webpack_require__(267),
-    listCacheGet = __webpack_require__(268),
-    listCacheHas = __webpack_require__(269),
-    listCacheSet = __webpack_require__(270);
+var listCacheClear = __webpack_require__(267),
+    listCacheDelete = __webpack_require__(268),
+    listCacheGet = __webpack_require__(269),
+    listCacheHas = __webpack_require__(270),
+    listCacheSet = __webpack_require__(271);
 
 /**
  * Creates an list cache object.
@@ -8701,7 +8779,7 @@ module.exports = eq;
 /* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isKeyable = __webpack_require__(272);
+var isKeyable = __webpack_require__(273);
 
 /**
  * Gets the data for `map`.
@@ -8726,7 +8804,7 @@ module.exports = getMapData;
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
-    isObjectLike = __webpack_require__(11);
+    isObjectLike = __webpack_require__(10);
 
 /** `Object#toString` result references. */
 var symbolTag = '[object Symbol]';
@@ -8861,8 +8939,8 @@ module.exports = createCtor;
 
 var isArray = __webpack_require__(5),
     isKey = __webpack_require__(98),
-    stringToPath = __webpack_require__(382),
-    toString = __webpack_require__(384);
+    stringToPath = __webpack_require__(383),
+    toString = __webpack_require__(385);
 
 /**
  * Casts `value` to a path array if it's not one.
@@ -8893,44 +8971,58 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var classes = {
-  AndSelector: "\nclass AndSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.all? do |selector|\n      selector.nil? || selector.match?(item) \n    end\n  end\nend",
+  Campaign: "\nclass Campaign\n  def initialize(condition, *qualifiers)\n    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym\n    @qualifiers = qualifiers.compact\n  end\n  \n  def qualifies?(cart)\n    return true if @qualifiers.empty?\n    @qualifiers.send(@condition) do |qualifier|\n      if qualifier.is_a?(Selector)\n        raise \"Missing line item match type\" if @li_match_type.nil?\n        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }\n      else\n        qualifier.match?(cart)\n      end\n    end\n  end\nend",
 
-  OrSelector: "\nclass OrSelector\n  def initialize(*selectors)\n    @selectors = selectors\n  end\n\n  def match?(item)\n    @selectors.any? do |selector|\n      next if selector.nil?\n      return selector.match?(item) \n    end\n  end\nend",
+  Qualifier: "\nclass Qualifier\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\n\n  def compare_amounts(compare, comparison_type, compare_to)\n    case @comparison_type\n      when :greater_than\n        return compare > compare_to\n      when :greater_than_or_equal\n        return compare >= compare_to\n      when :less_than\n        return compare < compare_to\n      when :less_than_or_equal\n        return compare <= compare_to\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend",
 
-  CustomerEmailQualifier: "\nclass CustomerEmailQualifier\n  def initialize(match_type, match_condition, emails)\n    @invert = match_type == :does_not\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @emails = emails.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    customer_email = cart.customer.email\n    case @match_condition\n      when :match\n        return @invert ^ @emails.include?(customer_email)\n      when :contains\n        return @invert ^ @emails.any? do |partial|\n          customer_email.include?(partial)\n        end\n      when :starts_with\n        return @invert ^ @emails.any? do |partial|\n          customer_email.start_with?(partial)\n        end\n      when :ends_with\n        return @invert ^ @emails.any? do |partial|\n        customer_email.end_with?(partial)\n      end\n    end\n  end\nend",
+  Selector: "\nclass Selector\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\nend",
 
-  CustomerTagQualifier: "\nclass CustomerTagQualifier\n  def initialize(match_type, match_condition, tags)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    customer_tags = cart.customer.tags.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@tags & customer_tags).length > 0)\n      when :contains\n        return @invert ^ @tags.any? do |partial_tag|\n          customer_tags.any? do |customer_tag|\n            customer_tag.include?(partial_tag)\n          end\n        end\n      when :starts_with\n        return @invert ^ @tags.any? do |partial_tag|\n          customer_tags.any? do |customer_tag|\n            customer_tag.start_with?(partial_tag)\n          end\n        end\n      when :ends_with\n        return @invert ^ @tags.any? do |partial_tag|\n          customer_tags.any? do |customer_tag|\n            customer_tag.end_with?(partial_tag)\n          end\n        end\n    end\n  end\nend",
+  AndSelector: "\nclass Campaign\n  def initialize(condition, *qualifiers)\n    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym\n    @qualifiers = qualifiers.compact\n  end\n  \n  def qualifies?(cart)\n    return true if @qualifiers.empty?\n    @qualifiers.send(@condition) do |qualifier|\n      if qualifier.is_a?(Selector)\n        raise \"Missing line item match type\" if @li_match_type.nil?\n        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }\n      else\n        qualifier.match?(cart)\n      end\n    end\n  end\nend\n\nclass Qualifier\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\n\n  def compare_amounts(compare, comparison_type, compare_to)\n    case @comparison_type\n      when :greater_than\n        return compare > compare_to\n      when :greater_than_or_equal\n        return compare >= compare_to\n      when :less_than\n        return compare < compare_to\n      when :less_than_or_equal\n        return compare <= compare_to\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend\n\nclass Selector\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\nend\n\n\nclass AndSelector\n  def initialize(*conditions)\n    @conditions = conditions.compact\n  end\n\n  def match?(item)\n    @conditions.all? do |condition|\n      condition.match?(item) \n    end\n  end\nend",
 
-  CustomerOrderCountQualifier: "\nclass CustomerOrderCountQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = amount\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    total = cart.customer.orders_count\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend",
+  OrSelector: "\nclass OrSelector\n  def initialize(*conditions)\n    @conditions = conditions.compact\n  end\n\n  def match?(item)\n    @conditions.any? do |condition|\n      condition.match?(item) \n    end\n  end\nend",
 
-  CustomerTotalSpentQualifier: "\nclass CustomerTotalSpentQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    total = cart.customer.total_spent\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend",
+  GiftCardSelector: "\nclass GiftCardSelector < Selector\n  def initialize(match_type)\n    @invert = match_type == :not\n  end\n\n  def match?(line_item)\n    @invert ^ line_item.variant.product.gift_card?\n  end\nend",
 
-  CustomerAcceptsMarketingQualifier: "\nclass CustomerAcceptsMarketingQualifier\n  def initialize(match_type)\n    @invert = match_type == :does_not\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    return @invert ^ cart.customer.accepts_marketing?\n  end\nend",
+  SaleItemSelector: "\nclass SaleItemSelector < Selector\n  def initialize(match_type)\n    @invert = match_type == :is\n  end\n\n  def match?(line_item)\n    @invert ^ (line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price)\n  end\nend",
 
-  HasCode: "\nclass HasCode\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.discount_code.nil?\n    code = cart.discount_code.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      when :contains\n        return @invert ^ @codes.any? do |partial_code|\n          code.include?(partial_code)\n        end\n      when :starts_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.start_with?(partial_code)\n        end\n      when :ends_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.end_with?(partial_code)\n        end\n    end\n  end\nend",
+  ReducedItemSelector: "\nclass ReducedItemSelector < Selector\n  def initialize(match_type)\n    @invert = match_type == :not\n  end\n\n  def match?(line_item)\n    @invert ^ line_item.discounted?\n  end\nend",
 
-  ProductIdSelector: "\nclass ProductIdSelector\n  def initialize(match_type, product_ids)\n    @invert = match_type == :not_one;\n    @product_ids = product_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @product_ids.include?(line_item.variant.product.id)\n  end\nend",
+  CustomerEmailQualifier: "\nclass CustomerEmailQualifier < Qualifier\n  def initialize(match_type, match_condition, emails)\n    @invert = match_type == :does_not\n    @match_condition = match_condition == :default ? :match : match_condition\n    @emails = emails.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    customer_email = cart.customer.email\n    case @match_condition\n      when :match\n        return @invert ^ @emails.include?(customer_email)\n      else\n        return @invert ^ partial_match(@match_condition, customer_email, @emails)\n    end\n  end\nend",
 
-  CountryAndProvinceSelector: "\nclass CountryAndProvinceSelector\n  def initialize(match_type, country_map)\n    @invert = match_type == :not_one\n    @country_map = country_map\n  end\n\n  def match?(cart)\n    return false if cart.shipping_address.nil?\n    country_code = cart.shipping_address.country_code.upcase\n    province_code = cart.shipping_address.province_code.upcase\n    return @invert unless @country_map.key?(country_code)\n    @invert ^ @country_map[country_code].include?(province_code)\n  end\nend",
+  CustomerTagQualifier: "\nclass CustomerTagQualifier < Qualifier\n  def initialize(match_type, match_condition, tags)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    customer_tags = cart.customer.tags.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@tags & customer_tags).length > 0)\n      else\n        return @invert ^ partial_match(@match_condition, customer_tags, @tags)\n    end\n  end\nend",
 
-  CountryCodeSelector: "\nclass CountryCodeSelector\n  def initialize(match_type, country_codes)\n    @invert = match_type == :not_one;\n    @country_codes = country_codes.map(&:upcase)\n  end\n\n  def match?(cart)\n    shipping_address = cart.shipping_address\n    return false if shipping_address.nil?\n    @invert ^ @country_codes.include?(shipping_address.country_code.upcase)\n  end\nend",
+  CustomerOrderCountQualifier: "\nclass CustomerOrderCountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    total = cart.customer.orders_count\n    \n  end\nend",
 
-  ProductTypeSelector: "\nclass ProductTypeSelector\n  def initialize(match_type, product_types)\n    @invert = match_type == :not_one\n    @product_types = product_types.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @product_types.include?(line_item.variant.product.product_type.downcase)\n  end\nend",
+  CustomerTotalSpentQualifier: "\nclass CustomerTotalSpentQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    total = cart.customer.total_spent\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
-  ProductVendorSelector: "\n  class ProductVendorSelector\n  def initialize(match_type, vendors)\n    @invert = match_type != :is_one\n    @vendors = vendors.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @vendors.include?(line_item.variant.product.vendor.downcase)\n  end\nend",
+  CustomerAcceptsMarketingQualifier: "\nclass CustomerAcceptsMarketingQualifier < Qualifier\n  def initialize(match_type)\n    @invert = match_type == :does_not\n  end\n\n  def match?(cart)\n    return false if cart.customer.nil?\n    return @invert ^ cart.customer.accepts_marketing?\n  end\nend",
 
-  VariantSkuSelector: "\nclass VariantSkuSelector\n  def initialize(match_type, match_condition, skus)\n    @invert = match_type == :does_not\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @skus = skus.map(&:downcase)\n  end\n\n  def match?(line_item)\n    variant_skus = line_item.variant.skus.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@skus & variant_skus).length > 0)\n      when :contains\n        return @invert ^ @skus.any? do |required_sku|\n          variant_skus.any? do |sku|\n            sku.include?(required_sku)\n          end\n        end\n      when :starts_with\n        return @invert ^ @skus.any? do |required_sku|\n          variant_skus.any? do |sku|\n            sku.start_with?(required_sku)\n          end\n        end\n      when :ends_with\n        return @invert ^ @skus.any? do |required_sku|\n          variant_skus.any? do |sku|\n            sku.end_with?(required_sku)\n          end\n        end\n    end\n  end\nend",
+  CodeQualifier: "\nclass CodeQualifier < Qualifier\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(cart)\n    return false if cart.discount_code.nil?\n    code = cart.discount_code.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      else\n        return @invert ^ partial_match(@match_condition, code, @codes)\n    end\n  end\nend",
 
-  VariantIdSelector: "\nclass VariantIdSelector\n  def initialize(match_type, variant_ids)\n    @invert = match_type == :not_one\n    @variant_ids = variant_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @variant_ids.include?(line_item.variant.id)\n  end\nend",
+  ProductIdSelector: "\nclass ProductIdSelector < Selector\n  def initialize(match_type, product_ids)\n    @invert = match_type == :not_one;\n    @product_ids = product_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @product_ids.include?(line_item.variant.product.id)\n  end\nend",
 
-  ProductTagSelector: "\nclass ProductTagSelector\n  def initialize(match_type, match_condition, tags)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(line_item)\n    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@tags & product_tags).length > 0)\n      when :contains\n        return @invert ^ @tags.any? do |required_tag|\n          product_tags.any? do |product_tag|\n            product_tag.include?(required_tag)\n          end\n        end\n      when :starts_with\n        return @invert ^ @tags.any? do |required_tag|\n          product_tags.any? do |product_tag|\n            product_tag.start_with?(required_tag)\n          end\n        end\n      when :ends_with\n        return @invert ^ @tags.any? do |required_tag|\n          product_tags.any? do |product_tag|\n            product_tag.end_with?(required_tag)\n          end\n        end\n    end\n  end\nend",
+  CountryAndProvinceQualifier: "\nclass CountryAndProvinceQualifier < Qualifier\n  def initialize(match_type, country_map)\n    @invert = match_type == :not_one\n    @country_map = country_map\n  end\n\n  def match?(cart)\n    return if cart.shipping_address.nil?\n    country_code = cart.shipping_address.country_code.upcase\n    return @invert unless @country_map.key?(country_code) && cart.shipping_address.province_code\n    province_code = cart.shipping_address.province_code.upcase\n    @invert ^ @country_map[country_code].include?(province_code)\n  end\nend",
 
-  LineItemPropertiesSelector: "\nclass LineItemPropertiesSelector\n  def initialize(target_properties)\n    @target_properties = target_properties\n  end\n\n  def match?(line_item)\n    line_item_props = line_item.properties\n    @target_properties.all? do |key, value|\n      next unless line_item_props.has_key?(key)\n      next true if line_item_props[key].downcase == value.downcase\n    end\n  end\nend",
+  CountryCodeQualifier: "\nclass CountryCodeQualifier < Qualifier\n  def initialize(match_type, country_codes)\n    @invert = match_type == :not_one;\n    @country_codes = country_codes.map(&:upcase)\n  end\n\n  def match?(cart)\n    shipping_address = cart.shipping_address\n    return false if shipping_address.nil?\n    @invert ^ @country_codes.include?(shipping_address.country_code.upcase)\n  end\nend",
 
-  CartAmountQualifier: "\nclass CartAmountQualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    total = cart.subtotal_price\n    case @comparison_type\n      when :greater_than\n        return total > @amount\n      when :greater_than_or_equal\n        return total >= @amount\n      when :less_than\n        return total < @amount\n      when :less_than_or_equal\n        return total <= @amount\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend"
+  ProductTypeSelector: "\nclass ProductTypeSelector < Selector\n  def initialize(match_type, product_types)\n    @invert = match_type == :not_one\n    @product_types = product_types.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @product_types.include?(line_item.variant.product.product_type.downcase)\n  end\nend",
+
+  ProductVendorSelector: "\nclass ProductVendorSelector < Selector\n  def initialize(match_type, vendors)\n    @invert = match_type != :is_one\n    @vendors = vendors.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @vendors.include?(line_item.variant.product.vendor.downcase)\n  end\nend",
+
+  VariantSkuSelector: "\nclass VariantSkuSelector < Selector\n  def initialize(match_type, match_condition, skus)\n    @invert = match_type == :does_not\n    @match_condition = match_condition == :default ? :match : match_condition\n    @skus = skus.map(&:downcase)\n  end\n\n  def match?(line_item)\n    variant_skus = line_item.variant.skus.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@skus & variant_skus).length > 0)\n      else\n        return @invert ^ partial_match(@match_condition, variant_skus, @skus)\n    end\n  end\nend",
+
+  VariantIdSelector: "\nclass VariantIdSelector < Selector\n  def initialize(match_type, variant_ids)\n    @invert = match_type == :not_one\n    @variant_ids = variant_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @variant_ids.include?(line_item.variant.id)\n  end\nend",
+
+  ProductTagSelector: "\nclass ProductTagSelector < Selector\n  def initialize(match_type, match_condition, tags)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(line_item)\n    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@tags & product_tags).length > 0)\n      else\n        return @invert ^ partial_match(@match_condition, product_tags, @tags)\n    end\n  end\nend",
+
+  LineItemPropertiesSelector: "\nclass LineItemPropertiesSelector < Selector\n  def initialize(target_properties)\n    @target_properties = target_properties\n  end\n\n  def match?(line_item)\n    line_item_props = line_item.properties\n    @target_properties.all? do |key, value|\n      next unless line_item_props.has_key?(key)\n      true if line_item_props[key].downcase == value.downcase\n    end\n  end\nend",
+
+  CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart)\n    total = cart.subtotal_price\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
+
+  TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend"
 };
 
-var customer_qualifiers = [{
+var customerQualifiers = [{
   value: "none",
   label: "None",
   description: "No effects"
@@ -8957,10 +9049,10 @@ var customer_qualifiers = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
         value: "ends_with",
@@ -8995,10 +9087,10 @@ var customer_qualifiers = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
         value: "ends_with",
@@ -9083,7 +9175,7 @@ var customer_qualifiers = [{
   }
 }];
 
-var cart_qualifiers = [{
+var cartQualifiers = [{
   value: "none",
   label: "None",
   description: "No effects"
@@ -9115,7 +9207,51 @@ var cart_qualifiers = [{
     }
   }
 }, {
-  value: "HasCode",
+  value: "TotalWeightQualifier",
+  label: "Cart Total Weight",
+  description: "Qualifies cart based on total weight of products.",
+  inputs: {
+    match_condition: {
+      type: "select",
+      description: "Type of comparison",
+      options: [{
+        value: "greater_than",
+        label: "Greater than"
+      }, {
+        value: "less_than",
+        label: "Less than"
+      }, {
+        value: "greater_than_or_equal",
+        label: "Greater than or equal to"
+      }, {
+        value: "less_than_or_equal",
+        label: "Less than or equal to"
+      }]
+    },
+    amount: {
+      type: "number",
+      description: "Weight to compare to"
+    },
+    units: {
+      type: "select",
+      description: "Units for weight",
+      options: [{
+        value: "g",
+        label: "Grams (g)"
+      }, {
+        value: "kg",
+        label: "Kilograms (kg)"
+      }, {
+        value: "oz",
+        label: "Ounces (oz)"
+      }, {
+        value: "lb",
+        label: "Pounds (lb)"
+      }]
+    }
+  }
+}, {
+  value: "CodeQualifier",
   label: "Cart Has Discount Code",
   description: "Checks to see if the discount code entered matches conditions",
   inputs: {
@@ -9137,10 +9273,10 @@ var cart_qualifiers = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
         value: "ends_with",
@@ -9153,8 +9289,8 @@ var cart_qualifiers = [{
     }
   }
 }, {
-  value: "CountryAndProvinceSelector",
-  label: "Shipping Address - Country/Province Selector",
+  value: "CountryAndProvinceQualifier",
+  label: "Shipping Address - Country/Province Qualifier",
   description: "Qualifies the cart based on specific country and province codes (Two letters)",
   newLineEachInput: true,
   inputs: {
@@ -9177,8 +9313,8 @@ var cart_qualifiers = [{
     }
   }
 }, {
-  value: "CountryCodeSelector",
-  label: "Shipping Address - Country Code Selector",
+  value: "CountryCodeQualifier",
+  label: "Shipping Address - Country Code Qualifier",
   description: "Qualifies the cart based on the country code of the shipping addresss (Two letters)",
   inputs: {
     match_type: {
@@ -9199,7 +9335,7 @@ var cart_qualifiers = [{
   }
 }];
 
-var line_item_qualifiers = [{
+var lineItemSelectors = [{
   value: "none",
   label: "None",
   description: "Any item selected/No effect on qualifier"
@@ -9289,10 +9425,10 @@ var line_item_qualifiers = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
         value: "ends_with",
@@ -9327,10 +9463,10 @@ var line_item_qualifiers = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
         value: "ends_with",
@@ -9375,13 +9511,64 @@ var line_item_qualifiers = [{
       outputFormat: '"{text}" => "{text}"'
     }
   }
+}, {
+  value: "GiftCardSelector",
+  label: "Gift Card Selector",
+  description: "Selects line items if they are/are not a Gift Card",
+  inputs: {
+    match_condition: {
+      type: "select",
+      description: "Set how gift cards are matched",
+      options: [{
+        value: "is",
+        label: "Is a Gift Card"
+      }, {
+        value: "not",
+        label: "Is not a Gift Card"
+      }]
+    }
+  }
+}, {
+  value: "SaleItemSelector",
+  label: "Sale Item Selector",
+  description: "Selects line items if they are/are not on sale",
+  inputs: {
+    match_condition: {
+      type: "select",
+      description: "Set how sale items are matched",
+      options: [{
+        value: "is",
+        label: "Is on sale"
+      }, {
+        value: "not",
+        label: "Is not on sale"
+      }]
+    }
+  }
+}, {
+  value: "ReducedItemSelector",
+  label: "Discounted Item Selector (discount by scripts)",
+  description: "Selects line items if they have/have not been discounted by a script",
+  inputs: {
+    match_condition: {
+      type: "select",
+      description: "Set how discounted items are matched",
+      options: [{
+        value: "is",
+        label: "Has been discounted"
+      }, {
+        value: "not",
+        label: "Has not been discounted"
+      }]
+    }
+  }
 }];
 
 exports.default = {
   classes: classes,
-  customer_qualifiers: customer_qualifiers,
-  cart_qualifiers: cart_qualifiers,
-  line_item_qualifiers: line_item_qualifiers
+  customerQualifiers: customerQualifiers,
+  cartQualifiers: cartQualifiers,
+  lineItemSelectors: lineItemSelectors
 };
 
 /***/ }),
@@ -9475,7 +9662,7 @@ module.exports = ReactPropTypesSecret;
 /***/ (function(module, exports, __webpack_require__) {
 
 // optional / simple context binding
-var aFunction = __webpack_require__(192);
+var aFunction = __webpack_require__(193);
 module.exports = function(fn, that, length){
   aFunction(fn);
   if(that === undefined)return fn;
@@ -9545,7 +9732,7 @@ module.exports = true;
 
 // 19.1.2.2 / 15.2.3.5 Object.create(O [, Properties])
 var anObject    = __webpack_require__(27)
-  , dPs         = __webpack_require__(198)
+  , dPs         = __webpack_require__(199)
   , enumBugKeys = __webpack_require__(71)
   , IE_PROTO    = __webpack_require__(69)('IE_PROTO')
   , Empty       = function(){ /* empty */ }
@@ -9554,13 +9741,13 @@ var anObject    = __webpack_require__(27)
 // Create object with fake `null` prototype: use iframe Object with cleared prototype
 var createDict = function(){
   // Thrash, waste and sodomy: IE GC bug
-  var iframe = __webpack_require__(110)('iframe')
+  var iframe = __webpack_require__(111)('iframe')
     , i      = enumBugKeys.length
     , lt     = '<'
     , gt     = '>'
     , iframeDocument;
   iframe.style.display = 'none';
-  __webpack_require__(202).appendChild(iframe);
+  __webpack_require__(203).appendChild(iframe);
   iframe.src = 'javascript:'; // eslint-disable-line no-script-url
   // createDict = iframe.contentWindow.Object;
   // html.removeChild(iframe);
@@ -9632,7 +9819,7 @@ module.exports = (
 
 var def = __webpack_require__(16).f
   , has = __webpack_require__(20)
-  , TAG = __webpack_require__(10)('toStringTag');
+  , TAG = __webpack_require__(9)('toStringTag');
 
 module.exports = function(it, tag, stat){
   if(it && !has(it = stat ? it : it.prototype, TAG))def(it, TAG, {configurable: true, value: tag});
@@ -9642,7 +9829,7 @@ module.exports = function(it, tag, stat){
 /* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports.f = __webpack_require__(10);
+exports.f = __webpack_require__(9);
 
 /***/ }),
 /* 74 */
@@ -9675,49 +9862,49 @@ function __export(m) {
 }
 Object.defineProperty(exports, "__esModule", { value: true });
 __export(__webpack_require__(0));
-__export(__webpack_require__(289));
-__export(__webpack_require__(315));
+__export(__webpack_require__(290));
 __export(__webpack_require__(316));
 __export(__webpack_require__(317));
 __export(__webpack_require__(318));
 __export(__webpack_require__(319));
 __export(__webpack_require__(320));
-__export(__webpack_require__(322));
+__export(__webpack_require__(321));
 __export(__webpack_require__(323));
 __export(__webpack_require__(324));
 __export(__webpack_require__(325));
 __export(__webpack_require__(326));
 __export(__webpack_require__(327));
-__export(__webpack_require__(329));
+__export(__webpack_require__(328));
 __export(__webpack_require__(330));
-__export(__webpack_require__(332));
-__export(__webpack_require__(334));
-__export(__webpack_require__(336));
-__export(__webpack_require__(340));
-__export(__webpack_require__(342));
+__export(__webpack_require__(331));
+__export(__webpack_require__(333));
+__export(__webpack_require__(335));
+__export(__webpack_require__(337));
+__export(__webpack_require__(341));
 __export(__webpack_require__(343));
 __export(__webpack_require__(344));
-__export(__webpack_require__(349));
-__export(__webpack_require__(351));
-__export(__webpack_require__(353));
-__export(__webpack_require__(392));
+__export(__webpack_require__(345));
+__export(__webpack_require__(350));
+__export(__webpack_require__(352));
+__export(__webpack_require__(354));
 __export(__webpack_require__(393));
-__export(__webpack_require__(395));
-__export(__webpack_require__(397));
-__export(__webpack_require__(399));
-__export(__webpack_require__(403));
+__export(__webpack_require__(394));
+__export(__webpack_require__(396));
+__export(__webpack_require__(398));
+__export(__webpack_require__(400));
 __export(__webpack_require__(404));
 __export(__webpack_require__(405));
 __export(__webpack_require__(406));
-__export(__webpack_require__(408));
+__export(__webpack_require__(407));
+__export(__webpack_require__(409));
 //# sourceMappingURL=index.js.map
 
 /***/ }),
 /* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIsArguments = __webpack_require__(245),
-    isObjectLike = __webpack_require__(11);
+var baseIsArguments = __webpack_require__(246),
+    isObjectLike = __webpack_require__(10);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -9819,11 +10006,11 @@ module.exports = baseUnary;
 /* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var mapCacheClear = __webpack_require__(255),
-    mapCacheDelete = __webpack_require__(271),
-    mapCacheGet = __webpack_require__(273),
-    mapCacheHas = __webpack_require__(274),
-    mapCacheSet = __webpack_require__(275);
+var mapCacheClear = __webpack_require__(256),
+    mapCacheDelete = __webpack_require__(272),
+    mapCacheGet = __webpack_require__(274),
+    mapCacheHas = __webpack_require__(275),
+    mapCacheSet = __webpack_require__(276);
 
 /**
  * Creates a map cache object to store key-value pairs.
@@ -9897,8 +10084,8 @@ module.exports = arrayMap;
 /* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseSetToString = __webpack_require__(283),
-    shortOut = __webpack_require__(138);
+var baseSetToString = __webpack_require__(284),
+    shortOut = __webpack_require__(139);
 
 /**
  * Sets the `toString` method of `func` to return `string`.
@@ -10075,8 +10262,8 @@ module.exports = baseLodash;
 /* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var metaMap = __webpack_require__(142),
-    noop = __webpack_require__(297);
+var metaMap = __webpack_require__(143),
+    noop = __webpack_require__(298);
 
 /**
  * Gets metadata for `func`.
@@ -10171,7 +10358,7 @@ module.exports = before;
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(6),
-    now = __webpack_require__(328),
+    now = __webpack_require__(329),
     toNumber = __webpack_require__(84);
 
 /** Error message constants. */
@@ -10364,8 +10551,8 @@ module.exports = debounce;
 /* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var flatten = __webpack_require__(338),
-    overRest = __webpack_require__(136),
+var flatten = __webpack_require__(339),
+    overRest = __webpack_require__(137),
     setToString = __webpack_require__(83);
 
 /**
@@ -10491,7 +10678,7 @@ module.exports = memoize;
 /* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseAssignValue = __webpack_require__(159),
+var baseAssignValue = __webpack_require__(160),
     eq = __webpack_require__(53);
 
 /** Used for built-in method references. */
@@ -10525,8 +10712,8 @@ module.exports = assignValue;
 /* 96 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIsEqualDeep = __webpack_require__(363),
-    isObjectLike = __webpack_require__(11);
+var baseIsEqualDeep = __webpack_require__(364),
+    isObjectLike = __webpack_require__(10);
 
 /**
  * The base implementation of `_.isEqual` which supports partial comparisons
@@ -10759,7 +10946,7 @@ var singleton = null;
 var	singletonCounter = 0;
 var	stylesInsertedAtTop = [];
 
-var	fixUrls = __webpack_require__(447);
+var	fixUrls = __webpack_require__(448);
 
 module.exports = function(list, options) {
 	if (typeof DEBUG !== "undefined" && DEBUG) {
@@ -10772,7 +10959,7 @@ module.exports = function(list, options) {
 
 	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
 	// tags it will allow on a page
-	if (!options.singleton) options.singleton = isOldIE();
+	if (!options.singleton && typeof options.singleton !== "boolean") options.singleton = isOldIE();
 
 	// By default, add <style> tags to the <head> element
 	if (!options.insertInto) options.insertInto = "head";
@@ -11079,6 +11266,221 @@ function updateLink (link, options, obj) {
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+function capitalize(word) {
+  return word[0].toUpperCase() + word.substring(1);
+}
+
+function splitAndCapitalize(splitOn, words) {
+  words = words.split(splitOn);
+  words[0] = capitalize(words[0]);
+  return words.join(' ');
+}
+
+function splitCamelCase(word) {
+  var isCapital = /[A-Z]/;
+  var seperator = " ";
+  var isFirstCapital = true;
+  var newWord = [];
+  word = word.split('');
+  for (var index in word) {
+    var letter = word[index];
+    if (isCapital.test(letter)) {
+      if (!isFirstCapital) {
+        newWord.push(seperator + letter);
+      } else {
+        isFirstCapital = false;
+        newWord.push(letter);
+      }
+    } else {
+      newWord.push(letter);
+    }
+  }
+  return newWord.join('');
+}
+
+function isCampaignSelect(inputName) {
+  if (inputName.indexOf('campaignSelect') === -1) {
+    return false;
+  }
+  var temparr = inputName.split('-');
+  return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
+}
+
+function getInputType(inputName) {
+  var type = inputName.split('-');
+  return type[type.length - 1].split('_')[0];
+}
+
+function getObjectFormats(campaignName, inputs) {
+  var keys = Object.keys(inputs);
+  // Default to the last input in the array
+  var targetInput = inputs[keys[keys.length - 1]];
+
+  for (var index = 0, length = keys.length; index < length; index++) {
+    var key = keys[index];
+    if (Array.isArray(inputs[key])) {
+      var foundInput = inputs[key].filter(function (input) {
+        return input.value === campaignName;
+      });
+      if (foundInput.length > 0) {
+        targetInput = foundInput[0];
+        break;
+      }
+    }
+  }
+
+  var targetObjectInput = null;
+  if (targetInput.inputs) {
+    targetObjectInput = targetInput.inputs[Object.keys(targetInput.inputs).pop()];
+  } else {
+    targetObjectInput = targetInput;
+  }
+  return [targetObjectInput.inputFormat, targetObjectInput.outputFormat];
+}
+
+function formatObject(inOut, value, inputFmt, outputFmt) {
+  if (inOut == 'input') {
+    // Remove {} or []
+    value = value.substring(value.length - 1, 0).substring(1);
+    if (value === "") {
+      return value;
+    }
+
+    var lines = value.split('\t').map(function (line) {
+      var values = line.split('=>').map(function (value) {
+        return value.trim();
+      });
+      var output = inputFmt;
+      for (var index = 0; index < values.length; index++) {
+        var type = output.match(/{\w+:(\w+)}/)[1];
+        if (type === "text") {
+          // Only grab what's in "". Removes unncessary stuff like :discount or ,
+          var _value = values[index].match(/"(.+)"/);
+          values[index] = _value ? _value[1] : _value;
+        } else {
+          values[index] = values[index].split(',').map(function (value) {
+            // Replace any [] found
+            value = value.replace(/[\[\]]/g, '');
+            // Removes "" around each value in the array
+            value = value.substring(value.length - 1, 0).substring(1);
+            return value.trim();
+          });
+          values[index] = values[index].filter(function (value) {
+            return value !== "";
+          }).join(', ');
+        }
+        // Skip null values
+        if (values[index] !== null) {
+          output = output.replace(/{\w+:\w+}/i, values[index]);
+        }
+      }
+      return output;
+    }).join('\n');
+    return lines;
+  } else {
+    var inputFormatRepl = inputFmt.replace(/{\w+:(\w+)}/gi, '').trim();
+    var splitter = inputFormatRepl[0];
+    var requiredInputs = inputFormatRepl.split(splitter).length;
+    var _lines = value.split('\n').map(function (line) {
+      var values = line.split(splitter).map(function (value) {
+        return value.trim();
+      });
+      // Don't allow a blank value
+      values = values.filter(function (value) {
+        return value !== "";
+      });
+
+      // Throw an error if we don't have the right number of inputs so the user can correct
+      if (values.length !== requiredInputs) {
+        throw Error("Number of inputs does not match required input format");
+      }
+
+      var output = outputFmt;
+      for (var index = 0; index < values.length; index++) {
+        var type = output.match(/{(\w+)}/)[1];
+        if (type === 'array') {
+          // Add "" around each value in the array
+          values[index] = values[index].split(',').map(function (value) {
+            return '"' + value.trim() + '"';
+          });
+          values[index] = values[index].filter(function (value) {
+            return value !== '""';
+          }).join();
+        }
+        output = output.replace(/{\w+}/i, values[index]);
+      }
+      return output;
+    }).join(',\t');
+    return _lines;
+  }
+}
+
+// Takes a file version and a minimum version and returns if the file version is later than the minimum version
+function meetsMinimumVersion(version, minimumVersion) {
+  var _version$split$map = version.split('.').map(function (num) {
+    return +num;
+  }),
+      _version$split$map2 = _slicedToArray(_version$split$map, 3),
+      vmajor = _version$split$map2[0],
+      vminor = _version$split$map2[1],
+      vpatch = _version$split$map2[2];
+
+  var _minimumVersion$split = minimumVersion.split('.').map(function (num) {
+    return +num;
+  }),
+      _minimumVersion$split2 = _slicedToArray(_minimumVersion$split, 3),
+      mvmajor = _minimumVersion$split2[0],
+      mvminor = _minimumVersion$split2[1],
+      mvpatch = _minimumVersion$split2[2];
+  // Deal with major version
+
+
+  if (vmajor < mvmajor) {
+    return false;
+  }
+  if (vmajor > mvmajor) {
+    return true;
+  }
+  // Deal with minor version
+  if (vminor < mvminor) {
+    return false;
+  }
+  if (vminor > mvminor) {
+    return true;
+  }
+  // Deal with patch version
+  if (vpatch < mvpatch) {
+    return false;
+  }
+  if (vpatch > mvpatch) {
+    return true;
+  }
+  // If they're all equal
+  return true;
+}
+
+exports.capitalize = capitalize;
+exports.splitAndCapitalize = splitAndCapitalize;
+exports.splitCamelCase = splitCamelCase;
+exports.isCampaignSelect = isCampaignSelect;
+exports.getInputType = getInputType;
+exports.getObjectFormats = getObjectFormats;
+exports.formatObject = formatObject;
+exports.meetsMinimumVersion = meetsMinimumVersion;
+
+/***/ }),
+/* 102 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
 /**
  * Copyright (c) 2013-present, Facebook, Inc.
  *
@@ -11114,7 +11516,7 @@ var ExecutionEnvironment = {
 module.exports = ExecutionEnvironment;
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11195,7 +11597,7 @@ module.exports = EventListener;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 103 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11237,7 +11639,7 @@ function getActiveElement(doc) /*?DOMElement*/{
 module.exports = getActiveElement;
 
 /***/ }),
-/* 104 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11308,7 +11710,7 @@ function shallowEqual(objA, objB) {
 module.exports = shallowEqual;
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11351,7 +11753,7 @@ function containsNode(outerNode, innerNode) {
 module.exports = containsNode;
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11381,14 +11783,14 @@ function focusNode(node) {
 module.exports = focusNode;
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var classnames = __webpack_require__(184); // tslint:disable-line no-require-imports
-exports.classNames = classnames;
+var classNames = __webpack_require__(184);
+exports.classNames = classNames;
 function variationName(name, value) {
     var valuePortion = typeof value === 'number' ? String(value) : "" + value[0].toUpperCase() + value.substring(1);
     return "" + name + valuePortion;
@@ -11397,7 +11799,7 @@ exports.variationName = variationName;
 
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11413,7 +11815,7 @@ var __assign = (this && this.__assign) || Object.assign || function(t) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var React = __webpack_require__(3);
 var react_dom_1 = __webpack_require__(44);
-var target_1 = __webpack_require__(186);
+var target_1 = __webpack_require__(187);
 var isValidElement = React.isValidElement, Children = React.Children;
 function FirstChild(props) {
     var childrenArray = React.Children.toArray(props.children);
@@ -11531,10 +11933,11 @@ function layeredComponent(options) {
                 if (target_1.isServer) {
                     return;
                 }
-                // tslint:disable-next-line no-invalid-this
-                var layerOutput = this.renderLayer();
-                // tslint:disable-next-line no-invalid-this
-                react_dom_1.unstable_renderSubtreeIntoContainer(this, layerOutput || React.createElement("span", null), this.layerNode);
+                /* tslint:disable no-invalid-this */
+                var layerOutput = this.renderLayer() || React.createElement("span", null);
+                this.layerOutput = layerOutput;
+                react_dom_1.unstable_renderSubtreeIntoContainer(this, layerOutput, this.layerNode);
+                /* tslint:enable no-invalid-this */
             },
             componentWillUnmount: function () {
                 if (target_1.isServer) {
@@ -11556,15 +11959,15 @@ exports.layeredComponent = layeredComponent;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = !__webpack_require__(19) && !__webpack_require__(45)(function(){
-  return Object.defineProperty(__webpack_require__(110)('div'), 'a', {get: function(){ return 7; }}).a != 7;
+  return Object.defineProperty(__webpack_require__(111)('div'), 'a', {get: function(){ return 7; }}).a != 7;
 });
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(33)
@@ -11576,7 +11979,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11584,11 +11987,11 @@ module.exports = function(it){
 
 exports.__esModule = true;
 
-var _iterator = __webpack_require__(194);
+var _iterator = __webpack_require__(195);
 
 var _iterator2 = _interopRequireDefault(_iterator);
 
-var _symbol = __webpack_require__(208);
+var _symbol = __webpack_require__(209);
 
 var _symbol2 = _interopRequireDefault(_symbol);
 
@@ -11603,15 +12006,15 @@ exports.default = typeof _symbol2.default === "function" && _typeof(_iterator2.d
 };
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var $at  = __webpack_require__(196)(true);
+var $at  = __webpack_require__(197)(true);
 
 // 21.1.3.27 String.prototype[@@iterator]()
-__webpack_require__(113)(String, 'String', function(iterated){
+__webpack_require__(114)(String, 'String', function(iterated){
   this._t = String(iterated); // target
   this._i = 0;                // next index
 // 21.1.5.2.1 %StringIteratorPrototype%.next()
@@ -11626,21 +12029,21 @@ __webpack_require__(113)(String, 'String', function(iterated){
 });
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 var LIBRARY        = __webpack_require__(66)
   , $export        = __webpack_require__(25)
-  , redefine       = __webpack_require__(114)
+  , redefine       = __webpack_require__(115)
   , hide           = __webpack_require__(26)
   , has            = __webpack_require__(20)
   , Iterators      = __webpack_require__(35)
-  , $iterCreate    = __webpack_require__(197)
+  , $iterCreate    = __webpack_require__(198)
   , setToStringTag = __webpack_require__(72)
-  , getPrototypeOf = __webpack_require__(203)
-  , ITERATOR       = __webpack_require__(10)('iterator')
+  , getPrototypeOf = __webpack_require__(204)
+  , ITERATOR       = __webpack_require__(9)('iterator')
   , BUGGY          = !([].keys && 'next' in [].keys()) // Safari has buggy iterators w/o `next`
   , FF_ITERATOR    = '@@iterator'
   , KEYS           = 'keys'
@@ -11702,18 +12105,18 @@ module.exports = function(Base, NAME, Constructor, next, DEFAULT, IS_SET, FORCED
 };
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(26);
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var has          = __webpack_require__(20)
   , toIObject    = __webpack_require__(21)
-  , arrayIndexOf = __webpack_require__(200)(false)
+  , arrayIndexOf = __webpack_require__(201)(false)
   , IE_PROTO     = __webpack_require__(69)('IE_PROTO');
 
 module.exports = function(object, names){
@@ -11730,7 +12133,7 @@ module.exports = function(object, names){
 };
 
 /***/ }),
-/* 116 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.15 ToLength
@@ -11741,7 +12144,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 117 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.1.13 ToObject(argument)
@@ -11751,17 +12154,17 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 118 */
+/* 119 */
 /***/ (function(module, exports) {
 
 exports.f = Object.getOwnPropertySymbols;
 
 /***/ }),
-/* 119 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.7 / 15.2.3.4 Object.getOwnPropertyNames(O)
-var $keys      = __webpack_require__(115)
+var $keys      = __webpack_require__(116)
   , hiddenKeys = __webpack_require__(71).concat('length', 'prototype');
 
 exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
@@ -11769,7 +12172,7 @@ exports.f = Object.getOwnPropertyNames || function getOwnPropertyNames(O){
 };
 
 /***/ }),
-/* 120 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var pIE            = __webpack_require__(75)
@@ -11777,7 +12180,7 @@ var pIE            = __webpack_require__(75)
   , toIObject      = __webpack_require__(21)
   , toPrimitive    = __webpack_require__(63)
   , has            = __webpack_require__(20)
-  , IE8_DOM_DEFINE = __webpack_require__(109)
+  , IE8_DOM_DEFINE = __webpack_require__(110)
   , gOPD           = Object.getOwnPropertyDescriptor;
 
 exports.f = __webpack_require__(19) ? gOPD : function getOwnPropertyDescriptor(O, P){
@@ -11790,7 +12193,7 @@ exports.f = __webpack_require__(19) ? gOPD : function getOwnPropertyDescriptor(O
 };
 
 /***/ }),
-/* 121 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/** Detect free variable `global` from Node.js. */
@@ -11798,10 +12201,10 @@ var freeGlobal = typeof global == 'object' && global && global.Object === Object
 
 module.exports = freeGlobal;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(231)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(232)))
 
 /***/ }),
-/* 122 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11812,7 +12215,7 @@ exports.InstanceChainMap = new utils_1.CompositeKeyWeakMap();
 //# sourceMappingURL=common.js.map
 
 /***/ }),
-/* 123 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -11833,13 +12236,13 @@ exports.log = log;
 //# sourceMappingURL=log.js.map
 
 /***/ }),
-/* 124 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var forOwn = __webpack_require__(239);
+var forOwn = __webpack_require__(240);
 /**
  * Used to copy over meta data from function to function.
  * If meta data is attached to a function. This can get lost
@@ -11854,11 +12257,11 @@ exports.copyMetadata = copyMetadata;
 //# sourceMappingURL=copyMetaData.js.map
 
 /***/ }),
-/* 125 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(module) {var root = __webpack_require__(4),
-    stubFalse = __webpack_require__(246);
+    stubFalse = __webpack_require__(247);
 
 /** Detect free variable `exports`. */
 var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
@@ -11896,10 +12299,10 @@ var isBuffer = nativeIsBuffer || stubFalse;
 
 module.exports = isBuffer;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(126)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(127)(module)))
 
 /***/ }),
-/* 126 */
+/* 127 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -11927,12 +12330,12 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 127 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIsTypedArray = __webpack_require__(247),
+var baseIsTypedArray = __webpack_require__(248),
     baseUnary = __webpack_require__(79),
-    nodeUtil = __webpack_require__(248);
+    nodeUtil = __webpack_require__(249);
 
 /* Node.js helper references. */
 var nodeIsTypedArray = nodeUtil && nodeUtil.isTypedArray;
@@ -11960,7 +12363,7 @@ module.exports = isTypedArray;
 
 
 /***/ }),
-/* 128 */
+/* 129 */
 /***/ (function(module, exports) {
 
 /** Used for built-in method references. */
@@ -11984,7 +12387,7 @@ module.exports = isPrototype;
 
 
 /***/ }),
-/* 129 */
+/* 130 */
 /***/ (function(module, exports) {
 
 /**
@@ -12005,7 +12408,7 @@ module.exports = overArg;
 
 
 /***/ }),
-/* 130 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(28);
@@ -12025,14 +12428,14 @@ module.exports = castFunction;
 
 
 /***/ }),
-/* 131 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var without = __webpack_require__(253);
-var attempt = __webpack_require__(139);
+var without = __webpack_require__(254);
+var attempt = __webpack_require__(140);
 var isObject = __webpack_require__(6);
 /**
  * Assigns all properties from an object to another object including non enumerable
@@ -12080,12 +12483,12 @@ exports.assignProperty = assignProperty;
 //# sourceMappingURL=assignAll.js.map
 
 /***/ }),
-/* 132 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var MapCache = __webpack_require__(80),
-    setCacheAdd = __webpack_require__(276),
-    setCacheHas = __webpack_require__(277);
+    setCacheAdd = __webpack_require__(277),
+    setCacheHas = __webpack_require__(278);
 
 /**
  *
@@ -12113,7 +12516,7 @@ module.exports = SetCache;
 
 
 /***/ }),
-/* 133 */
+/* 134 */
 /***/ (function(module, exports) {
 
 /** Used for built-in method references. */
@@ -12145,10 +12548,10 @@ module.exports = toSource;
 
 
 /***/ }),
-/* 134 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIndexOf = __webpack_require__(278);
+var baseIndexOf = __webpack_require__(279);
 
 /**
  * A specialized version of `_.includes` for arrays without support for
@@ -12168,7 +12571,7 @@ module.exports = arrayIncludes;
 
 
 /***/ }),
-/* 135 */
+/* 136 */
 /***/ (function(module, exports) {
 
 /**
@@ -12187,7 +12590,7 @@ module.exports = cacheHas;
 
 
 /***/ }),
-/* 136 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = __webpack_require__(29);
@@ -12229,7 +12632,7 @@ module.exports = overRest;
 
 
 /***/ }),
-/* 137 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(23);
@@ -12246,7 +12649,7 @@ module.exports = defineProperty;
 
 
 /***/ }),
-/* 138 */
+/* 139 */
 /***/ (function(module, exports) {
 
 /** Used to detect hot functions by number of calls within a span of milliseconds. */
@@ -12289,12 +12692,12 @@ module.exports = shortOut;
 
 
 /***/ }),
-/* 139 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = __webpack_require__(29),
     baseRest = __webpack_require__(7),
-    isError = __webpack_require__(286);
+    isError = __webpack_require__(287);
 
 /**
  * Attempts to invoke `func`, returning either the result or the caught error
@@ -12330,7 +12733,7 @@ module.exports = attempt;
 
 
 /***/ }),
-/* 140 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var toInteger = __webpack_require__(38);
@@ -12378,11 +12781,11 @@ module.exports = after;
 
 
 /***/ }),
-/* 141 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var identity = __webpack_require__(28),
-    metaMap = __webpack_require__(142);
+    metaMap = __webpack_require__(143);
 
 /**
  * The base implementation of `setData` without support for hot loop shorting.
@@ -12401,10 +12804,10 @@ module.exports = baseSetData;
 
 
 /***/ }),
-/* 142 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var WeakMap = __webpack_require__(143);
+var WeakMap = __webpack_require__(144);
 
 /** Used to store function metadata. */
 var metaMap = WeakMap && new WeakMap;
@@ -12413,7 +12816,7 @@ module.exports = metaMap;
 
 
 /***/ }),
-/* 143 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(23),
@@ -12426,16 +12829,16 @@ module.exports = WeakMap;
 
 
 /***/ }),
-/* 144 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var composeArgs = __webpack_require__(145),
-    composeArgsRight = __webpack_require__(146),
-    countHolders = __webpack_require__(296),
+var composeArgs = __webpack_require__(146),
+    composeArgsRight = __webpack_require__(147),
+    countHolders = __webpack_require__(297),
     createCtor = __webpack_require__(57),
-    createRecurry = __webpack_require__(147),
+    createRecurry = __webpack_require__(148),
     getHolder = __webpack_require__(39),
-    reorder = __webpack_require__(305),
+    reorder = __webpack_require__(306),
     replaceHolders = __webpack_require__(30),
     root = __webpack_require__(4);
 
@@ -12524,7 +12927,7 @@ module.exports = createHybrid;
 
 
 /***/ }),
-/* 145 */
+/* 146 */
 /***/ (function(module, exports) {
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -12569,7 +12972,7 @@ module.exports = composeArgs;
 
 
 /***/ }),
-/* 146 */
+/* 147 */
 /***/ (function(module, exports) {
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -12616,12 +13019,12 @@ module.exports = composeArgsRight;
 
 
 /***/ }),
-/* 147 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isLaziable = __webpack_require__(148),
-    setData = __webpack_require__(151),
-    setWrapToString = __webpack_require__(152);
+var isLaziable = __webpack_require__(149),
+    setData = __webpack_require__(152),
+    setWrapToString = __webpack_require__(153);
 
 /** Used to compose bitmasks for function metadata. */
 var WRAP_BIND_FLAG = 1,
@@ -12678,13 +13081,13 @@ module.exports = createRecurry;
 
 
 /***/ }),
-/* 148 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var LazyWrapper = __webpack_require__(86),
     getData = __webpack_require__(88),
-    getFuncName = __webpack_require__(149),
-    lodash = __webpack_require__(299);
+    getFuncName = __webpack_require__(150),
+    lodash = __webpack_require__(300);
 
 /**
  * Checks if `func` has a lazy counterpart.
@@ -12712,10 +13115,10 @@ module.exports = isLaziable;
 
 
 /***/ }),
-/* 149 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var realNames = __webpack_require__(298);
+var realNames = __webpack_require__(299);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -12749,7 +13152,7 @@ module.exports = getFuncName;
 
 
 /***/ }),
-/* 150 */
+/* 151 */
 /***/ (function(module, exports) {
 
 /**
@@ -12775,11 +13178,11 @@ module.exports = copyArray;
 
 
 /***/ }),
-/* 151 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseSetData = __webpack_require__(141),
-    shortOut = __webpack_require__(138);
+var baseSetData = __webpack_require__(142),
+    shortOut = __webpack_require__(139);
 
 /**
  * Sets metadata for `func`.
@@ -12801,13 +13204,13 @@ module.exports = setData;
 
 
 /***/ }),
-/* 152 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getWrapDetails = __webpack_require__(301),
-    insertWrapDetails = __webpack_require__(302),
+var getWrapDetails = __webpack_require__(302),
+    insertWrapDetails = __webpack_require__(303),
     setToString = __webpack_require__(83),
-    updateWrapDetails = __webpack_require__(303);
+    updateWrapDetails = __webpack_require__(304);
 
 /**
  * Sets the `toString` method of `wrapper` to mimic the source of `reference`
@@ -12828,7 +13231,7 @@ module.exports = setWrapToString;
 
 
 /***/ }),
-/* 153 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var createWrap = __webpack_require__(18);
@@ -12863,7 +13266,7 @@ module.exports = ary;
 
 
 /***/ }),
-/* 154 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var createWrap = __webpack_require__(18);
@@ -12926,7 +13329,7 @@ module.exports = curry;
 
 
 /***/ }),
-/* 155 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var createWrap = __webpack_require__(18);
@@ -12986,7 +13389,7 @@ module.exports = curryRight;
 
 
 /***/ }),
-/* 156 */
+/* 157 */
 /***/ (function(module, exports) {
 
 /** Error message constants. */
@@ -13013,15 +13416,15 @@ module.exports = baseDelay;
 
 
 /***/ }),
-/* 157 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var LodashWrapper = __webpack_require__(89),
     flatRest = __webpack_require__(92),
     getData = __webpack_require__(88),
-    getFuncName = __webpack_require__(149),
+    getFuncName = __webpack_require__(150),
     isArray = __webpack_require__(5),
-    isLaziable = __webpack_require__(148);
+    isLaziable = __webpack_require__(149);
 
 /** Error message constants. */
 var FUNC_ERROR_TEXT = 'Expected a function';
@@ -13097,11 +13500,11 @@ module.exports = createFlow;
 
 
 /***/ }),
-/* 158 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var arrayPush = __webpack_require__(93),
-    isFlattenable = __webpack_require__(339);
+    isFlattenable = __webpack_require__(340);
 
 /**
  * The base implementation of `_.flatten` with support for restricting flattening.
@@ -13141,10 +13544,10 @@ module.exports = baseFlatten;
 
 
 /***/ }),
-/* 159 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var defineProperty = __webpack_require__(137);
+var defineProperty = __webpack_require__(138);
 
 /**
  * The base implementation of `assignValue` and `assignMergeValue` without
@@ -13172,15 +13575,15 @@ module.exports = baseAssignValue;
 
 
 /***/ }),
-/* 160 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ListCache = __webpack_require__(51),
-    stackClear = __webpack_require__(358),
-    stackDelete = __webpack_require__(359),
-    stackGet = __webpack_require__(360),
-    stackHas = __webpack_require__(361),
-    stackSet = __webpack_require__(362);
+    stackClear = __webpack_require__(359),
+    stackDelete = __webpack_require__(360),
+    stackGet = __webpack_require__(361),
+    stackHas = __webpack_require__(362),
+    stackSet = __webpack_require__(363);
 
 /**
  * Creates a stack cache object to store key-value pairs.
@@ -13205,12 +13608,12 @@ module.exports = Stack;
 
 
 /***/ }),
-/* 161 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var SetCache = __webpack_require__(132),
-    arraySome = __webpack_require__(364),
-    cacheHas = __webpack_require__(135);
+var SetCache = __webpack_require__(133),
+    arraySome = __webpack_require__(365),
+    cacheHas = __webpack_require__(136);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1,
@@ -13294,7 +13697,7 @@ module.exports = equalArrays;
 
 
 /***/ }),
-/* 162 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isObject = __webpack_require__(6);
@@ -13315,7 +13718,7 @@ module.exports = isStrictComparable;
 
 
 /***/ }),
-/* 163 */
+/* 164 */
 /***/ (function(module, exports) {
 
 /**
@@ -13341,11 +13744,11 @@ module.exports = matchesStrictComparable;
 
 
 /***/ }),
-/* 164 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseHasIn = __webpack_require__(386),
-    hasPath = __webpack_require__(387);
+var baseHasIn = __webpack_require__(387),
+    hasPath = __webpack_require__(388);
 
 /**
  * Checks if `path` is a direct or inherited property of `object`.
@@ -13381,7 +13784,7 @@ module.exports = hasIn;
 
 
 /***/ }),
-/* 165 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var debounce = __webpack_require__(91),
@@ -13456,7 +13859,7 @@ module.exports = throttle;
 
 
 /***/ }),
-/* 166 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13621,7 +14024,7 @@ exports.isDateBefore = isDateBefore;
 
 
 /***/ }),
-/* 167 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13679,7 +14082,7 @@ exports.closest = closest;
 
 
 /***/ }),
-/* 168 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -13700,7 +14103,7 @@ var _reactDom = __webpack_require__(44);
 
 var _reactDom2 = _interopRequireDefault(_reactDom);
 
-var _PropTypes = __webpack_require__(169);
+var _PropTypes = __webpack_require__(170);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -14243,7 +14646,7 @@ exports.default = Transition;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 169 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -14297,174 +14700,6 @@ var classNamesShape = exports.classNamesShape = _propTypes2.default.oneOfType([_
 })]);
 
 /***/ }),
-/* 170 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-function capitalize(word) {
-  return word[0].toUpperCase() + word.substring(1);
-}
-
-function splitAndCapitalize(splitOn, words) {
-  words = words.split(splitOn);
-  words[0] = capitalize(words[0]);
-  return words.join(' ');
-}
-
-function splitCamelCase(word) {
-  var isCapital = /[A-Z]/;
-  var seperator = " ";
-  var isFirstCapital = true;
-  var newWord = [];
-  word = word.split('');
-  for (var index in word) {
-    var letter = word[index];
-    if (isCapital.test(letter)) {
-      if (!isFirstCapital) {
-        newWord.push(seperator + letter);
-      } else {
-        isFirstCapital = false;
-        newWord.push(letter);
-      }
-    } else {
-      newWord.push(letter);
-    }
-  }
-  return newWord.join('');
-}
-
-function isCampaignSelect(inputName) {
-  if (inputName.indexOf('campaignSelect') === -1) {
-    return false;
-  }
-  var temparr = inputName.split('-');
-  return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
-}
-
-function getInputType(inputName) {
-  var type = inputName.split('-');
-  return type[type.length - 1].split('_')[0];
-}
-
-function getObjectFormats(campaignName, inputs) {
-  var keys = Object.keys(inputs);
-  // Default to the last input in the array
-  var targetInput = inputs[keys[keys.length - 1]];
-
-  for (var index = 0, length = keys.length; index < length; index++) {
-    var key = keys[index];
-    if (!Array.isArray(inputs[key])) {
-      break;
-    }
-    var foundInput = inputs[key].filter(function (input) {
-      return input.value === campaignName;
-    });
-    if (foundInput.length > 0) {
-      targetInput = foundInput[0];
-      break;
-    }
-  }
-
-  var targetObjectInput = null;
-  if (targetInput.inputs) {
-    targetObjectInput = targetInput.inputs[Object.keys(targetInput.inputs).pop()];
-  } else {
-    targetObjectInput = targetInput;
-  }
-  return [targetObjectInput.inputFormat, targetObjectInput.outputFormat];
-}
-
-function formatObject(inOut, value, inputFmt, outputFmt) {
-  if (inOut == 'input') {
-    // Remove {} or []
-    value = value.substring(value.length - 1, 0).substring(1);
-    if (value === "") {
-      return value;
-    }
-
-    var lines = value.split('\t').map(function (line) {
-      var values = line.split('=>').map(function (value) {
-        return value.trim();
-      });
-      var output = inputFmt;
-      for (var index = 0; index < values.length; index++) {
-        var type = output.match(/{\w+:(\w+)}/)[1];
-        if (type === "text") {
-          // Only grab what's in "". Removes unncessary stuff like :discount or ,
-          var _value = values[index].match(/"(.+)"/);
-          values[index] = _value ? _value[1] : _value;
-        } else {
-          values[index] = values[index].split(',').map(function (value) {
-            // Replace any [] found
-            value = value.replace(/[\[\]]/g, '');
-            // Removes "" around each value in the array
-            value = value.substring(value.length - 1, 0).substring(1);
-            return value.trim();
-          });
-          values[index] = values[index].filter(function (value) {
-            return value !== "";
-          }).join(', ');
-        }
-        // Skip null values
-        if (values[index] !== null) {
-          output = output.replace(/{\w+:\w+}/i, values[index]);
-        }
-      }
-      return output;
-    }).join('\n');
-    return lines;
-  } else {
-    var inputFormatRepl = inputFmt.replace(/{\w+:(\w+)}/gi, '').trim();
-    var splitter = inputFormatRepl[0];
-    var requiredInputs = inputFormatRepl.split(splitter).length;
-    var _lines = value.split('\n').map(function (line) {
-      var values = line.split(splitter).map(function (value) {
-        return value.trim();
-      });
-      // Don't allow a blank value
-      values = values.filter(function (value) {
-        return value !== "";
-      });
-
-      // Throw an error if we don't have the right number of inputs so the user can correct
-      if (values.length !== requiredInputs) {
-        throw Error("Number of inputs does not match required input format");
-      }
-
-      var output = outputFmt;
-      for (var index = 0; index < values.length; index++) {
-        var type = output.match(/{(\w+)}/)[1];
-        if (type === 'array') {
-          // Add "" around each value in the array
-          values[index] = values[index].split(',').map(function (value) {
-            return '"' + value.trim() + '"';
-          });
-          values[index] = values[index].filter(function (value) {
-            return value !== '""';
-          }).join();
-        }
-        output = output.replace(/{\w+}/i, values[index]);
-      }
-      return output;
-    }).join(',\t');
-    return _lines;
-  }
-}
-
-exports.capitalize = capitalize;
-exports.splitAndCapitalize = splitAndCapitalize;
-exports.splitCamelCase = splitCamelCase;
-exports.isCampaignSelect = isCampaignSelect;
-exports.getInputType = getInputType;
-exports.getObjectFormats = getObjectFormats;
-exports.formatObject = formatObject;
-
-/***/ }),
 /* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -14492,7 +14727,13 @@ var _App2 = _interopRequireDefault(_App);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-_reactDom2.default.render(_react2.default.createElement(_App2.default, null), document.getElementById('root'));
+var ErrorBoundary = bugsnagClient.use(bugsnag__react(_react2.default));
+
+_reactDom2.default.render(_react2.default.createElement(
+  ErrorBoundary,
+  null,
+  _react2.default.createElement(_App2.default, null)
+), document.getElementById('root'));
 
 /***/ }),
 /* 173 */
@@ -15904,7 +16145,7 @@ module.exports = react;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(3),l=__webpack_require__(101),B=__webpack_require__(31),C=__webpack_require__(13),ba=__webpack_require__(102),da=__webpack_require__(103),ea=__webpack_require__(104),fa=__webpack_require__(105),ia=__webpack_require__(106),D=__webpack_require__(42);
+var aa=__webpack_require__(3),l=__webpack_require__(102),B=__webpack_require__(31),C=__webpack_require__(13),ba=__webpack_require__(103),da=__webpack_require__(104),ea=__webpack_require__(105),fa=__webpack_require__(106),ia=__webpack_require__(107),D=__webpack_require__(42);
 function E(a){for(var b=arguments.length-1,c="Minified React error #"+a+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant\x3d"+a,d=0;d<b;d++)c+="\x26args[]\x3d"+encodeURIComponent(arguments[d+1]);b=Error(c+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.");b.name="Invariant Violation";b.framesToPop=1;throw b;}aa?void 0:E("227");
 var oa={children:!0,dangerouslySetInnerHTML:!0,defaultValue:!0,defaultChecked:!0,innerHTML:!0,suppressContentEditableWarning:!0,suppressHydrationWarning:!0,style:!0};function pa(a,b){return(a&b)===b}
 var ta={MUST_USE_PROPERTY:1,HAS_BOOLEAN_VALUE:4,HAS_NUMERIC_VALUE:8,HAS_POSITIVE_NUMERIC_VALUE:24,HAS_OVERLOADED_BOOLEAN_VALUE:32,HAS_STRING_BOOLEAN_VALUE:64,injectDOMPropertyConfig:function(a){var b=ta,c=a.Properties||{},d=a.DOMAttributeNamespaces||{},e=a.DOMAttributeNames||{};a=a.DOMMutationMethods||{};for(var f in c){ua.hasOwnProperty(f)?E("48",f):void 0;var g=f.toLowerCase(),h=c[f];g={attributeName:g,attributeNamespace:null,propertyName:f,mutationMethod:null,mustUseProperty:pa(h,b.MUST_USE_PROPERTY),
@@ -16204,14 +16445,14 @@ if (process.env.NODE_ENV !== "production") {
 var React = __webpack_require__(3);
 var invariant = __webpack_require__(32);
 var warning = __webpack_require__(43);
-var ExecutionEnvironment = __webpack_require__(101);
+var ExecutionEnvironment = __webpack_require__(102);
 var _assign = __webpack_require__(31);
 var emptyFunction = __webpack_require__(13);
-var EventListener = __webpack_require__(102);
-var getActiveElement = __webpack_require__(103);
-var shallowEqual = __webpack_require__(104);
-var containsNode = __webpack_require__(105);
-var focusNode = __webpack_require__(106);
+var EventListener = __webpack_require__(103);
+var getActiveElement = __webpack_require__(104);
+var shallowEqual = __webpack_require__(105);
+var containsNode = __webpack_require__(106);
+var focusNode = __webpack_require__(107);
 var emptyObject = __webpack_require__(42);
 var checkPropTypes = __webpack_require__(60);
 var hyphenateStyleName = __webpack_require__(179);
@@ -31758,35 +31999,35 @@ var _react2 = _interopRequireDefault(_react);
 
 var _polaris = __webpack_require__(24);
 
-var _ScriptSelector = __webpack_require__(443);
+var _ScriptSelector = __webpack_require__(444);
 
 var _ScriptSelector2 = _interopRequireDefault(_ScriptSelector);
 
-var _CampaignForm = __webpack_require__(444);
+var _CampaignForm = __webpack_require__(445);
 
 var _CampaignForm2 = _interopRequireDefault(_CampaignForm);
 
-var _CampaignsList = __webpack_require__(448);
+var _CampaignsList = __webpack_require__(449);
 
 var _CampaignsList2 = _interopRequireDefault(_CampaignsList);
 
-var _ScriptOutput = __webpack_require__(451);
+var _ScriptOutput = __webpack_require__(452);
 
 var _ScriptOutput2 = _interopRequireDefault(_ScriptOutput);
 
-var _Footer = __webpack_require__(454);
+var _Footer = __webpack_require__(455);
 
 var _Footer2 = _interopRequireDefault(_Footer);
 
-var _lineItem = __webpack_require__(455);
+var _lineItem = __webpack_require__(456);
 
 var _lineItem2 = _interopRequireDefault(_lineItem);
 
-var _shipping = __webpack_require__(456);
+var _shipping = __webpack_require__(457);
 
 var _shipping2 = _interopRequireDefault(_shipping);
 
-var _payment = __webpack_require__(457);
+var _payment = __webpack_require__(458);
 
 var _payment2 = _interopRequireDefault(_payment);
 
@@ -31794,9 +32035,11 @@ var _common = __webpack_require__(59);
 
 var _common2 = _interopRequireDefault(_common);
 
-var _versions = __webpack_require__(458);
+var _versions = __webpack_require__(459);
 
 var _versions2 = _interopRequireDefault(_versions);
+
+var _helpers = __webpack_require__(101);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -31818,7 +32061,7 @@ var App = function (_Component) {
       scriptType: 'line_item',
       showForm: false,
       currentCampaign: null,
-      availableCampaigns: _this.getCampagins('line_item'),
+      availableCampaigns: _this.getCampaigns('line_item'),
       campaigns: [{ name: "Create new campaign", skip: true }],
       currentId: 0,
       output: '',
@@ -31830,7 +32073,7 @@ var App = function (_Component) {
 
     // Versions used for saving script files to detect imcompatabilities
     _this.version = _versions2.default.currentVersion;
-    _this.incompatibleVersions = _versions2.default.incompatibleVersions;
+    _this.minimumVersion = _versions2.default.minimumVersion;
 
     _this.state = JSON.parse(JSON.stringify(_this.defaultState));
 
@@ -31841,7 +32084,7 @@ var App = function (_Component) {
     _this.editCampaign = _this.editCampaign.bind(_this);
     _this.removeCampaign = _this.removeCampaign.bind(_this);
     _this.updateCurrentCampaign = _this.updateCurrentCampaign.bind(_this);
-    _this.getCampagins = _this.getCampagins.bind(_this);
+    _this.getCampaigns = _this.getCampaigns.bind(_this);
     _this.getCampaignInfo = _this.getCampaignInfo.bind(_this);
     _this.getCampaignById = _this.getCampaignById.bind(_this);
     _this.readFile = _this.readFile.bind(_this);
@@ -31871,7 +32114,7 @@ var App = function (_Component) {
 
       var newState = JSON.parse(JSON.stringify(this.defaultState));
       newState.scriptType = newType;
-      newState.availableCampaigns = this.getCampagins(newType);
+      newState.availableCampaigns = this.getCampaigns(newType);
       this.setState(newState);
     }
   }, {
@@ -31889,8 +32132,8 @@ var App = function (_Component) {
       }
     }
   }, {
-    key: 'getCampagins',
-    value: function getCampagins(type) {
+    key: 'getCampaigns',
+    value: function getCampaigns(type) {
       switch (type) {
         case 'line_item':
           return _lineItem2.default.campaigns;
@@ -32047,16 +32290,15 @@ var App = function (_Component) {
       // Generate the campaign initialization code (also finds out what classes are used)
       var campaigns = this.state.campaigns.map(function (campaign) {
         _this2.IL++;
-        var code = _this2.generateCode(campaign, classesUsed);
+        var code = _this2.generateCode(campaign, classesUsed, allClasses);
         _this2.IL--;
         return code;
       }).join(',\n');
       // remove the last `,` from the campaigns string (raises syntax error)
       campaigns = campaigns.substring(campaigns.length - 1, 0);
 
-      // Generate the classes code
       var output = generateClassCode(allClasses, classesUsed);
-      // Remove first newline 
+      // Remove first newline
       output = output.substring(1);
 
       // Replace the default code with the campaign initialization code
@@ -32080,7 +32322,7 @@ var App = function (_Component) {
     }
   }, {
     key: 'generateCode',
-    value: function generateCode(campaign, classesUsed) {
+    value: function generateCode(campaign, classesUsed, allClasses) {
       var _this3 = this;
 
       if (campaign.skip) {
@@ -32094,21 +32336,21 @@ var App = function (_Component) {
         4: '        '
       };
 
-      addUsedClass(campaign.name);
+      addUsedClass(campaign.name, allClasses);
       if (campaign.dependants) {
         campaign.dependants.forEach(function (dependant) {
-          return addUsedClass(dependant);
+          return addUsedClass(dependant, allClasses);
         });
       }
 
       var inputsCode = campaign.inputs.map(function (input, index) {
         if (input.inputs) {
           _this3.IL++;
-          var code = _this3.generateCode(input, classesUsed);
+          var code = _this3.generateCode(input, classesUsed, allClasses);
           _this3.IL--;
           return code;
         } else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === "object" && input.name !== "none") {
-          addUsedClass(input.name);
+          addUsedClass(input.name, allClasses);
           return '' + INDENT[_this3.IL + 1] + input.name + '.new()';
         } else if ((typeof input === 'undefined' ? 'undefined' : _typeof(input)) === "object" && input.name === 'none') {
           return INDENT[_this3.IL + 1] + 'nil';
@@ -32119,7 +32361,16 @@ var App = function (_Component) {
 
       return '' + INDENT[this.IL] + campaign.name + '.new(\n' + inputsCode + '\n' + INDENT[this.IL] + ')';
 
-      function addUsedClass(className) {
+      function addUsedClass(className, allClasses) {
+        // Grab what inherits from the class (if anything)
+        var inheritsFrom = allClasses[className].split('\n')[1];
+        if (inheritsFrom.indexOf('<') > -1) {
+          inheritsFrom = inheritsFrom.split('<')[1].trim();
+          if (classesUsed.indexOf(inheritsFrom) === -1) {
+            classesUsed.push(inheritsFrom);
+          }
+        }
+
         if (classesUsed.indexOf(className) === -1) {
           classesUsed.push(className);
         }
@@ -32167,9 +32418,14 @@ var App = function (_Component) {
           // Google Analytics
           gtag('event', 'importAttempt');
 
-          _this4.readFile(evt.target, function (loadedCampaigns) {
-            if (loadedCampaigns && loadedCampaigns.length > 0) {
+          _this4.readFile(evt.target, function (results) {
+            if (results && results.campaigns.length > 0) {
               var newState = JSON.parse(JSON.stringify(_this4.defaultState));
+              if (results.type !== 'line_item') {
+                newState.scriptType = results.type;
+                newState.availableCampaigns = _this4.getCampaigns(results.type);
+              }
+              var loadedCampaigns = results.campaigns;
               loadedCampaigns.reverse().forEach(function (campaign) {
                 newState.campaigns.unshift(campaign);
               });
@@ -32214,16 +32470,21 @@ var App = function (_Component) {
       var validFileSignature = 'ShopifyScriptCreatorFile';
       var results = null;
       if (file && file.length) {
-        results = file;
-        if (results.indexOf(validFileSignature) > -1) {
-          var fileVersion = results.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
-          if (this.incompatibleVersions.indexOf(fileVersion) > -1) {
-            alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
-          } else {
-            var splitOn = /-V\d+\.\d+\.\d+-/;
-            return JSON.parse(results.split(splitOn)[1]);
+        try {
+          results = JSON.parse(file);
+          if (results.version.indexOf(validFileSignature) < 0) {
+            throw Error;
           }
-        } else {
+          var fileVersion = results.version.split('ShopifyScriptCreatorFile-V')[1].split('-')[0];
+          if ((0, _helpers.meetsMinimumVersion)(fileVersion, this.minimumVersion)) {
+            if (!results.type || !results.campaigns) {
+              throw Error;
+            }
+            return results;
+          } else {
+            alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
+          }
+        } catch (error) {
           alert('File does not appear to be a valid script creator file');
         }
       } else {
@@ -32241,8 +32502,12 @@ var App = function (_Component) {
       var campaigns = this.state.campaigns.filter(function (campaign) {
         return !campaign.skip;
       });
-      var data = 'ShopifyScriptCreatorFile-V' + this.version + '-' + JSON.stringify(campaigns);
-      this.download(data, filename, 'text/plain');
+      var data = {
+        version: 'ShopifyScriptCreatorFile-V' + this.version,
+        type: this.state.scriptType,
+        campaigns: campaigns
+      };
+      this.download(JSON.stringify(data), filename, 'text/plain');
     }
   }, {
     key: 'render',
@@ -32432,6 +32697,196 @@ var __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;/*!
 
 /***/ }),
 /* 185 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* unused harmony export __extends */
+/* unused harmony export __assign */
+/* harmony export (immutable) */ __webpack_exports__["b"] = __rest;
+/* harmony export (immutable) */ __webpack_exports__["a"] = __decorate;
+/* unused harmony export __param */
+/* unused harmony export __metadata */
+/* unused harmony export __awaiter */
+/* unused harmony export __generator */
+/* unused harmony export __exportStar */
+/* unused harmony export __values */
+/* unused harmony export __read */
+/* unused harmony export __spread */
+/* unused harmony export __await */
+/* unused harmony export __asyncGenerator */
+/* unused harmony export __asyncDelegator */
+/* unused harmony export __asyncValues */
+/* unused harmony export __makeTemplateObject */
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
+var __assign = Object.assign || function __assign(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+    }
+    return t;
+}
+
+function __rest(s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) if (e.indexOf(p[i]) < 0)
+            t[p[i]] = s[p[i]];
+    return t;
+}
+
+function __decorate(decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+}
+
+function __param(paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+}
+
+function __metadata(metadataKey, metadataValue) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(metadataKey, metadataValue);
+}
+
+function __awaiter(thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = y[op[0] & 2 ? "return" : op[0] ? "throw" : "next"]) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [0, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+
+function __exportStar(m, exports) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+
+function __values(o) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
+    if (m) return m.call(o);
+    return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
+function __spread() {
+    for (var ar = [], i = 0; i < arguments.length; i++)
+        ar = ar.concat(__read(arguments[i]));
+    return ar;
+}
+
+function __await(v) {
+    return this instanceof __await ? (this.v = v, this) : new __await(v);
+}
+
+function __asyncGenerator(thisArg, _arguments, generator) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var g = generator.apply(thisArg, _arguments || []), i, q = [];
+    return i = {}, verb("next"), verb("throw"), verb("return"), i[Symbol.asyncIterator] = function () { return this; }, i;
+    function verb(n) { if (g[n]) i[n] = function (v) { return new Promise(function (a, b) { q.push([n, v, a, b]) > 1 || resume(n, v); }); }; }
+    function resume(n, v) { try { step(g[n](v)); } catch (e) { settle(q[0][3], e); } }
+    function step(r) { r.value instanceof __await ? Promise.resolve(r.value.v).then(fulfill, reject) : settle(q[0][2], r);  }
+    function fulfill(value) { resume("next", value); }
+    function reject(value) { resume("throw", value); }
+    function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
+}
+
+function __asyncDelegator(o) {
+    var i, p;
+    return i = {}, verb("next"), verb("throw", function (e) { throw e; }), verb("return"), i[Symbol.iterator] = function () { return this; }, i;
+    function verb(n, f) { if (o[n]) i[n] = function (v) { return (p = !p) ? { value: __await(o[n](v)), done: n === "return" } : f ? f(v) : v; }; }
+}
+
+function __asyncValues(o) {
+    if (!Symbol.asyncIterator) throw new TypeError("Symbol.asyncIterator is not defined.");
+    var m = o[Symbol.asyncIterator];
+    return m ? m.call(o) : typeof __values === "function" ? __values(o) : o[Symbol.iterator]();
+}
+
+function __makeTemplateObject(cooked, raw) {
+    if (Object.defineProperty) { Object.defineProperty(cooked, "raw", { value: raw }); } else { cooked.raw = raw; }
+    return cooked;
+};
+
+
+/***/ }),
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32440,12 +32895,12 @@ function __export(m) {
     for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
 }
 Object.defineProperty(exports, "__esModule", { value: true });
+__export(__webpack_require__(109));
 __export(__webpack_require__(108));
-__export(__webpack_require__(107));
 
 
 /***/ }),
-/* 186 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32456,7 +32911,7 @@ exports.isClient = !exports.isServer;
 
 
 /***/ }),
-/* 187 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32471,7 +32926,7 @@ exports.default = function (instance, Constructor) {
 };
 
 /***/ }),
-/* 188 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32479,7 +32934,7 @@ exports.default = function (instance, Constructor) {
 
 exports.__esModule = true;
 
-var _defineProperty = __webpack_require__(189);
+var _defineProperty = __webpack_require__(190);
 
 var _defineProperty2 = _interopRequireDefault(_defineProperty);
 
@@ -32504,23 +32959,23 @@ exports.default = function () {
 }();
 
 /***/ }),
-/* 189 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(190), __esModule: true };
-
-/***/ }),
 /* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(191);
+module.exports = { "default": __webpack_require__(191), __esModule: true };
+
+/***/ }),
+/* 191 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(192);
 var $Object = __webpack_require__(15).Object;
 module.exports = function defineProperty(it, key, desc){
   return $Object.defineProperty(it, key, desc);
 };
 
 /***/ }),
-/* 191 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var $export = __webpack_require__(25);
@@ -32528,7 +32983,7 @@ var $export = __webpack_require__(25);
 $export($export.S + $export.F * !__webpack_require__(19), 'Object', {defineProperty: __webpack_require__(16).f});
 
 /***/ }),
-/* 192 */
+/* 193 */
 /***/ (function(module, exports) {
 
 module.exports = function(it){
@@ -32537,7 +32992,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 193 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32545,7 +33000,7 @@ module.exports = function(it){
 
 exports.__esModule = true;
 
-var _typeof2 = __webpack_require__(111);
+var _typeof2 = __webpack_require__(112);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
@@ -32560,21 +33015,21 @@ exports.default = function (self, call) {
 };
 
 /***/ }),
-/* 194 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(195), __esModule: true };
-
-/***/ }),
 /* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(112);
-__webpack_require__(204);
-module.exports = __webpack_require__(73).f('iterator');
+module.exports = { "default": __webpack_require__(196), __esModule: true };
 
 /***/ }),
 /* 196 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(113);
+__webpack_require__(205);
+module.exports = __webpack_require__(73).f('iterator');
+
+/***/ }),
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var toInteger = __webpack_require__(64)
@@ -32596,7 +33051,7 @@ module.exports = function(TO_STRING){
 };
 
 /***/ }),
-/* 197 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32607,7 +33062,7 @@ var create         = __webpack_require__(67)
   , IteratorPrototype = {};
 
 // 25.1.2.1.1 %IteratorPrototype%[@@iterator]()
-__webpack_require__(26)(IteratorPrototype, __webpack_require__(10)('iterator'), function(){ return this; });
+__webpack_require__(26)(IteratorPrototype, __webpack_require__(9)('iterator'), function(){ return this; });
 
 module.exports = function(Constructor, NAME, next){
   Constructor.prototype = create(IteratorPrototype, {next: descriptor(1, next)});
@@ -32615,7 +33070,7 @@ module.exports = function(Constructor, NAME, next){
 };
 
 /***/ }),
-/* 198 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var dP       = __webpack_require__(16)
@@ -32633,7 +33088,7 @@ module.exports = __webpack_require__(19) ? Object.defineProperties : function de
 };
 
 /***/ }),
-/* 199 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for non-array-like ES3 and non-enumerable old V8 strings
@@ -32643,14 +33098,14 @@ module.exports = Object('z').propertyIsEnumerable(0) ? Object : function(it){
 };
 
 /***/ }),
-/* 200 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // false -> Array#indexOf
 // true  -> Array#includes
 var toIObject = __webpack_require__(21)
-  , toLength  = __webpack_require__(116)
-  , toIndex   = __webpack_require__(201);
+  , toLength  = __webpack_require__(117)
+  , toIndex   = __webpack_require__(202);
 module.exports = function(IS_INCLUDES){
   return function($this, el, fromIndex){
     var O      = toIObject($this)
@@ -32669,7 +33124,7 @@ module.exports = function(IS_INCLUDES){
 };
 
 /***/ }),
-/* 201 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var toInteger = __webpack_require__(64)
@@ -32681,18 +33136,18 @@ module.exports = function(index, length){
 };
 
 /***/ }),
-/* 202 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(14).document && document.documentElement;
 
 /***/ }),
-/* 203 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 19.1.2.9 / 15.2.3.2 Object.getPrototypeOf(O)
 var has         = __webpack_require__(20)
-  , toObject    = __webpack_require__(117)
+  , toObject    = __webpack_require__(118)
   , IE_PROTO    = __webpack_require__(69)('IE_PROTO')
   , ObjectProto = Object.prototype;
 
@@ -32705,14 +33160,14 @@ module.exports = Object.getPrototypeOf || function(O){
 };
 
 /***/ }),
-/* 204 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(205);
+__webpack_require__(206);
 var global        = __webpack_require__(14)
   , hide          = __webpack_require__(26)
   , Iterators     = __webpack_require__(35)
-  , TO_STRING_TAG = __webpack_require__(10)('toStringTag');
+  , TO_STRING_TAG = __webpack_require__(9)('toStringTag');
 
 for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList', 'CSSRuleList'], i = 0; i < 5; i++){
   var NAME       = collections[i]
@@ -32723,13 +33178,13 @@ for(var collections = ['NodeList', 'DOMTokenList', 'MediaList', 'StyleSheetList'
 }
 
 /***/ }),
-/* 205 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
-var addToUnscopables = __webpack_require__(206)
-  , step             = __webpack_require__(207)
+var addToUnscopables = __webpack_require__(207)
+  , step             = __webpack_require__(208)
   , Iterators        = __webpack_require__(35)
   , toIObject        = __webpack_require__(21);
 
@@ -32737,7 +33192,7 @@ var addToUnscopables = __webpack_require__(206)
 // 22.1.3.13 Array.prototype.keys()
 // 22.1.3.29 Array.prototype.values()
 // 22.1.3.30 Array.prototype[@@iterator]()
-module.exports = __webpack_require__(113)(Array, 'Array', function(iterated, kind){
+module.exports = __webpack_require__(114)(Array, 'Array', function(iterated, kind){
   this._t = toIObject(iterated); // target
   this._i = 0;                   // next index
   this._k = kind;                // kind
@@ -32763,13 +33218,13 @@ addToUnscopables('values');
 addToUnscopables('entries');
 
 /***/ }),
-/* 206 */
+/* 207 */
 /***/ (function(module, exports) {
 
 module.exports = function(){ /* empty */ };
 
 /***/ }),
-/* 207 */
+/* 208 */
 /***/ (function(module, exports) {
 
 module.exports = function(done, value){
@@ -32777,23 +33232,23 @@ module.exports = function(done, value){
 };
 
 /***/ }),
-/* 208 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(209), __esModule: true };
-
-/***/ }),
 /* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(210);
-__webpack_require__(216);
-__webpack_require__(217);
-__webpack_require__(218);
-module.exports = __webpack_require__(15).Symbol;
+module.exports = { "default": __webpack_require__(210), __esModule: true };
 
 /***/ }),
 /* 210 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(211);
+__webpack_require__(217);
+__webpack_require__(218);
+__webpack_require__(219);
+module.exports = __webpack_require__(15).Symbol;
+
+/***/ }),
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -32803,25 +33258,25 @@ var global         = __webpack_require__(14)
   , has            = __webpack_require__(20)
   , DESCRIPTORS    = __webpack_require__(19)
   , $export        = __webpack_require__(25)
-  , redefine       = __webpack_require__(114)
-  , META           = __webpack_require__(211).KEY
+  , redefine       = __webpack_require__(115)
+  , META           = __webpack_require__(212).KEY
   , $fails         = __webpack_require__(45)
   , shared         = __webpack_require__(70)
   , setToStringTag = __webpack_require__(72)
   , uid            = __webpack_require__(47)
-  , wks            = __webpack_require__(10)
+  , wks            = __webpack_require__(9)
   , wksExt         = __webpack_require__(73)
   , wksDefine      = __webpack_require__(74)
-  , keyOf          = __webpack_require__(212)
-  , enumKeys       = __webpack_require__(213)
-  , isArray        = __webpack_require__(214)
+  , keyOf          = __webpack_require__(213)
+  , enumKeys       = __webpack_require__(214)
+  , isArray        = __webpack_require__(215)
   , anObject       = __webpack_require__(27)
   , toIObject      = __webpack_require__(21)
   , toPrimitive    = __webpack_require__(63)
   , createDesc     = __webpack_require__(34)
   , _create        = __webpack_require__(67)
-  , gOPNExt        = __webpack_require__(215)
-  , $GOPD          = __webpack_require__(120)
+  , gOPNExt        = __webpack_require__(216)
+  , $GOPD          = __webpack_require__(121)
   , $DP            = __webpack_require__(16)
   , $keys          = __webpack_require__(46)
   , gOPD           = $GOPD.f
@@ -32946,9 +33401,9 @@ if(!USE_NATIVE){
 
   $GOPD.f = $getOwnPropertyDescriptor;
   $DP.f   = $defineProperty;
-  __webpack_require__(119).f = gOPNExt.f = $getOwnPropertyNames;
+  __webpack_require__(120).f = gOPNExt.f = $getOwnPropertyNames;
   __webpack_require__(75).f  = $propertyIsEnumerable;
-  __webpack_require__(118).f = $getOwnPropertySymbols;
+  __webpack_require__(119).f = $getOwnPropertySymbols;
 
   if(DESCRIPTORS && !__webpack_require__(66)){
     redefine(ObjectProto, 'propertyIsEnumerable', $propertyIsEnumerable, true);
@@ -33034,7 +33489,7 @@ setToStringTag(Math, 'Math', true);
 setToStringTag(global.JSON, 'JSON', true);
 
 /***/ }),
-/* 211 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var META     = __webpack_require__(47)('meta')
@@ -33092,7 +33547,7 @@ var meta = module.exports = {
 };
 
 /***/ }),
-/* 212 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getKeys   = __webpack_require__(46)
@@ -33107,12 +33562,12 @@ module.exports = function(object, el){
 };
 
 /***/ }),
-/* 213 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // all enumerable object keys, includes symbols
 var getKeys = __webpack_require__(46)
-  , gOPS    = __webpack_require__(118)
+  , gOPS    = __webpack_require__(119)
   , pIE     = __webpack_require__(75);
 module.exports = function(it){
   var result     = getKeys(it)
@@ -33127,7 +33582,7 @@ module.exports = function(it){
 };
 
 /***/ }),
-/* 214 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // 7.2.2 IsArray(argument)
@@ -33137,12 +33592,12 @@ module.exports = Array.isArray || function isArray(arg){
 };
 
 /***/ }),
-/* 215 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
 var toIObject = __webpack_require__(21)
-  , gOPN      = __webpack_require__(119).f
+  , gOPN      = __webpack_require__(120).f
   , toString  = {}.toString;
 
 var windowNames = typeof window == 'object' && window && Object.getOwnPropertyNames
@@ -33162,25 +33617,25 @@ module.exports.f = function getOwnPropertyNames(it){
 
 
 /***/ }),
-/* 216 */
+/* 217 */
 /***/ (function(module, exports) {
 
 
 
 /***/ }),
-/* 217 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(74)('asyncIterator');
 
 /***/ }),
-/* 218 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(74)('observable');
 
 /***/ }),
-/* 219 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33188,15 +33643,15 @@ __webpack_require__(74)('observable');
 
 exports.__esModule = true;
 
-var _setPrototypeOf = __webpack_require__(220);
+var _setPrototypeOf = __webpack_require__(221);
 
 var _setPrototypeOf2 = _interopRequireDefault(_setPrototypeOf);
 
-var _create = __webpack_require__(224);
+var _create = __webpack_require__(225);
 
 var _create2 = _interopRequireDefault(_create);
 
-var _typeof2 = __webpack_require__(111);
+var _typeof2 = __webpack_require__(112);
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
@@ -33219,28 +33674,28 @@ exports.default = function (subClass, superClass) {
 };
 
 /***/ }),
-/* 220 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(221), __esModule: true };
-
-/***/ }),
 /* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(222);
-module.exports = __webpack_require__(15).Object.setPrototypeOf;
+module.exports = { "default": __webpack_require__(222), __esModule: true };
 
 /***/ }),
 /* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
-// 19.1.3.19 Object.setPrototypeOf(O, proto)
-var $export = __webpack_require__(25);
-$export($export.S, 'Object', {setPrototypeOf: __webpack_require__(223).set});
+__webpack_require__(223);
+module.exports = __webpack_require__(15).Object.setPrototypeOf;
 
 /***/ }),
 /* 223 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// 19.1.3.19 Object.setPrototypeOf(O, proto)
+var $export = __webpack_require__(25);
+$export($export.S, 'Object', {setPrototypeOf: __webpack_require__(224).set});
+
+/***/ }),
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // Works with __proto__ only. Old v8 can't work with null proto objects.
@@ -33255,7 +33710,7 @@ module.exports = {
   set: Object.setPrototypeOf || ('__proto__' in {} ? // eslint-disable-line
     function(test, buggy, set){
       try {
-        set = __webpack_require__(62)(Function.call, __webpack_require__(120).f(Object.prototype, '__proto__').set, 2);
+        set = __webpack_require__(62)(Function.call, __webpack_require__(121).f(Object.prototype, '__proto__').set, 2);
         set(test, []);
         buggy = !(test instanceof Array);
       } catch(e){ buggy = true; }
@@ -33270,23 +33725,23 @@ module.exports = {
 };
 
 /***/ }),
-/* 224 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = { "default": __webpack_require__(225), __esModule: true };
-
-/***/ }),
 /* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(226);
+module.exports = { "default": __webpack_require__(226), __esModule: true };
+
+/***/ }),
+/* 226 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(227);
 var $Object = __webpack_require__(15).Object;
 module.exports = function create(P, D){
   return $Object.create(P, D);
 };
 
 /***/ }),
-/* 226 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var $export = __webpack_require__(25)
@@ -33294,22 +33749,22 @@ var $export = __webpack_require__(25)
 $export($export.S, 'Object', {create: __webpack_require__(67)});
 
 /***/ }),
-/* 227 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var debounce_1 = __webpack_require__(228);
+var debounce_1 = __webpack_require__(229);
 exports.debounce = debounce_1.default;
-var memoize_1 = __webpack_require__(410);
+var memoize_1 = __webpack_require__(411);
 exports.memoize = memoize_1.default;
-var autobind_1 = __webpack_require__(411);
+var autobind_1 = __webpack_require__(412);
 exports.autobind = autobind_1.default;
 
 
 /***/ }),
-/* 228 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33320,7 +33775,7 @@ exports.default = lodash_decorators_1.debounce;
 
 
 /***/ }),
-/* 229 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33374,14 +33829,14 @@ exports.DecoratorConfig = DecoratorConfig;
 //# sourceMappingURL=DecoratorConfig.js.map
 
 /***/ }),
-/* 230 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var isFunction = __webpack_require__(22);
-var common_1 = __webpack_require__(122);
+var common_1 = __webpack_require__(123);
 var utils_1 = __webpack_require__(12);
 var InternalDecoratorFactory = (function () {
     function InternalDecoratorFactory() {
@@ -33527,7 +33982,7 @@ exports.DecoratorFactory = new InternalDecoratorFactory();
 //# sourceMappingURL=DecoratorFactory.js.map
 
 /***/ }),
-/* 231 */
+/* 232 */
 /***/ (function(module, exports) {
 
 var g;
@@ -33554,7 +34009,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 232 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(36);
@@ -33606,7 +34061,7 @@ module.exports = getRawTag;
 
 
 /***/ }),
-/* 233 */
+/* 234 */
 /***/ (function(module, exports) {
 
 /** Used for built-in method references. */
@@ -33634,15 +34089,15 @@ module.exports = objectToString;
 
 
 /***/ }),
-/* 234 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var isFunction = __webpack_require__(22);
-var isString = __webpack_require__(235);
-var log_1 = __webpack_require__(123);
+var isString = __webpack_require__(236);
+var log_1 = __webpack_require__(124);
 /**
   * Resolves a function on the current target object. It first will
   * try and resolve on the context object, then the target object,
@@ -33674,12 +34129,12 @@ exports.resolveFunction = resolveFunction;
 //# sourceMappingURL=resolveFunction.js.map
 
 /***/ }),
-/* 235 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
     isArray = __webpack_require__(5),
-    isObjectLike = __webpack_require__(11);
+    isObjectLike = __webpack_require__(10);
 
 /** `Object#toString` result references. */
 var stringTag = '[object String]';
@@ -33710,13 +34165,13 @@ module.exports = isString;
 
 
 /***/ }),
-/* 236 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var isUndefined = __webpack_require__(237);
+var isUndefined = __webpack_require__(238);
 /**
  * A map for weakly holding nested references.
  * @private
@@ -33760,7 +34215,7 @@ exports.CompositeKeyWeakMap = CompositeKeyWeakMap;
 //# sourceMappingURL=CompositeKeyWeakMap.js.map
 
 /***/ }),
-/* 237 */
+/* 238 */
 /***/ (function(module, exports) {
 
 /**
@@ -33788,7 +34243,7 @@ module.exports = isUndefined;
 
 
 /***/ }),
-/* 238 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33816,11 +34271,11 @@ exports.returnAtIndex = returnAtIndex;
 //# sourceMappingURL=returnAtIndex.js.map
 
 /***/ }),
-/* 239 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseForOwn = __webpack_require__(240),
-    castFunction = __webpack_require__(130);
+var baseForOwn = __webpack_require__(241),
+    castFunction = __webpack_require__(131);
 
 /**
  * Iterates over own enumerable string keyed properties of an object and
@@ -33858,10 +34313,10 @@ module.exports = forOwn;
 
 
 /***/ }),
-/* 240 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseFor = __webpack_require__(241),
+var baseFor = __webpack_require__(242),
     keys = __webpack_require__(48);
 
 /**
@@ -33880,10 +34335,10 @@ module.exports = baseForOwn;
 
 
 /***/ }),
-/* 241 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createBaseFor = __webpack_require__(242);
+var createBaseFor = __webpack_require__(243);
 
 /**
  * The base implementation of `baseForOwn` which iterates over `object`
@@ -33902,7 +34357,7 @@ module.exports = baseFor;
 
 
 /***/ }),
-/* 242 */
+/* 243 */
 /***/ (function(module, exports) {
 
 /**
@@ -33933,15 +34388,15 @@ module.exports = createBaseFor;
 
 
 /***/ }),
-/* 243 */
+/* 244 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseTimes = __webpack_require__(244),
+var baseTimes = __webpack_require__(245),
     isArguments = __webpack_require__(77),
     isArray = __webpack_require__(5),
-    isBuffer = __webpack_require__(125),
+    isBuffer = __webpack_require__(126),
     isIndex = __webpack_require__(37),
-    isTypedArray = __webpack_require__(127);
+    isTypedArray = __webpack_require__(128);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -33988,7 +34443,7 @@ module.exports = arrayLikeKeys;
 
 
 /***/ }),
-/* 244 */
+/* 245 */
 /***/ (function(module, exports) {
 
 /**
@@ -34014,11 +34469,11 @@ module.exports = baseTimes;
 
 
 /***/ }),
-/* 245 */
+/* 246 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
-    isObjectLike = __webpack_require__(11);
+    isObjectLike = __webpack_require__(10);
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]';
@@ -34038,7 +34493,7 @@ module.exports = baseIsArguments;
 
 
 /***/ }),
-/* 246 */
+/* 247 */
 /***/ (function(module, exports) {
 
 /**
@@ -34062,12 +34517,12 @@ module.exports = stubFalse;
 
 
 /***/ }),
-/* 247 */
+/* 248 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
     isLength = __webpack_require__(78),
-    isObjectLike = __webpack_require__(11);
+    isObjectLike = __webpack_require__(10);
 
 /** `Object#toString` result references. */
 var argsTag = '[object Arguments]',
@@ -34128,10 +34583,10 @@ module.exports = baseIsTypedArray;
 
 
 /***/ }),
-/* 248 */
+/* 249 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(module) {var freeGlobal = __webpack_require__(121);
+/* WEBPACK VAR INJECTION */(function(module) {var freeGlobal = __webpack_require__(122);
 
 /** Detect free variable `exports`. */
 var freeExports = typeof exports == 'object' && exports && !exports.nodeType && exports;
@@ -34154,14 +34609,14 @@ var nodeUtil = (function() {
 
 module.exports = nodeUtil;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(126)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(127)(module)))
 
 /***/ }),
-/* 249 */
+/* 250 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isPrototype = __webpack_require__(128),
-    nativeKeys = __webpack_require__(250);
+var isPrototype = __webpack_require__(129),
+    nativeKeys = __webpack_require__(251);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -34193,10 +34648,10 @@ module.exports = baseKeys;
 
 
 /***/ }),
-/* 250 */
+/* 251 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var overArg = __webpack_require__(129);
+var overArg = __webpack_require__(130);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
 var nativeKeys = overArg(Object.keys, Object);
@@ -34205,13 +34660,13 @@ module.exports = nativeKeys;
 
 
 /***/ }),
-/* 251 */
+/* 252 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var copyMetaData_1 = __webpack_require__(124);
+var copyMetaData_1 = __webpack_require__(125);
 /**
  * Binds a function and copies metadata.
  * @private
@@ -34227,13 +34682,13 @@ exports.bind = bind;
 //# sourceMappingURL=bind.js.map
 
 /***/ }),
-/* 252 */
+/* 253 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assignAll_1 = __webpack_require__(131);
+var assignAll_1 = __webpack_require__(132);
 var PROPERTY_EXCLUDES = [
     'length',
     'name',
@@ -34264,12 +34719,12 @@ exports.wrapConstructor = wrapConstructor;
 //# sourceMappingURL=wrapConstructor.js.map
 
 /***/ }),
-/* 253 */
+/* 254 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseDifference = __webpack_require__(254),
+var baseDifference = __webpack_require__(255),
     baseRest = __webpack_require__(7),
-    isArrayLikeObject = __webpack_require__(285);
+    isArrayLikeObject = __webpack_require__(286);
 
 /**
  * Creates an array excluding all given values using
@@ -34301,15 +34756,15 @@ module.exports = without;
 
 
 /***/ }),
-/* 254 */
+/* 255 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var SetCache = __webpack_require__(132),
-    arrayIncludes = __webpack_require__(134),
-    arrayIncludesWith = __webpack_require__(282),
+var SetCache = __webpack_require__(133),
+    arrayIncludes = __webpack_require__(135),
+    arrayIncludesWith = __webpack_require__(283),
     arrayMap = __webpack_require__(82),
     baseUnary = __webpack_require__(79),
-    cacheHas = __webpack_require__(135);
+    cacheHas = __webpack_require__(136);
 
 /** Used as the size to enable large array optimizations. */
 var LARGE_ARRAY_SIZE = 200;
@@ -34374,10 +34829,10 @@ module.exports = baseDifference;
 
 
 /***/ }),
-/* 255 */
+/* 256 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Hash = __webpack_require__(256),
+var Hash = __webpack_require__(257),
     ListCache = __webpack_require__(51),
     Map = __webpack_require__(81);
 
@@ -34401,14 +34856,14 @@ module.exports = mapCacheClear;
 
 
 /***/ }),
-/* 256 */
+/* 257 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var hashClear = __webpack_require__(257),
-    hashDelete = __webpack_require__(262),
-    hashGet = __webpack_require__(263),
-    hashHas = __webpack_require__(264),
-    hashSet = __webpack_require__(265);
+var hashClear = __webpack_require__(258),
+    hashDelete = __webpack_require__(263),
+    hashGet = __webpack_require__(264),
+    hashHas = __webpack_require__(265),
+    hashSet = __webpack_require__(266);
 
 /**
  * Creates a hash object.
@@ -34439,7 +34894,7 @@ module.exports = Hash;
 
 
 /***/ }),
-/* 257 */
+/* 258 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nativeCreate = __webpack_require__(50);
@@ -34460,13 +34915,13 @@ module.exports = hashClear;
 
 
 /***/ }),
-/* 258 */
+/* 259 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isFunction = __webpack_require__(22),
-    isMasked = __webpack_require__(259),
+    isMasked = __webpack_require__(260),
     isObject = __webpack_require__(6),
-    toSource = __webpack_require__(133);
+    toSource = __webpack_require__(134);
 
 /**
  * Used to match `RegExp`
@@ -34513,10 +34968,10 @@ module.exports = baseIsNative;
 
 
 /***/ }),
-/* 259 */
+/* 260 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var coreJsData = __webpack_require__(260);
+var coreJsData = __webpack_require__(261);
 
 /** Used to detect methods masquerading as native. */
 var maskSrcKey = (function() {
@@ -34539,7 +34994,7 @@ module.exports = isMasked;
 
 
 /***/ }),
-/* 260 */
+/* 261 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var root = __webpack_require__(4);
@@ -34551,7 +35006,7 @@ module.exports = coreJsData;
 
 
 /***/ }),
-/* 261 */
+/* 262 */
 /***/ (function(module, exports) {
 
 /**
@@ -34570,7 +35025,7 @@ module.exports = getValue;
 
 
 /***/ }),
-/* 262 */
+/* 263 */
 /***/ (function(module, exports) {
 
 /**
@@ -34593,7 +35048,7 @@ module.exports = hashDelete;
 
 
 /***/ }),
-/* 263 */
+/* 264 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nativeCreate = __webpack_require__(50);
@@ -34629,7 +35084,7 @@ module.exports = hashGet;
 
 
 /***/ }),
-/* 264 */
+/* 265 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nativeCreate = __webpack_require__(50);
@@ -34658,7 +35113,7 @@ module.exports = hashHas;
 
 
 /***/ }),
-/* 265 */
+/* 266 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var nativeCreate = __webpack_require__(50);
@@ -34687,7 +35142,7 @@ module.exports = hashSet;
 
 
 /***/ }),
-/* 266 */
+/* 267 */
 /***/ (function(module, exports) {
 
 /**
@@ -34706,7 +35161,7 @@ module.exports = listCacheClear;
 
 
 /***/ }),
-/* 267 */
+/* 268 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assocIndexOf = __webpack_require__(52);
@@ -34747,7 +35202,7 @@ module.exports = listCacheDelete;
 
 
 /***/ }),
-/* 268 */
+/* 269 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assocIndexOf = __webpack_require__(52);
@@ -34772,7 +35227,7 @@ module.exports = listCacheGet;
 
 
 /***/ }),
-/* 269 */
+/* 270 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assocIndexOf = __webpack_require__(52);
@@ -34794,7 +35249,7 @@ module.exports = listCacheHas;
 
 
 /***/ }),
-/* 270 */
+/* 271 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assocIndexOf = __webpack_require__(52);
@@ -34826,7 +35281,7 @@ module.exports = listCacheSet;
 
 
 /***/ }),
-/* 271 */
+/* 272 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getMapData = __webpack_require__(54);
@@ -34850,7 +35305,7 @@ module.exports = mapCacheDelete;
 
 
 /***/ }),
-/* 272 */
+/* 273 */
 /***/ (function(module, exports) {
 
 /**
@@ -34871,7 +35326,7 @@ module.exports = isKeyable;
 
 
 /***/ }),
-/* 273 */
+/* 274 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getMapData = __webpack_require__(54);
@@ -34893,7 +35348,7 @@ module.exports = mapCacheGet;
 
 
 /***/ }),
-/* 274 */
+/* 275 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getMapData = __webpack_require__(54);
@@ -34915,7 +35370,7 @@ module.exports = mapCacheHas;
 
 
 /***/ }),
-/* 275 */
+/* 276 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getMapData = __webpack_require__(54);
@@ -34943,7 +35398,7 @@ module.exports = mapCacheSet;
 
 
 /***/ }),
-/* 276 */
+/* 277 */
 /***/ (function(module, exports) {
 
 /** Used to stand-in for `undefined` hash values. */
@@ -34968,7 +35423,7 @@ module.exports = setCacheAdd;
 
 
 /***/ }),
-/* 277 */
+/* 278 */
 /***/ (function(module, exports) {
 
 /**
@@ -34988,12 +35443,12 @@ module.exports = setCacheHas;
 
 
 /***/ }),
-/* 278 */
+/* 279 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseFindIndex = __webpack_require__(279),
-    baseIsNaN = __webpack_require__(280),
-    strictIndexOf = __webpack_require__(281);
+var baseFindIndex = __webpack_require__(280),
+    baseIsNaN = __webpack_require__(281),
+    strictIndexOf = __webpack_require__(282);
 
 /**
  * The base implementation of `_.indexOf` without `fromIndex` bounds checks.
@@ -35014,7 +35469,7 @@ module.exports = baseIndexOf;
 
 
 /***/ }),
-/* 279 */
+/* 280 */
 /***/ (function(module, exports) {
 
 /**
@@ -35044,7 +35499,7 @@ module.exports = baseFindIndex;
 
 
 /***/ }),
-/* 280 */
+/* 281 */
 /***/ (function(module, exports) {
 
 /**
@@ -35062,7 +35517,7 @@ module.exports = baseIsNaN;
 
 
 /***/ }),
-/* 281 */
+/* 282 */
 /***/ (function(module, exports) {
 
 /**
@@ -35091,7 +35546,7 @@ module.exports = strictIndexOf;
 
 
 /***/ }),
-/* 282 */
+/* 283 */
 /***/ (function(module, exports) {
 
 /**
@@ -35119,11 +35574,11 @@ module.exports = arrayIncludesWith;
 
 
 /***/ }),
-/* 283 */
+/* 284 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var constant = __webpack_require__(284),
-    defineProperty = __webpack_require__(137),
+var constant = __webpack_require__(285),
+    defineProperty = __webpack_require__(138),
     identity = __webpack_require__(28);
 
 /**
@@ -35147,7 +35602,7 @@ module.exports = baseSetToString;
 
 
 /***/ }),
-/* 284 */
+/* 285 */
 /***/ (function(module, exports) {
 
 /**
@@ -35179,11 +35634,11 @@ module.exports = constant;
 
 
 /***/ }),
-/* 285 */
+/* 286 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var isArrayLike = __webpack_require__(49),
-    isObjectLike = __webpack_require__(11);
+    isObjectLike = __webpack_require__(10);
 
 /**
  * This method is like `_.isArrayLike` except that it also checks if `value`
@@ -35218,12 +35673,12 @@ module.exports = isArrayLikeObject;
 
 
 /***/ }),
-/* 286 */
+/* 287 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
-    isObjectLike = __webpack_require__(11),
-    isPlainObject = __webpack_require__(287);
+    isObjectLike = __webpack_require__(10),
+    isPlainObject = __webpack_require__(288);
 
 /** `Object#toString` result references. */
 var domExcTag = '[object DOMException]',
@@ -35260,12 +35715,12 @@ module.exports = isError;
 
 
 /***/ }),
-/* 287 */
+/* 288 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGetTag = __webpack_require__(17),
-    getPrototype = __webpack_require__(288),
-    isObjectLike = __webpack_require__(11);
+    getPrototype = __webpack_require__(289),
+    isObjectLike = __webpack_require__(10);
 
 /** `Object#toString` result references. */
 var objectTag = '[object Object]';
@@ -35328,10 +35783,10 @@ module.exports = isPlainObject;
 
 
 /***/ }),
-/* 288 */
+/* 289 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var overArg = __webpack_require__(129);
+var overArg = __webpack_require__(130);
 
 /** Built-in value references. */
 var getPrototype = overArg(Object.getPrototypeOf, Object);
@@ -35340,13 +35795,13 @@ module.exports = getPrototype;
 
 
 /***/ }),
-/* 289 */
+/* 290 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var after = __webpack_require__(140);
+var after = __webpack_require__(141);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(after, new applicators_1.PostValueApplicator(), { setter: true }));
@@ -35376,7 +35831,7 @@ exports.default = decorator;
 //# sourceMappingURL=after.js.map
 
 /***/ }),
-/* 290 */
+/* 291 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var toNumber = __webpack_require__(84);
@@ -35424,15 +35879,15 @@ module.exports = toFinite;
 
 
 /***/ }),
-/* 291 */
+/* 292 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
+var tslib_1 = __webpack_require__(11);
 var identity = __webpack_require__(28);
-var Applicator_1 = __webpack_require__(9);
+var Applicator_1 = __webpack_require__(8);
 var utils_1 = __webpack_require__(12);
 var ComposeApplicator = (function (_super) {
     tslib_1.__extends(ComposeApplicator, _super);
@@ -35474,14 +35929,14 @@ exports.ComposeApplicator = ComposeApplicator;
 //# sourceMappingURL=ComposeApplicator.js.map
 
 /***/ }),
-/* 292 */
+/* 293 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
-var Applicator_1 = __webpack_require__(9);
+var tslib_1 = __webpack_require__(11);
+var Applicator_1 = __webpack_require__(8);
 var utils_1 = __webpack_require__(12);
 var PartialApplicator = (function (_super) {
     tslib_1.__extends(PartialApplicator, _super);
@@ -35504,15 +35959,15 @@ exports.PartialApplicator = PartialApplicator;
 //# sourceMappingURL=PartialApplicator.js.map
 
 /***/ }),
-/* 293 */
+/* 294 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
+var tslib_1 = __webpack_require__(11);
 var partial = __webpack_require__(56);
-var Applicator_1 = __webpack_require__(9);
+var Applicator_1 = __webpack_require__(8);
 var PartialedApplicator = (function (_super) {
     tslib_1.__extends(PartialedApplicator, _super);
     function PartialedApplicator() {
@@ -35528,7 +35983,7 @@ exports.PartialedApplicator = PartialedApplicator;
 //# sourceMappingURL=PartialedApplicator.js.map
 
 /***/ }),
-/* 294 */
+/* 295 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var createCtor = __webpack_require__(57),
@@ -35562,13 +36017,13 @@ module.exports = createBind;
 
 
 /***/ }),
-/* 295 */
+/* 296 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = __webpack_require__(29),
     createCtor = __webpack_require__(57),
-    createHybrid = __webpack_require__(144),
-    createRecurry = __webpack_require__(147),
+    createHybrid = __webpack_require__(145),
+    createRecurry = __webpack_require__(148),
     getHolder = __webpack_require__(39),
     replaceHolders = __webpack_require__(30),
     root = __webpack_require__(4);
@@ -35614,7 +36069,7 @@ module.exports = createCurry;
 
 
 /***/ }),
-/* 296 */
+/* 297 */
 /***/ (function(module, exports) {
 
 /**
@@ -35641,7 +36096,7 @@ module.exports = countHolders;
 
 
 /***/ }),
-/* 297 */
+/* 298 */
 /***/ (function(module, exports) {
 
 /**
@@ -35664,7 +36119,7 @@ module.exports = noop;
 
 
 /***/ }),
-/* 298 */
+/* 299 */
 /***/ (function(module, exports) {
 
 /** Used to lookup unminified function names. */
@@ -35674,15 +36129,15 @@ module.exports = realNames;
 
 
 /***/ }),
-/* 299 */
+/* 300 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var LazyWrapper = __webpack_require__(86),
     LodashWrapper = __webpack_require__(89),
     baseLodash = __webpack_require__(87),
     isArray = __webpack_require__(5),
-    isObjectLike = __webpack_require__(11),
-    wrapperClone = __webpack_require__(300);
+    isObjectLike = __webpack_require__(10),
+    wrapperClone = __webpack_require__(301);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -35827,12 +36282,12 @@ module.exports = lodash;
 
 
 /***/ }),
-/* 300 */
+/* 301 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var LazyWrapper = __webpack_require__(86),
     LodashWrapper = __webpack_require__(89),
-    copyArray = __webpack_require__(150);
+    copyArray = __webpack_require__(151);
 
 /**
  * Creates a clone of `wrapper`.
@@ -35856,7 +36311,7 @@ module.exports = wrapperClone;
 
 
 /***/ }),
-/* 301 */
+/* 302 */
 /***/ (function(module, exports) {
 
 /** Used to match wrap detail comments. */
@@ -35879,7 +36334,7 @@ module.exports = getWrapDetails;
 
 
 /***/ }),
-/* 302 */
+/* 303 */
 /***/ (function(module, exports) {
 
 /** Used to match wrap detail comments. */
@@ -35908,11 +36363,11 @@ module.exports = insertWrapDetails;
 
 
 /***/ }),
-/* 303 */
+/* 304 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayEach = __webpack_require__(304),
-    arrayIncludes = __webpack_require__(134);
+var arrayEach = __webpack_require__(305),
+    arrayIncludes = __webpack_require__(135);
 
 /** Used to compose bitmasks for function metadata. */
 var WRAP_BIND_FLAG = 1,
@@ -35960,7 +36415,7 @@ module.exports = updateWrapDetails;
 
 
 /***/ }),
-/* 304 */
+/* 305 */
 /***/ (function(module, exports) {
 
 /**
@@ -35988,10 +36443,10 @@ module.exports = arrayEach;
 
 
 /***/ }),
-/* 305 */
+/* 306 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var copyArray = __webpack_require__(150),
+var copyArray = __webpack_require__(151),
     isIndex = __webpack_require__(37);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -36023,7 +36478,7 @@ module.exports = reorder;
 
 
 /***/ }),
-/* 306 */
+/* 307 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = __webpack_require__(29),
@@ -36072,11 +36527,11 @@ module.exports = createPartial;
 
 
 /***/ }),
-/* 307 */
+/* 308 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var composeArgs = __webpack_require__(145),
-    composeArgsRight = __webpack_require__(146),
+var composeArgs = __webpack_require__(146),
+    composeArgsRight = __webpack_require__(147),
     replaceHolders = __webpack_require__(30);
 
 /** Used as the internal argument placeholder. */
@@ -36168,15 +36623,15 @@ module.exports = mergeData;
 
 
 /***/ }),
-/* 308 */
+/* 309 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
+var tslib_1 = __webpack_require__(11);
 var isFunction = __webpack_require__(22);
-var Applicator_1 = __webpack_require__(9);
+var Applicator_1 = __webpack_require__(8);
 var utils_1 = __webpack_require__(12);
 var PartialValueApplicator = (function (_super) {
     tslib_1.__extends(PartialValueApplicator, _super);
@@ -36205,14 +36660,14 @@ exports.PartialValueApplicator = PartialValueApplicator;
 //# sourceMappingURL=PartialValueApplicator.js.map
 
 /***/ }),
-/* 309 */
+/* 310 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
-var Applicator_1 = __webpack_require__(9);
+var tslib_1 = __webpack_require__(11);
+var Applicator_1 = __webpack_require__(8);
 var PostValueApplicator = (function (_super) {
     tslib_1.__extends(PostValueApplicator, _super);
     function PostValueApplicator() {
@@ -36228,14 +36683,14 @@ exports.PostValueApplicator = PostValueApplicator;
 //# sourceMappingURL=PostValueApplicator.js.map
 
 /***/ }),
-/* 310 */
+/* 311 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
-var Applicator_1 = __webpack_require__(9);
+var tslib_1 = __webpack_require__(11);
+var Applicator_1 = __webpack_require__(8);
 var PreValueApplicator = (function (_super) {
     tslib_1.__extends(PreValueApplicator, _super);
     function PreValueApplicator() {
@@ -36251,14 +36706,14 @@ exports.PreValueApplicator = PreValueApplicator;
 //# sourceMappingURL=PreValueApplicator.js.map
 
 /***/ }),
-/* 311 */
+/* 312 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
-var Applicator_1 = __webpack_require__(9);
+var tslib_1 = __webpack_require__(11);
+var Applicator_1 = __webpack_require__(8);
 var utils_1 = __webpack_require__(12);
 var WrapApplicator = (function (_super) {
     tslib_1.__extends(WrapApplicator, _super);
@@ -36281,14 +36736,14 @@ exports.WrapApplicator = WrapApplicator;
 //# sourceMappingURL=WrapApplicator.js.map
 
 /***/ }),
-/* 312 */
+/* 313 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
-var Applicator_1 = __webpack_require__(9);
+var tslib_1 = __webpack_require__(11);
+var Applicator_1 = __webpack_require__(8);
 var BindApplicator = (function (_super) {
     tslib_1.__extends(BindApplicator, _super);
     function BindApplicator() {
@@ -36307,14 +36762,14 @@ exports.BindApplicator = BindApplicator;
 //# sourceMappingURL=BindApplicator.js.map
 
 /***/ }),
-/* 313 */
+/* 314 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
-var Applicator_1 = __webpack_require__(9);
+var tslib_1 = __webpack_require__(11);
+var Applicator_1 = __webpack_require__(8);
 var InvokeApplicator = (function (_super) {
     tslib_1.__extends(InvokeApplicator, _super);
     function InvokeApplicator() {
@@ -36336,16 +36791,16 @@ exports.InvokeApplicator = InvokeApplicator;
 //# sourceMappingURL=InvokeApplicator.js.map
 
 /***/ }),
-/* 314 */
+/* 315 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var tslib_1 = __webpack_require__(8);
+var tslib_1 = __webpack_require__(11);
 var isFunction = __webpack_require__(22);
 var isObject = __webpack_require__(6);
-var Applicator_1 = __webpack_require__(9);
+var Applicator_1 = __webpack_require__(8);
 var utils_1 = __webpack_require__(12);
 var MemoizeApplicator = (function (_super) {
     tslib_1.__extends(MemoizeApplicator, _super);
@@ -36376,13 +36831,13 @@ exports.MemoizeApplicator = MemoizeApplicator;
 //# sourceMappingURL=MemoizeApplicator.js.map
 
 /***/ }),
-/* 315 */
+/* 316 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var after = __webpack_require__(140);
+var after = __webpack_require__(141);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(after, new applicators_1.PostValueApplicator(), { setter: true }));
@@ -36417,13 +36872,13 @@ exports.default = decorator;
 //# sourceMappingURL=afterAll.js.map
 
 /***/ }),
-/* 316 */
+/* 317 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var ary = __webpack_require__(153);
+var ary = __webpack_require__(154);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(ary, new applicators_1.PreValueApplicator()));
@@ -36452,13 +36907,13 @@ exports.default = decorator;
 //# sourceMappingURL=ary.js.map
 
 /***/ }),
-/* 317 */
+/* 318 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var attempt = __webpack_require__(139);
+var attempt = __webpack_require__(140);
 var partial = __webpack_require__(56);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
@@ -36498,7 +36953,7 @@ exports.default = decorator;
 //# sourceMappingURL=attempt.js.map
 
 /***/ }),
-/* 318 */
+/* 319 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36541,7 +36996,7 @@ exports.default = decorator;
 //# sourceMappingURL=before.js.map
 
 /***/ }),
-/* 319 */
+/* 320 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36587,13 +37042,13 @@ exports.default = decorator;
 //# sourceMappingURL=beforeAll.js.map
 
 /***/ }),
-/* 320 */
+/* 321 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var bind = __webpack_require__(321);
+var bind = __webpack_require__(322);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(bind, new applicators_1.BindApplicator()));
@@ -36635,7 +37090,7 @@ exports.default = decorator;
 //# sourceMappingURL=bind.js.map
 
 /***/ }),
-/* 321 */
+/* 322 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseRest = __webpack_require__(7),
@@ -36698,7 +37153,7 @@ module.exports = bind;
 
 
 /***/ }),
-/* 322 */
+/* 323 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -36780,13 +37235,13 @@ exports.default = BindAll;
 //# sourceMappingURL=bindAll.js.map
 
 /***/ }),
-/* 323 */
+/* 324 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var curry = __webpack_require__(154);
+var curry = __webpack_require__(155);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(curry, new applicators_1.PreValueApplicator(), { bound: true }));
@@ -36825,13 +37280,13 @@ exports.default = decorator;
 //# sourceMappingURL=curry.js.map
 
 /***/ }),
-/* 324 */
+/* 325 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var curry = __webpack_require__(154);
+var curry = __webpack_require__(155);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(curry, new applicators_1.PreValueApplicator()));
@@ -36868,13 +37323,13 @@ exports.default = decorator;
 //# sourceMappingURL=curryAll.js.map
 
 /***/ }),
-/* 325 */
+/* 326 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var curryRight = __webpack_require__(155);
+var curryRight = __webpack_require__(156);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(curryRight, new applicators_1.PreValueApplicator(), { bound: true }));
@@ -36913,13 +37368,13 @@ exports.default = decorator;
 //# sourceMappingURL=curryRight.js.map
 
 /***/ }),
-/* 326 */
+/* 327 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var curryRight = __webpack_require__(155);
+var curryRight = __webpack_require__(156);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(curryRight, new applicators_1.PreValueApplicator()));
@@ -36956,7 +37411,7 @@ exports.default = decorator;
 //# sourceMappingURL=curryRightAll.js.map
 
 /***/ }),
-/* 327 */
+/* 328 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37010,7 +37465,7 @@ exports.default = decorator;
 //# sourceMappingURL=debounce.js.map
 
 /***/ }),
-/* 328 */
+/* 329 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var root = __webpack_require__(4);
@@ -37039,7 +37494,7 @@ module.exports = now;
 
 
 /***/ }),
-/* 329 */
+/* 330 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37095,13 +37550,13 @@ exports.default = decorator;
 //# sourceMappingURL=debounceAll.js.map
 
 /***/ }),
-/* 330 */
+/* 331 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var defer = __webpack_require__(331);
+var defer = __webpack_require__(332);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(defer, new applicators_1.InvokeApplicator(), { setter: true }));
@@ -37143,10 +37598,10 @@ exports.default = decorator;
 //# sourceMappingURL=defer.js.map
 
 /***/ }),
-/* 331 */
+/* 332 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseDelay = __webpack_require__(156),
+var baseDelay = __webpack_require__(157),
     baseRest = __webpack_require__(7);
 
 /**
@@ -37175,13 +37630,13 @@ module.exports = defer;
 
 
 /***/ }),
-/* 332 */
+/* 333 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var delay = __webpack_require__(333);
+var delay = __webpack_require__(334);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(function (value, wait) {
@@ -37236,10 +37691,10 @@ exports.default = decorator;
 //# sourceMappingURL=delay.js.map
 
 /***/ }),
-/* 333 */
+/* 334 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseDelay = __webpack_require__(156),
+var baseDelay = __webpack_require__(157),
     baseRest = __webpack_require__(7),
     toNumber = __webpack_require__(84);
 
@@ -37270,13 +37725,13 @@ module.exports = delay;
 
 
 /***/ }),
-/* 334 */
+/* 335 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var flip = __webpack_require__(335);
+var flip = __webpack_require__(336);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(flip, new applicators_1.PartialValueApplicator(), { property: true }));
@@ -37310,7 +37765,7 @@ exports.default = decorator;
 //# sourceMappingURL=flip.js.map
 
 /***/ }),
-/* 335 */
+/* 336 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var createWrap = __webpack_require__(18);
@@ -37344,13 +37799,13 @@ module.exports = flip;
 
 
 /***/ }),
-/* 336 */
+/* 337 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var flow = __webpack_require__(337);
+var flow = __webpack_require__(338);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(flow, new applicators_1.ComposeApplicator({ post: true }), { property: true }));
@@ -37388,10 +37843,10 @@ exports.default = decorator;
 //# sourceMappingURL=flow.js.map
 
 /***/ }),
-/* 337 */
+/* 338 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createFlow = __webpack_require__(157);
+var createFlow = __webpack_require__(158);
 
 /**
  * Creates a function that returns the result of invoking the given functions
@@ -37421,10 +37876,10 @@ module.exports = flow;
 
 
 /***/ }),
-/* 338 */
+/* 339 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseFlatten = __webpack_require__(158);
+var baseFlatten = __webpack_require__(159);
 
 /**
  * Flattens `array` a single level deep.
@@ -37449,7 +37904,7 @@ module.exports = flatten;
 
 
 /***/ }),
-/* 339 */
+/* 340 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(36),
@@ -37475,13 +37930,13 @@ module.exports = isFlattenable;
 
 
 /***/ }),
-/* 340 */
+/* 341 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var flowRight = __webpack_require__(341);
+var flowRight = __webpack_require__(342);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(flowRight, new applicators_1.ComposeApplicator({ post: false }), { property: true }));
@@ -37519,10 +37974,10 @@ exports.default = decorator;
 //# sourceMappingURL=flowRight.js.map
 
 /***/ }),
-/* 341 */
+/* 342 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var createFlow = __webpack_require__(157);
+var createFlow = __webpack_require__(158);
 
 /**
  * This method is like `_.flow` except that it creates a function that
@@ -37551,7 +38006,7 @@ module.exports = flowRight;
 
 
 /***/ }),
-/* 342 */
+/* 343 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37594,7 +38049,7 @@ exports.default = decorator;
 //# sourceMappingURL=memoize.js.map
 
 /***/ }),
-/* 343 */
+/* 344 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -37617,13 +38072,13 @@ exports.default = decorator;
 //# sourceMappingURL=memoizeAll.js.map
 
 /***/ }),
-/* 344 */
+/* 345 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var assign = __webpack_require__(345);
+var assign = __webpack_require__(346);
 /**
  * Mixins an object into the classes prototype.
  * @export
@@ -37658,14 +38113,14 @@ exports.default = Mixin;
 //# sourceMappingURL=mixin.js.map
 
 /***/ }),
-/* 345 */
+/* 346 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(95),
-    copyObject = __webpack_require__(346),
-    createAssigner = __webpack_require__(347),
+    copyObject = __webpack_require__(347),
+    createAssigner = __webpack_require__(348),
     isArrayLike = __webpack_require__(49),
-    isPrototype = __webpack_require__(128),
+    isPrototype = __webpack_require__(129),
     keys = __webpack_require__(48);
 
 /** Used for built-in method references. */
@@ -37722,11 +38177,11 @@ module.exports = assign;
 
 
 /***/ }),
-/* 346 */
+/* 347 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(95),
-    baseAssignValue = __webpack_require__(159);
+    baseAssignValue = __webpack_require__(160);
 
 /**
  * Copies properties of `source` to `object`.
@@ -37768,11 +38223,11 @@ module.exports = copyObject;
 
 
 /***/ }),
-/* 347 */
+/* 348 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseRest = __webpack_require__(7),
-    isIterateeCall = __webpack_require__(348);
+    isIterateeCall = __webpack_require__(349);
 
 /**
  * Creates a function like `_.assign`.
@@ -37811,7 +38266,7 @@ module.exports = createAssigner;
 
 
 /***/ }),
-/* 348 */
+/* 349 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var eq = __webpack_require__(53),
@@ -37847,13 +38302,13 @@ module.exports = isIterateeCall;
 
 
 /***/ }),
-/* 349 */
+/* 350 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var negate = __webpack_require__(350);
+var negate = __webpack_require__(351);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(negate, new applicators_1.PartialValueApplicator(), { property: true }));
@@ -37866,7 +38321,7 @@ exports.default = decorator;
 //# sourceMappingURL=negate.js.map
 
 /***/ }),
-/* 350 */
+/* 351 */
 /***/ (function(module, exports) {
 
 /** Error message constants. */
@@ -37912,13 +38367,13 @@ module.exports = negate;
 
 
 /***/ }),
-/* 351 */
+/* 352 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var once = __webpack_require__(352);
+var once = __webpack_require__(353);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(once, new applicators_1.PreValueApplicator(), { setter: true }));
@@ -37931,7 +38386,7 @@ exports.default = decorator;
 //# sourceMappingURL=once.js.map
 
 /***/ }),
-/* 352 */
+/* 353 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var before = __webpack_require__(90);
@@ -37962,13 +38417,13 @@ module.exports = once;
 
 
 /***/ }),
-/* 353 */
+/* 354 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var overArgs = __webpack_require__(354);
+var overArgs = __webpack_require__(355);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(overArgs, new applicators_1.PreValueApplicator(), { setter: true }));
@@ -37985,16 +38440,16 @@ exports.default = decorator;
 //# sourceMappingURL=overArgs.js.map
 
 /***/ }),
-/* 354 */
+/* 355 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = __webpack_require__(29),
     arrayMap = __webpack_require__(82),
-    baseFlatten = __webpack_require__(158),
-    baseIteratee = __webpack_require__(355),
+    baseFlatten = __webpack_require__(159),
+    baseIteratee = __webpack_require__(356),
     baseRest = __webpack_require__(7),
     baseUnary = __webpack_require__(79),
-    castRest = __webpack_require__(391),
+    castRest = __webpack_require__(392),
     isArray = __webpack_require__(5);
 
 /* Built-in method references for those with the same name as other `lodash` methods. */
@@ -38052,14 +38507,14 @@ module.exports = overArgs;
 
 
 /***/ }),
-/* 355 */
+/* 356 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseMatches = __webpack_require__(356),
-    baseMatchesProperty = __webpack_require__(380),
+var baseMatches = __webpack_require__(357),
+    baseMatchesProperty = __webpack_require__(381),
     identity = __webpack_require__(28),
     isArray = __webpack_require__(5),
-    property = __webpack_require__(388);
+    property = __webpack_require__(389);
 
 /**
  * The base implementation of `_.iteratee`.
@@ -38089,12 +38544,12 @@ module.exports = baseIteratee;
 
 
 /***/ }),
-/* 356 */
+/* 357 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseIsMatch = __webpack_require__(357),
-    getMatchData = __webpack_require__(379),
-    matchesStrictComparable = __webpack_require__(163);
+var baseIsMatch = __webpack_require__(358),
+    getMatchData = __webpack_require__(380),
+    matchesStrictComparable = __webpack_require__(164);
 
 /**
  * The base implementation of `_.matches` which doesn't clone `source`.
@@ -38117,10 +38572,10 @@ module.exports = baseMatches;
 
 
 /***/ }),
-/* 357 */
+/* 358 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stack = __webpack_require__(160),
+var Stack = __webpack_require__(161),
     baseIsEqual = __webpack_require__(96);
 
 /** Used to compose bitmasks for value comparisons. */
@@ -38185,7 +38640,7 @@ module.exports = baseIsMatch;
 
 
 /***/ }),
-/* 358 */
+/* 359 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ListCache = __webpack_require__(51);
@@ -38206,7 +38661,7 @@ module.exports = stackClear;
 
 
 /***/ }),
-/* 359 */
+/* 360 */
 /***/ (function(module, exports) {
 
 /**
@@ -38230,7 +38685,7 @@ module.exports = stackDelete;
 
 
 /***/ }),
-/* 360 */
+/* 361 */
 /***/ (function(module, exports) {
 
 /**
@@ -38250,7 +38705,7 @@ module.exports = stackGet;
 
 
 /***/ }),
-/* 361 */
+/* 362 */
 /***/ (function(module, exports) {
 
 /**
@@ -38270,7 +38725,7 @@ module.exports = stackHas;
 
 
 /***/ }),
-/* 362 */
+/* 363 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var ListCache = __webpack_require__(51),
@@ -38310,17 +38765,17 @@ module.exports = stackSet;
 
 
 /***/ }),
-/* 363 */
+/* 364 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var Stack = __webpack_require__(160),
-    equalArrays = __webpack_require__(161),
-    equalByTag = __webpack_require__(365),
-    equalObjects = __webpack_require__(369),
-    getTag = __webpack_require__(375),
+var Stack = __webpack_require__(161),
+    equalArrays = __webpack_require__(162),
+    equalByTag = __webpack_require__(366),
+    equalObjects = __webpack_require__(370),
+    getTag = __webpack_require__(376),
     isArray = __webpack_require__(5),
-    isBuffer = __webpack_require__(125),
-    isTypedArray = __webpack_require__(127);
+    isBuffer = __webpack_require__(126),
+    isTypedArray = __webpack_require__(128);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1;
@@ -38399,7 +38854,7 @@ module.exports = baseIsEqualDeep;
 
 
 /***/ }),
-/* 364 */
+/* 365 */
 /***/ (function(module, exports) {
 
 /**
@@ -38428,15 +38883,15 @@ module.exports = arraySome;
 
 
 /***/ }),
-/* 365 */
+/* 366 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(36),
-    Uint8Array = __webpack_require__(366),
+    Uint8Array = __webpack_require__(367),
     eq = __webpack_require__(53),
-    equalArrays = __webpack_require__(161),
-    mapToArray = __webpack_require__(367),
-    setToArray = __webpack_require__(368);
+    equalArrays = __webpack_require__(162),
+    mapToArray = __webpack_require__(368),
+    setToArray = __webpack_require__(369);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1,
@@ -38546,7 +39001,7 @@ module.exports = equalByTag;
 
 
 /***/ }),
-/* 366 */
+/* 367 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var root = __webpack_require__(4);
@@ -38558,7 +39013,7 @@ module.exports = Uint8Array;
 
 
 /***/ }),
-/* 367 */
+/* 368 */
 /***/ (function(module, exports) {
 
 /**
@@ -38582,7 +39037,7 @@ module.exports = mapToArray;
 
 
 /***/ }),
-/* 368 */
+/* 369 */
 /***/ (function(module, exports) {
 
 /**
@@ -38606,10 +39061,10 @@ module.exports = setToArray;
 
 
 /***/ }),
-/* 369 */
+/* 370 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var getAllKeys = __webpack_require__(370);
+var getAllKeys = __webpack_require__(371);
 
 /** Used to compose bitmasks for value comparisons. */
 var COMPARE_PARTIAL_FLAG = 1;
@@ -38701,11 +39156,11 @@ module.exports = equalObjects;
 
 
 /***/ }),
-/* 370 */
+/* 371 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseGetAllKeys = __webpack_require__(371),
-    getSymbols = __webpack_require__(372),
+var baseGetAllKeys = __webpack_require__(372),
+    getSymbols = __webpack_require__(373),
     keys = __webpack_require__(48);
 
 /**
@@ -38723,7 +39178,7 @@ module.exports = getAllKeys;
 
 
 /***/ }),
-/* 371 */
+/* 372 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var arrayPush = __webpack_require__(93),
@@ -38749,11 +39204,11 @@ module.exports = baseGetAllKeys;
 
 
 /***/ }),
-/* 372 */
+/* 373 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var arrayFilter = __webpack_require__(373),
-    stubArray = __webpack_require__(374);
+var arrayFilter = __webpack_require__(374),
+    stubArray = __webpack_require__(375);
 
 /** Used for built-in method references. */
 var objectProto = Object.prototype;
@@ -38785,7 +39240,7 @@ module.exports = getSymbols;
 
 
 /***/ }),
-/* 373 */
+/* 374 */
 /***/ (function(module, exports) {
 
 /**
@@ -38816,7 +39271,7 @@ module.exports = arrayFilter;
 
 
 /***/ }),
-/* 374 */
+/* 375 */
 /***/ (function(module, exports) {
 
 /**
@@ -38845,16 +39300,16 @@ module.exports = stubArray;
 
 
 /***/ }),
-/* 375 */
+/* 376 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var DataView = __webpack_require__(376),
+var DataView = __webpack_require__(377),
     Map = __webpack_require__(81),
-    Promise = __webpack_require__(377),
-    Set = __webpack_require__(378),
-    WeakMap = __webpack_require__(143),
+    Promise = __webpack_require__(378),
+    Set = __webpack_require__(379),
+    WeakMap = __webpack_require__(144),
     baseGetTag = __webpack_require__(17),
-    toSource = __webpack_require__(133);
+    toSource = __webpack_require__(134);
 
 /** `Object#toString` result references. */
 var mapTag = '[object Map]',
@@ -38909,7 +39364,7 @@ module.exports = getTag;
 
 
 /***/ }),
-/* 376 */
+/* 377 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(23),
@@ -38922,7 +39377,7 @@ module.exports = DataView;
 
 
 /***/ }),
-/* 377 */
+/* 378 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(23),
@@ -38935,7 +39390,7 @@ module.exports = Promise;
 
 
 /***/ }),
-/* 378 */
+/* 379 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var getNative = __webpack_require__(23),
@@ -38948,10 +39403,10 @@ module.exports = Set;
 
 
 /***/ }),
-/* 379 */
+/* 380 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var isStrictComparable = __webpack_require__(162),
+var isStrictComparable = __webpack_require__(163),
     keys = __webpack_require__(48);
 
 /**
@@ -38978,15 +39433,15 @@ module.exports = getMatchData;
 
 
 /***/ }),
-/* 380 */
+/* 381 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsEqual = __webpack_require__(96),
-    get = __webpack_require__(381),
-    hasIn = __webpack_require__(164),
+    get = __webpack_require__(382),
+    hasIn = __webpack_require__(165),
     isKey = __webpack_require__(98),
-    isStrictComparable = __webpack_require__(162),
-    matchesStrictComparable = __webpack_require__(163),
+    isStrictComparable = __webpack_require__(163),
+    matchesStrictComparable = __webpack_require__(164),
     toKey = __webpack_require__(40);
 
 /** Used to compose bitmasks for value comparisons. */
@@ -39017,7 +39472,7 @@ module.exports = baseMatchesProperty;
 
 
 /***/ }),
-/* 381 */
+/* 382 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGet = __webpack_require__(97);
@@ -39056,10 +39511,10 @@ module.exports = get;
 
 
 /***/ }),
-/* 382 */
+/* 383 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var memoizeCapped = __webpack_require__(383);
+var memoizeCapped = __webpack_require__(384);
 
 /** Used to match property names within property paths. */
 var reLeadingDot = /^\./,
@@ -39090,7 +39545,7 @@ module.exports = stringToPath;
 
 
 /***/ }),
-/* 383 */
+/* 384 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var memoize = __webpack_require__(94);
@@ -39122,10 +39577,10 @@ module.exports = memoizeCapped;
 
 
 /***/ }),
-/* 384 */
+/* 385 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseToString = __webpack_require__(385);
+var baseToString = __webpack_require__(386);
 
 /**
  * Converts `value` to a string. An empty string is returned for `null`
@@ -39156,7 +39611,7 @@ module.exports = toString;
 
 
 /***/ }),
-/* 385 */
+/* 386 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var Symbol = __webpack_require__(36),
@@ -39199,7 +39654,7 @@ module.exports = baseToString;
 
 
 /***/ }),
-/* 386 */
+/* 387 */
 /***/ (function(module, exports) {
 
 /**
@@ -39218,7 +39673,7 @@ module.exports = baseHasIn;
 
 
 /***/ }),
-/* 387 */
+/* 388 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var castPath = __webpack_require__(58),
@@ -39263,11 +39718,11 @@ module.exports = hasPath;
 
 
 /***/ }),
-/* 388 */
+/* 389 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseProperty = __webpack_require__(389),
-    basePropertyDeep = __webpack_require__(390),
+var baseProperty = __webpack_require__(390),
+    basePropertyDeep = __webpack_require__(391),
     isKey = __webpack_require__(98),
     toKey = __webpack_require__(40);
 
@@ -39301,7 +39756,7 @@ module.exports = property;
 
 
 /***/ }),
-/* 389 */
+/* 390 */
 /***/ (function(module, exports) {
 
 /**
@@ -39321,7 +39776,7 @@ module.exports = baseProperty;
 
 
 /***/ }),
-/* 390 */
+/* 391 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGet = __webpack_require__(97);
@@ -39343,7 +39798,7 @@ module.exports = basePropertyDeep;
 
 
 /***/ }),
-/* 391 */
+/* 392 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseRest = __webpack_require__(7);
@@ -39363,7 +39818,7 @@ module.exports = castRest;
 
 
 /***/ }),
-/* 392 */
+/* 393 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39386,13 +39841,13 @@ exports.default = decorator;
 //# sourceMappingURL=partial.js.map
 
 /***/ }),
-/* 393 */
+/* 394 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var partialRight = __webpack_require__(394);
+var partialRight = __webpack_require__(395);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(partialRight, new applicators_1.PartialApplicator(), { property: true, method: false }));
@@ -39409,7 +39864,7 @@ exports.default = decorator;
 //# sourceMappingURL=partialRight.js.map
 
 /***/ }),
-/* 394 */
+/* 395 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseRest = __webpack_require__(7),
@@ -39464,13 +39919,13 @@ module.exports = partialRight;
 
 
 /***/ }),
-/* 395 */
+/* 396 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var rearg = __webpack_require__(396);
+var rearg = __webpack_require__(397);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(rearg, new applicators_1.PartialValueApplicator(), { property: true }));
@@ -39487,7 +39942,7 @@ exports.default = decorator;
 //# sourceMappingURL=rearg.js.map
 
 /***/ }),
-/* 396 */
+/* 397 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var createWrap = __webpack_require__(18),
@@ -39526,13 +39981,13 @@ module.exports = rearg;
 
 
 /***/ }),
-/* 397 */
+/* 398 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var rest = __webpack_require__(398);
+var rest = __webpack_require__(399);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(rest, new applicators_1.PreValueApplicator()));
@@ -39545,7 +40000,7 @@ exports.default = decorator;
 //# sourceMappingURL=rest.js.map
 
 /***/ }),
-/* 398 */
+/* 399 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseRest = __webpack_require__(7),
@@ -39591,13 +40046,13 @@ module.exports = rest;
 
 
 /***/ }),
-/* 399 */
+/* 400 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var spread = __webpack_require__(400);
+var spread = __webpack_require__(401);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(spread, new applicators_1.PreValueApplicator()));
@@ -39610,13 +40065,13 @@ exports.default = decorator;
 //# sourceMappingURL=spread.js.map
 
 /***/ }),
-/* 400 */
+/* 401 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var apply = __webpack_require__(29),
     arrayPush = __webpack_require__(93),
     baseRest = __webpack_require__(7),
-    castSlice = __webpack_require__(401),
+    castSlice = __webpack_require__(402),
     toInteger = __webpack_require__(38);
 
 /** Error message constants. */
@@ -39679,10 +40134,10 @@ module.exports = spread;
 
 
 /***/ }),
-/* 401 */
+/* 402 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var baseSlice = __webpack_require__(402);
+var baseSlice = __webpack_require__(403);
 
 /**
  * Casts `array` to a slice if it's needed.
@@ -39703,7 +40158,7 @@ module.exports = castSlice;
 
 
 /***/ }),
-/* 402 */
+/* 403 */
 /***/ (function(module, exports) {
 
 /**
@@ -39740,7 +40195,7 @@ module.exports = baseSlice;
 
 
 /***/ }),
-/* 403 */
+/* 404 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39763,13 +40218,13 @@ exports.default = decorator;
 //# sourceMappingURL=tap.js.map
 
 /***/ }),
-/* 404 */
+/* 405 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var throttle = __webpack_require__(165);
+var throttle = __webpack_require__(166);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createInstanceDecorator(new factory_1.DecoratorConfig(throttle, new applicators_1.PreValueApplicator(), { setter: true, getter: true }));
@@ -39794,13 +40249,13 @@ exports.default = decorator;
 //# sourceMappingURL=throttle.js.map
 
 /***/ }),
-/* 405 */
+/* 406 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var throttle = __webpack_require__(165);
+var throttle = __webpack_require__(166);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(throttle, new applicators_1.PreValueApplicator(), { setter: true }));
@@ -39813,13 +40268,13 @@ exports.default = decorator;
 //# sourceMappingURL=throttleAll.js.map
 
 /***/ }),
-/* 406 */
+/* 407 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var unary = __webpack_require__(407);
+var unary = __webpack_require__(408);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(unary, new applicators_1.PreValueApplicator()));
@@ -39832,10 +40287,10 @@ exports.default = decorator;
 //# sourceMappingURL=unary.js.map
 
 /***/ }),
-/* 407 */
+/* 408 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var ary = __webpack_require__(153);
+var ary = __webpack_require__(154);
 
 /**
  * Creates a function that accepts up to one argument, ignoring any
@@ -39860,13 +40315,13 @@ module.exports = unary;
 
 
 /***/ }),
-/* 408 */
+/* 409 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var wrap = __webpack_require__(409);
+var wrap = __webpack_require__(410);
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(wrap, new applicators_1.WrapApplicator()));
@@ -39879,10 +40334,10 @@ exports.default = decorator;
 //# sourceMappingURL=wrap.js.map
 
 /***/ }),
-/* 409 */
+/* 410 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var castFunction = __webpack_require__(130),
+var castFunction = __webpack_require__(131),
     partial = __webpack_require__(56);
 
 /**
@@ -39915,7 +40370,7 @@ module.exports = wrap;
 
 
 /***/ }),
-/* 410 */
+/* 411 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39926,7 +40381,7 @@ exports.default = lodash_decorators_1.memoize;
 
 
 /***/ }),
-/* 411 */
+/* 412 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39934,23 +40389,6 @@ exports.default = lodash_decorators_1.memoize;
 Object.defineProperty(exports, "__esModule", { value: true });
 var lodash_decorators_1 = __webpack_require__(76);
 exports.default = lodash_decorators_1.bind();
-
-
-/***/ }),
-/* 412 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-// tslint:disable-next-line:no-empty
-function noop() { }
-exports.noop = noop;
-function createUniqueIDFactory(prefix) {
-    var index = 1;
-    return function () { return "" + prefix + index++; };
-}
-exports.createUniqueIDFactory = createUniqueIDFactory;
 
 
 /***/ }),
@@ -39990,7 +40428,7 @@ module.exports = { "default": __webpack_require__(415), __esModule: true };
 /* 415 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(112);
+__webpack_require__(113);
 __webpack_require__(416);
 module.exports = __webpack_require__(15).Array.from;
 
@@ -40002,10 +40440,10 @@ module.exports = __webpack_require__(15).Array.from;
 
 var ctx            = __webpack_require__(62)
   , $export        = __webpack_require__(25)
-  , toObject       = __webpack_require__(117)
+  , toObject       = __webpack_require__(118)
   , call           = __webpack_require__(417)
   , isArrayIter    = __webpack_require__(418)
-  , toLength       = __webpack_require__(116)
+  , toLength       = __webpack_require__(117)
   , createProperty = __webpack_require__(419)
   , getIterFn      = __webpack_require__(420);
 
@@ -40061,7 +40499,7 @@ module.exports = function(iterator, fn, value, entries){
 
 // check on default Array iterator
 var Iterators  = __webpack_require__(35)
-  , ITERATOR   = __webpack_require__(10)('iterator')
+  , ITERATOR   = __webpack_require__(9)('iterator')
   , ArrayProto = Array.prototype;
 
 module.exports = function(it){
@@ -40087,7 +40525,7 @@ module.exports = function(object, index, value){
 /***/ (function(module, exports, __webpack_require__) {
 
 var classof   = __webpack_require__(421)
-  , ITERATOR  = __webpack_require__(10)('iterator')
+  , ITERATOR  = __webpack_require__(9)('iterator')
   , Iterators = __webpack_require__(35);
 module.exports = __webpack_require__(15).getIteratorMethod = function(it){
   if(it != undefined)return it[ITERATOR]
@@ -40101,7 +40539,7 @@ module.exports = __webpack_require__(15).getIteratorMethod = function(it){
 
 // getting tag from 19.1.3.6 Object.prototype.toString()
 var cof = __webpack_require__(68)
-  , TAG = __webpack_require__(10)('toStringTag')
+  , TAG = __webpack_require__(9)('toStringTag')
   // ES3 wrong here
   , ARG = cof(function(){ return arguments; }()) == 'Arguments';
 
@@ -40127,7 +40565,7 @@ module.exports = function(it){
 /* 422 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var ITERATOR     = __webpack_require__(10)('iterator')
+var ITERATOR     = __webpack_require__(9)('iterator')
   , SAFE_CLOSING = false;
 
 try {
@@ -40151,6 +40589,23 @@ module.exports = function(exec, skipClosing){
 
 /***/ }),
 /* 423 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+// tslint:disable-next-line:no-empty
+function noop() { }
+exports.noop = noop;
+function createUniqueIDFactory(prefix) {
+    var index = 1;
+    return function () { return "" + prefix + index++; };
+}
+exports.createUniqueIDFactory = createUniqueIDFactory;
+
+
+/***/ }),
+/* 424 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40700,7 +41155,7 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 424 */
+/* 425 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40765,13 +41220,13 @@ module.exports = function() {
 
 
 /***/ }),
-/* 425 */
+/* 426 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var feature_detect_1 = __webpack_require__(426);
+var feature_detect_1 = __webpack_require__(427);
 function addEventListener(target, eventName, handler, options) {
     if (options === void 0) { options = {}; }
     var wrappedHandler = !feature_detect_1.supportsEventListenerOnceOption() && options.once
@@ -40797,7 +41252,7 @@ function once(target, eventName, handler) {
 
 
 /***/ }),
-/* 426 */
+/* 427 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40846,7 +41301,7 @@ exports.supportsEventListenerOnceOption = supportsEventListenerOnceOption;
 
 
 /***/ }),
-/* 427 */
+/* 428 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40868,7 +41323,7 @@ exports.clear = clear;
 
 
 /***/ }),
-/* 428 */
+/* 429 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40881,7 +41336,7 @@ exports.clamp = clamp;
 
 
 /***/ }),
-/* 429 */
+/* 430 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseIsEqual = __webpack_require__(96);
@@ -40922,10 +41377,10 @@ module.exports = isEqual;
 
 
 /***/ }),
-/* 430 */
+/* 431 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var basePick = __webpack_require__(431),
+var basePick = __webpack_require__(432),
     flatRest = __webpack_require__(92);
 
 /**
@@ -40953,11 +41408,11 @@ module.exports = pick;
 
 
 /***/ }),
-/* 431 */
+/* 432 */
 /***/ (function(module, exports, __webpack_require__) {
 
-var basePickBy = __webpack_require__(432),
-    hasIn = __webpack_require__(164);
+var basePickBy = __webpack_require__(433),
+    hasIn = __webpack_require__(165);
 
 /**
  * The base implementation of `_.pick` without support for individual
@@ -40978,11 +41433,11 @@ module.exports = basePick;
 
 
 /***/ }),
-/* 432 */
+/* 433 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var baseGet = __webpack_require__(97),
-    baseSet = __webpack_require__(433),
+    baseSet = __webpack_require__(434),
     castPath = __webpack_require__(58);
 
 /**
@@ -41014,7 +41469,7 @@ module.exports = basePickBy;
 
 
 /***/ }),
-/* 433 */
+/* 434 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var assignValue = __webpack_require__(95),
@@ -41067,13 +41522,13 @@ module.exports = baseSet;
 
 
 /***/ }),
-/* 434 */
+/* 435 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var dom_1 = __webpack_require__(167);
+var dom_1 = __webpack_require__(168);
 exports.FOCUSABLE_SELECTOR = 'a,frame,iframe,input:not([type=hidden]),select,textarea,button,*[tabindex]';
 function findFirstFocusableNode(element, onlyDescendants) {
     if (onlyDescendants === void 0) { onlyDescendants = true; }
@@ -41111,21 +41566,21 @@ exports.focusLastFocusableNode = focusLastFocusableNode;
 
 
 /***/ }),
-/* 435 */
+/* 436 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _CSSTransition = __webpack_require__(436);
+var _CSSTransition = __webpack_require__(437);
 
 var _CSSTransition2 = _interopRequireDefault(_CSSTransition);
 
-var _TransitionGroup = __webpack_require__(440);
+var _TransitionGroup = __webpack_require__(441);
 
 var _TransitionGroup2 = _interopRequireDefault(_TransitionGroup);
 
-var _Transition = __webpack_require__(168);
+var _Transition = __webpack_require__(169);
 
 var _Transition2 = _interopRequireDefault(_Transition);
 
@@ -41138,7 +41593,7 @@ module.exports = {
 };
 
 /***/ }),
-/* 436 */
+/* 437 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41152,11 +41607,11 @@ var _propTypes = __webpack_require__(41);
 
 var PropTypes = _interopRequireWildcard(_propTypes);
 
-var _addClass = __webpack_require__(437);
+var _addClass = __webpack_require__(438);
 
 var _addClass2 = _interopRequireDefault(_addClass);
 
-var _removeClass = __webpack_require__(439);
+var _removeClass = __webpack_require__(440);
 
 var _removeClass2 = _interopRequireDefault(_removeClass);
 
@@ -41164,11 +41619,11 @@ var _react = __webpack_require__(3);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _Transition = __webpack_require__(168);
+var _Transition = __webpack_require__(169);
 
 var _Transition2 = _interopRequireDefault(_Transition);
 
-var _PropTypes = __webpack_require__(169);
+var _PropTypes = __webpack_require__(170);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -41456,7 +41911,7 @@ module.exports = exports['default'];
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 437 */
+/* 438 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41467,7 +41922,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = addClass;
 
-var _hasClass = __webpack_require__(438);
+var _hasClass = __webpack_require__(439);
 
 var _hasClass2 = _interopRequireDefault(_hasClass);
 
@@ -41479,7 +41934,7 @@ function addClass(element, className) {
 module.exports = exports['default'];
 
 /***/ }),
-/* 438 */
+/* 439 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41495,7 +41950,7 @@ function hasClass(element, className) {
 module.exports = exports["default"];
 
 /***/ }),
-/* 439 */
+/* 440 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41506,7 +41961,7 @@ module.exports = function removeClass(element, className) {
 };
 
 /***/ }),
-/* 440 */
+/* 441 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41524,7 +41979,7 @@ var _react = __webpack_require__(3);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _ChildMapping = __webpack_require__(441);
+var _ChildMapping = __webpack_require__(442);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -41803,7 +42258,7 @@ module.exports = exports['default'];
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
-/* 441 */
+/* 442 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41898,7 +42353,7 @@ function mergeChildMappings(prev, next) {
 }
 
 /***/ }),
-/* 442 */
+/* 443 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41951,7 +42406,7 @@ exports.getRectForNode = getRectForNode;
 
 
 /***/ }),
-/* 443 */
+/* 444 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42079,7 +42534,7 @@ var Step1Buttons = function (_Component) {
 exports.default = Step1Buttons;
 
 /***/ }),
-/* 444 */
+/* 445 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42101,11 +42556,11 @@ var _react2 = _interopRequireDefault(_react);
 
 var _polaris = __webpack_require__(24);
 
-var _CampaignForm = __webpack_require__(445);
+var _CampaignForm = __webpack_require__(446);
 
 var _CampaignForm2 = _interopRequireDefault(_CampaignForm);
 
-var _helpers = __webpack_require__(170);
+var _helpers = __webpack_require__(101);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -42437,7 +42892,6 @@ var Step2Form = function (_Component) {
               _react2.default.createElement(_polaris.Select, {
                 label: input.label,
                 options: input.options,
-                placeholder: 'Pick one',
                 name: input.name,
                 value: _this3.state.inputs[input.type][input.name],
                 onChange: function onChange(val) {
@@ -42457,7 +42911,7 @@ var Step2Form = function (_Component) {
               name: input.name,
               multiline: 3,
               helpText: input.description,
-              value: _this3.state.inputs[input.type][input.name] || input.value,
+              value: _this3.state.inputs[input.type][input.name],
               onChange: function onChange(val) {
                 return _this3.handleInputChange(val, input.type, input.name);
               }
@@ -42473,7 +42927,7 @@ var Step2Form = function (_Component) {
               name: input.name,
               multiline: 3,
               helpText: input.description,
-              value: _this3.state.inputs[input.type][input.name] || input.value,
+              value: _this3.state.inputs[input.type][input.name],
               onChange: function onChange(val) {
                 return _this3.handleInputChange(val, input.type, input.name);
               }
@@ -42487,7 +42941,7 @@ var Step2Form = function (_Component) {
         },
         campaignSelect: {
           generate: function generate(input) {
-            var value = _this3.state.inputs[input.type][input.name];
+            var value = _this3.state.inputs[input.type][input.name] || 'none';
             if (value && typeof value !== 'string') {
               value = value.name;
             }
@@ -42536,7 +42990,6 @@ var Step2Form = function (_Component) {
                 { className: 'select-wrapper' },
                 _react2.default.createElement(_polaris.Select, {
                   options: input.options,
-                  placeholder: 'Pick one',
                   name: input.name,
                   value: value,
                   onChange: function onChange(val) {
@@ -42624,13 +43077,15 @@ var Step2Form = function (_Component) {
         case 'text':
           return value ? '"' + value + '"' : '""';
         case 'select':
-          return ':' + value;
+          return ':' + (value || 'default');
         case 'boolean':
           return value ? true : false;
         case 'number':
-          return parseInt(value) || 0;
+          return parseInt(value < 0 ? -value : value) || 0;
         case 'object':
-          if (!value) return "{}";
+          if (!value) {
+            return "{}";
+          }
           try {
             var _getObjectFormats3 = (0, _helpers.getObjectFormats)(campaignName, campaignInputs),
                 _getObjectFormats4 = _slicedToArray(_getObjectFormats3, 2),
@@ -42646,7 +43101,9 @@ var Step2Form = function (_Component) {
             throw Error('Error parsing object input for ' + (0, _helpers.splitCamelCase)(campaignName) + '. Make sure your input matches the required format');
           }
         case 'objectArray':
-          if (!value) return "[]";
+          if (!value) {
+            return "[]";
+          }
           try {
             var _getObjectFormats5 = (0, _helpers.getObjectFormats)(campaignName, campaignInputs),
                 _getObjectFormats6 = _slicedToArray(_getObjectFormats5, 2),
@@ -42662,7 +43119,7 @@ var Step2Form = function (_Component) {
             throw Error('Error parsing object input for ' + (0, _helpers.splitCamelCase)(campaignName) + '. Make sure your input matches the required format');
           }
         case 'campaignSelect':
-          return value ? value : 'none';
+          return value || 'none';
         default:
           return value;
       }
@@ -42772,13 +43229,13 @@ var Step2Form = function (_Component) {
 exports.default = Step2Form;
 
 /***/ }),
-/* 445 */
+/* 446 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(446);
+var content = __webpack_require__(447);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -42803,7 +43260,7 @@ if(false) {
 }
 
 /***/ }),
-/* 446 */
+/* 447 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(99)(undefined);
@@ -42817,7 +43274,7 @@ exports.push([module.i, ".select-wrapper span {\n  display: block;\n  margin-top
 
 
 /***/ }),
-/* 447 */
+/* 448 */
 /***/ (function(module, exports) {
 
 
@@ -42912,7 +43369,7 @@ module.exports = function (css) {
 
 
 /***/ }),
-/* 448 */
+/* 449 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -42930,9 +43387,9 @@ var _react2 = _interopRequireDefault(_react);
 
 var _polaris = __webpack_require__(24);
 
-var _helpers = __webpack_require__(170);
+var _helpers = __webpack_require__(101);
 
-var _CampaignsList = __webpack_require__(449);
+var _CampaignsList = __webpack_require__(450);
 
 var _CampaignsList2 = _interopRequireDefault(_CampaignsList);
 
@@ -43056,13 +43513,13 @@ var Campaigns = function (_Component) {
 exports.default = Campaigns;
 
 /***/ }),
-/* 449 */
+/* 450 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(450);
+var content = __webpack_require__(451);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -43087,7 +43544,7 @@ if(false) {
 }
 
 /***/ }),
-/* 450 */
+/* 451 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(99)(undefined);
@@ -43101,7 +43558,7 @@ exports.push([module.i, ".campaign-info {\n  padding: 0 0 1rem 1rem;\n}", ""]);
 
 
 /***/ }),
-/* 451 */
+/* 452 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43119,7 +43576,7 @@ var _react2 = _interopRequireDefault(_react);
 
 var _polaris = __webpack_require__(24);
 
-var _ScriptOutput = __webpack_require__(452);
+var _ScriptOutput = __webpack_require__(453);
 
 var _ScriptOutput2 = _interopRequireDefault(_ScriptOutput);
 
@@ -43182,13 +43639,13 @@ var ScriptOutput = function (_Component) {
 exports.default = ScriptOutput;
 
 /***/ }),
-/* 452 */
+/* 453 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(453);
+var content = __webpack_require__(454);
 if(typeof content === 'string') content = [[module.i, content, '']];
 // Prepare cssTransformation
 var transform;
@@ -43213,7 +43670,7 @@ if(false) {
 }
 
 /***/ }),
-/* 453 */
+/* 454 */
 /***/ (function(module, exports, __webpack_require__) {
 
 exports = module.exports = __webpack_require__(99)(undefined);
@@ -43227,7 +43684,7 @@ exports.push([module.i, "#ScriptOutput {\n  max-height: 252px !important;\n  fon
 
 
 /***/ }),
-/* 454 */
+/* 455 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43264,7 +43721,7 @@ exports.default = function () {
 };
 
 /***/ }),
-/* 455 */
+/* 456 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43283,42 +43740,38 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
-  ExcludeGiftCards: "\nclass ExcludeGiftCards\n  def match?(line_item)\n    !line_item.variant.product.gift_card?\n  end\nend",
+  PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent, message)\n    @discount = (100 - percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_item.change_line_price(line_item.line_price * @discount, message: @message)\n  end\nend",
 
-  ExcludeSaleItems: "\nclass ExcludeSaleItems\n  def match?(line_item)\n    line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price\n  end\nend",
+  FixedTotalDiscount: "\nclass FixedTotalDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend",
 
-  ExcludeReducedItems: "\nclass ExcludeReducedItems\n  def match?(line_item)\n    !line_item.discounted?\n  end\nend",
-
-  PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100.0\n    @message = message\n  end\n\n  def apply(line_item)\n    line_discount = line_item.line_price * @percent\n    new_line_price = line_item.line_price - line_discount\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
-
-  FixedDiscount: "\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n    @discount_applied = Money.zero\n  end\n\n  def apply(line_item)\n    return unless @discount_applied < @amount\n    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n    @discount_applied += discount_to_apply\n  end\nend",
-
-  ExcludeDiscountCodes: "\nclass ExcludeDiscountCodes\n  def initialize(behaviour, message)\n    @reject = behaviour == :apply_script\n    @message = message == \"\" ? \"Discount codes cannot be used with this offer\" : message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend",
-
-  ConditionalDiscount: "\nclass ConditionalDiscount\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, discount, max_discounts)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @discount = discount\n    @items_to_discount = max_discounts == 0 ? nil : max_discounts\n  end\n\n  def run(cart)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    applicable_items = cart.line_items.select { |item| @line_item_qualifier.nil? || @line_item_qualifier.match?(item) }\n    applicable_items = applicable_items.sort_by { |item| item.variant.price }\n    applicable_items.each do |item|\n      break if @items_to_discount == 0\n      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)\n        discounted_items = item.split(take: @items_to_discount)\n        @discount.apply(discounted_items)\n        cart.line_items << discounted_items\n        @items_to_discount = 0\n      else\n        @discount.apply(item)\n        @items_to_discount -= item.quantity if !@items_to_discount.nil?\n      end\n    end\n  end\nend",
-
-  RejectAllDiscountCodes: "\nclass RejectAllDiscountCodes\n  def initialize(message)\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    if cart.discount_code\n      cart.discount_code.reject({message: @message})\n    end\n  end\nend",
-
-  BuyXGetX: "\nclass BuyXGetX\n  def initialize(customer_qualifier, cart_qualifier, buy_item_qualifier, get_item_qualifier, discount, buy_x, get_x, max_sets)\n    raise \"buy_x must be greater than or equal to get_x\" unless buy_x >= get_x\n    \n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @buy_item_qualifier = buy_item_qualifier\n    @get_item_qualifier = get_item_qualifier\n    @discount = discount\n    @buy_x = buy_x + get_x\n    @get_x = get_x\n    @max_sets = max_sets == 0 ? nil : max_sets\n  end\n  \n  def run(cart)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @buy_item_qualifier.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @buy_item_qualifier.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_qualifier.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_qualifier.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n  end\nend",
-
-  ConditionalDiscountCodeRejection: "\nclass ConditionalDiscountCodeRejection\n  def initialize(match_type, customer_qualifier, cart_qualifier, line_item_selector, message)\n    @invert = match_type == :no_match\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless @customer_qualifier.nil? || (@invert ^ @customer_qualifier.match?(cart))\n    return unless @cart_qualifier.nil? || (@invert ^ @cart_qualifier.match?(cart))\n    return unless @line_item_selector.nil? || @invert ^ cart.line_items.any? do |item|\n      @line_item_selector.match?(item)\n    end\n    cart.discount_code.reject({message: @message})\n  end\nend",
+  FixedItemDiscount: "\nclass FixedItemDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n  end\n\n  def apply(line_item)\n    per_item_price = line_item.variant.price\n    per_item_discount = [(@amount - per_item_price), @amount].max\n    discount_to_apply = [(per_item_discount * line_item.quantity), line_item.line_price].min\n    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})\n  end\nend",
 
   TaxDiscount: "\nclass TaxDiscount\n  def initialize(amount, message)\n    @amount = amount\n    @message = message\n  end\n\n  def apply(line_item)\n    calculated_tax_fraction = @amount / (100 + @amount)\n    item_tax = line_item.variant.price * calculated_tax_fraction\n    per_item_price = line_item.variant.price - item_tax\n    new_line_price = per_item_price * line_item.quantity\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
 
-  QuantityLimit: "\nclass QuantityLimit\n  def initialize(customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    @limit_by = limit_by == :undefined ? :product : limit_by\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return if !@customer_qualifier.nil? && @customer_qualifier.match?(cart)\n    return if !@cart_qualifier.nil? && @cart_qualifier.match?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n  end\nend",
+  ExcludeDiscountCodes: "\nclass ExcludeDiscountCodes < Qualifier\n  def initialize(behaviour, message)\n    @reject = behaviour == :apply_script\n    @message = message == \"\" ? \"Discount codes cannot be used with this offer\" : message\n  end\n  \n  def match?(cart)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend",
 
-  TieredDiscount: "\nclass TieredDiscount\n  def initialize(customer_qualifier, cart_qualifier, item_selector, discount_type, tier_type, discount_tiers)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @item_selector = item_selector\n    @discount_type = discount_type\n    @tier_type = tier_type == :undefined ? :customer_tag : tier_type\n    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }\n  end\n  \n  def init_discount(amount, message)\n    if @discount_type == :fixed\n      return FixedDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n  \n  def run(cart)\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    \n    applicable_items = cart.line_items.select { |item| @item_selector.nil? || @item_selector.match?(item) }\n    case @tier_type\n      when :customer_tag\n        return if cart.customer.nil?\n        customer_tags = cart.customer.tags.map(&:downcase)\n        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }\n      when :cart_subtotal\n        cart_total = cart.subtotal_price\n        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total\n        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }\n    end\n\n    return if qualified_tiers.empty?\n    discount_amount = qualified_tiers.last[:discount].to_i\n    discount_message = qualified_tiers.last[:message]\n    \n    discount = init_discount(discount_amount, discount_message)\n    applicable_items.each { |item| discount.apply(item) }\n  end\nend",
+  ConditionalDiscount: "\nclass ConditionalDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, max_discounts)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount = discount\n    @items_to_discount = max_discounts == 0 ? nil : max_discounts\n  end\n\n  def run(cart)\n    return unless @discount\n    return unless qualifies?(cart)\n    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    applicable_items = applicable_items.sort_by { |item| item.variant.price }\n    applicable_items.each do |item|\n      break if @items_to_discount == 0\n      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)\n        discounted_items = item.split(take: @items_to_discount)\n        @discount.apply(discounted_items)\n        cart.line_items << discounted_items\n        @items_to_discount = 0\n      else\n        @discount.apply(item)\n        @items_to_discount -= item.quantity if !@items_to_discount.nil?\n      end\n    end\n  end\nend",
 
-  DiscountCodeList: "\nclass DiscountCodeList\n  def initialize(customer_qualifier, cart_qualifier, line_item_selector, discount_list)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @discount_list = discount_list\n  end\n\n  def init_discount(type, amount, message)\n    if type == :fixed\n      return FixedDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n\n  def get_discount_code_type(discount_code)\n    case discount_code\n      when CartDiscount::Percentage\n        return :percent\n      when CartDiscount::FixedAmount\n        return :fixed\n      else\n        return nil\n    end\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n\n    applied_code = cart.discount_code.code.downcase\n    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }\n    return if applicable_discount.empty?\n    raise \"#{applied_code} matches multiple discounts\" if applicable_discount.length > 1\n    \n    applicable_discount = applicable_discount.first\n    case applicable_discount[:type].downcase\n      when 'p', 'percent'\n        discount_type = :percent\n      when 'f', 'fixed'\n        discount_type = :fixed\n      when 'c', 'code'\n        discount_type = get_discount_code_type(cart.discount_code)\n    end\n    return if discount_type.nil?\n\n    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)\n\n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n  end\nend",
+  RejectAllDiscountCodes: "\nclass RejectAllDiscountCodes < Campaign\n  def initialize(message)\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    cart.discount_code.reject({message: @message}) unless cart.discount_code.nil?\n  end\nend",
 
-  DiscountCodePattern: "\nclass DiscountCodePattern\n  def initialize(customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_selector = line_item_selector\n    @percent_format = percent_format\n    @fixed_format = fixed_format\n  end\n\n  def get_discount_type(code)\n    percent_search = @percent_format.split('#').first\n    fixed_search = @fixed_format.split('#').first\n    if code.include?(percent_search)\n      return :percent\n    elsif code.include?(fixed_search)\n      return :fixed\n    end\n    return nil\n  end\n\n  def get_discount_amount(type, code)\n    start_num = nil\n    end_num = nil\n    start_search = nil\n    \n    case type\n      when :percent\n        start_num = @percent_format.index('#')\n        end_num = @percent_format.rindex('#')\n        start_search = @percent_format.split('#').first\n      when :fixed\n        start_num = @fixed_format.index('#')\n        end_num = @fixed_format.rindex('#')\n        start_search = @fixed_format.split('#').first\n    end\n    \n    search_length = start_search.length\n    start_index = code.index(start_search) + search_length\n    return if start_index.nil? || start_num.nil?\n    \n    length = (end_num - start_num || 0) + 1\n    puts code.slice(start_index, length)\n    return code.slice(start_index, length).to_i(base=10)\n  end\n\n  def initialize_discount(code)\n    type = get_discount_type(code)\n    discount_amount = get_discount_amount(type, code)\n    return if type == nil || discount_amount == nil\n    return type == :fixed ? FixedDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless @customer_qualifier.nil? || @customer_qualfier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    \n    discount = initialize_discount(cart.discount_code.code)\n    return unless discount\n    \n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n  end\nend"
+  BuyXGetX: "\nclass BuyXGetX < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, buy_item_selector, get_item_selector, discount, buy_x, get_x, max_sets)\n    raise \"buy_x must be greater than or equal to get_x\" unless buy_x >= get_x\n\n    super(condition, customer_qualifier, cart_qualifier)\n    @buy_item_selector = buy_item_selector\n    @get_item_selector = get_item_selector\n    @discount = discount\n    @buy_x = buy_x + get_x\n    @get_x = get_x\n    @max_sets = max_sets == 0 ? nil : max_sets\n  end\n  \n  def run(cart)\n    return unless @discount\n    return unless qualifies?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @buy_item_selector.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @buy_item_selector.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_selector.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_selector.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n  end\nend",
+
+  ConditionalDiscountCodeRejection: "\nclass ConditionalDiscountCodeRejection < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    cart.discount_code.reject({message: @message}) unless qualifies?(cart)\n  end\nend",
+
+  QuantityLimit: "\nclass QuantityLimit < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    super(condition, customer_qualifier, cart_qualifier)\n    @limit_by = limit_by == :default ? :product : limit_by\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return unless qualifies?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n  end\nend",
+
+  TieredDiscount: "\nclass TieredDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, item_selector, discount_type, tier_type, discount_tiers)\n    super(condition, customer_qualifier, cart_qualifier)\n    @item_selector = item_selector\n    @discount_type = discount_type\n    @tier_type = tier_type == :default ? :customer_tag : tier_type\n    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }\n  end\n  \n  def init_discount(amount, message)\n    if @discount_type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n  \n  def run(cart)\n    return unless qualifies?(cart)\n    \n    applicable_items = cart.line_items.select { |item| @item_selector.nil? || @item_selector.match?(item) }\n    case @tier_type\n      when :customer_tag\n        return if cart.customer.nil?\n        customer_tags = cart.customer.tags.map(&:downcase)\n        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }\n      when :cart_subtotal\n        cart_total = cart.subtotal_price\n        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total\n        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }\n    end\n\n    return if qualified_tiers.empty?\n    discount_amount = qualified_tiers.last[:discount].to_i\n    discount_message = qualified_tiers.last[:message]\n    \n    discount = init_discount(discount_amount, discount_message)\n    applicable_items.each { |item| discount.apply(item) }\n  end\nend",
+
+  DiscountCodeList: "\nclass DiscountCodeList < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_list)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_list = discount_list\n  end\n\n  def init_discount(type, amount, message)\n    if type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n\n  def get_discount_code_type(discount_code)\n    case discount_code\n      when CartDiscount::Percentage\n        return :percent\n      when CartDiscount::FixedAmount\n        return :fixed\n      else\n        return nil\n    end\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n\n    applied_code = cart.discount_code.code.downcase\n    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }\n    return if applicable_discount.empty?\n    raise \"#{applied_code} matches multiple discounts\" if applicable_discount.length > 1\n    \n    applicable_discount = applicable_discount.first\n    case applicable_discount[:type].downcase\n      when 'p', 'percent'\n        discount_type = :percent\n      when 'f', 'fixed'\n        discount_type = :fixed\n      when 'c', 'code'\n        discount_type = get_discount_code_type(cart.discount_code)\n    end\n    return if discount_type.nil?\n\n    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)\n\n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n  end\nend",
+
+  DiscountCodePattern: "\nclass DiscountCodePattern < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @line_item_selector = line_item_selector\n    @percent_format = percent_format\n    @fixed_format = fixed_format\n  end\n\n  def get_discount_type(code)\n    percent_search = @percent_format.split('#').first\n    fixed_search = @fixed_format.split('#').first\n    if code.include?(percent_search)\n      return :percent\n    elsif code.include?(fixed_search)\n      return :fixed\n    end\n    return nil\n  end\n\n  def get_discount_amount(type, code)\n    start_num = nil\n    end_num = nil\n    start_search = nil\n    \n    case type\n      when :percent\n        start_num = @percent_format.index('#')\n        end_num = @percent_format.rindex('#')\n        start_search = @percent_format.split('#').first\n      when :fixed\n        start_num = @fixed_format.index('#')\n        end_num = @fixed_format.rindex('#')\n        start_search = @fixed_format.split('#').first\n    end\n    \n    search_length = start_search.length\n    start_index = code.index(start_search) + search_length\n    return if start_index.nil? || start_num.nil?\n    \n    length = (end_num - start_num || 0) + 1\n    puts code.slice(start_index, length)\n    return code.slice(start_index, length).to_i(base=10)\n  end\n\n  def initialize_discount(code)\n    type = get_discount_type(code)\n    discount_amount = get_discount_amount(type, code)\n    return if type == nil || discount_amount == nil\n    return type == :fixed ? FixedTotalDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n    \n    discount = initialize_discount(cart.discount_code.code)\n    return unless discount\n    \n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
 
-var CUSTOMER_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.customer_qualifiers));
+var CUSTOMER_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.customerQualifiers));
 
-var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cart_qualifiers), [{
+var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cartQualifiers), [{
   value: "ExcludeDiscountCodes",
   label: "Cart Has No Discount Codes",
   description: "Do not allow discount codes and script discount to combine",
@@ -43341,19 +43794,7 @@ var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cart_qualifi
   }
 }]);
 
-var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.line_item_qualifiers), [{
-  value: "ExcludeGiftCards",
-  label: "Not a Gift Card",
-  description: "Do not match products that are gift cards"
-}, {
-  value: "ExcludeSaleItems",
-  label: "Not on sale",
-  description: "Do not match products that are on sale (price is less than compare at price)"
-}, {
-  value: "ExcludeReducedItems",
-  label: "Not previously discounted (via script)",
-  description: "Do not match products that were already discounted via scripts"
-}]);
+var LINE_ITEM_SELECTORS = [].concat(_toConsumableArray(_common2.default.lineItemSelectors));
 
 var DISCOUNTS = [{
   value: "none",
@@ -43362,7 +43803,7 @@ var DISCOUNTS = [{
 }, {
   value: "PercentageDiscount",
   label: "Percentage Discount",
-  description: "Discounts the line item by a percentage",
+  description: "Discounts each selected line item by a percentage",
   inputs: {
     percent: {
       type: "number",
@@ -43374,13 +43815,27 @@ var DISCOUNTS = [{
     }
   }
 }, {
-  value: "FixedDiscount",
-  label: "Fixed Discount",
-  description: "Splits the given amount between qualified items",
+  value: "FixedTotalDiscount",
+  label: "Fixed Total Discount",
+  description: "Discounts selected items up to a maximum",
   inputs: {
     amount: {
       type: "number",
-      description: "Total discount to apply"
+      description: "Maximum discount to apply"
+    },
+    message: {
+      type: "text",
+      description: "Message to display to customer"
+    }
+  }
+}, {
+  value: "FixedItemDiscount",
+  label: "Fixed Per Item Discount",
+  description: "Discounts each selected item by this amount",
+  inputs: {
+    amount: {
+      type: "number",
+      description: "Per Item discount to apply"
     },
     message: {
       type: "text",
@@ -43430,9 +43885,9 @@ var LINE_ITEM_AND_SELECTOR = {
   label: "Multi-Select - Meets all conditions",
   description: "Selected if all of the following conditions are met",
   inputs: {
-    line_item_selector_1: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    and_line_item_selector_2: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    and_line_item_selector_3: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS))
+    line_item_selector_1: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS)),
+    and_line_item_selector_2: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS)),
+    and_line_item_selector_3: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS))
   }
 };
 
@@ -43441,9 +43896,9 @@ var LINE_ITEM_OR_SELECTOR = {
   label: "Multi-Select - Meets any conditions",
   description: "Selected if any of the following conditions are met",
   inputs: {
-    line_item_selector_1: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    or_line_item_selector_2: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS)),
-    or_line_item_selector_3: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS))
+    line_item_selector_1: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS)),
+    or_line_item_selector_2: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS)),
+    or_line_item_selector_3: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS))
   }
 };
 
@@ -43474,9 +43929,20 @@ var campaigns = [{
   label: "Conditional Discount",
   description: "Specify conditions to apply a discount",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    discounted_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    discounted_item_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discount_to_apply: [].concat(DISCOUNTS),
     maximum_discounts: {
       type: "number",
@@ -43488,10 +43954,21 @@ var campaigns = [{
   label: "Buy X Get X Discounted",
   description: "Buy a certain number of items to receive discounted items",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    buy_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
-    get_item_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    buy_item_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    get_item_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discount_to_apply: [].concat(DISCOUNTS),
     buy_number: {
       type: "number",
@@ -43521,20 +43998,31 @@ var campaigns = [{
   label: "Conditionally Reject Discount Code",
   description: "Rejects discount codes based on conditions",
   inputs: {
-    match_condition: {
+    qualifer_behaviour: {
       type: "select",
-      description: "Sets the type of match needed to reject the code",
+      description: "Set the qualifier behaviour",
       options: [{
-        value: "match",
-        label: "Reject if any match"
+        value: "all",
+        label: "Reject code if all qualify"
       }, {
-        value: "no_match",
-        label: "Reject if none match"
+        value: "any",
+        label: "Reject code if any qualify"
       }]
     },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
+    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     message: {
       type: "text",
       description: "Message to display to customer when code is rejected"
@@ -43543,11 +44031,22 @@ var campaigns = [{
 }, {
   value: "QuantityLimit",
   label: "Quantity Limit",
-  description: "Limit purchasable quantities for items if qualifiers are not met",
+  description: "Limit purchasable quantities for items if qualifiers do not match",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Limit unless all qualify"
+      }, {
+        value: "any",
+        label: "Limit unless any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    items_to_limit_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    items_to_limit_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     limit_by: {
       type: "select",
       description: "Sets how items are limited",
@@ -43569,9 +44068,20 @@ var campaigns = [{
   label: "Tiered Discount",
   description: "Apply different discounts based on specified conditons",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discount_type: {
       type: "select",
       description: "Discount selected items by the tier amount as a percent or a total fixed amount",
@@ -43580,7 +44090,7 @@ var campaigns = [{
         label: "Percentage Discount"
       }, {
         value: "fixed",
-        label: "Fixed Discount"
+        label: "Fixed Total Discount"
       }]
     },
     tier_type: {
@@ -43604,15 +44114,26 @@ var campaigns = [{
       outputFormat: '{:tier => "{text}", :discount => "{text}", :message => "{text}"}'
     }
   },
-  dependants: ["PercentageDiscount", "FixedDiscount"]
+  dependants: ["PercentageDiscount", "FixedTotalDiscount"]
 }, {
   value: "DiscountCodeList",
   label: "Discount Code List",
   description: "Apply different discounts based on discount code entered",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discounts: {
       type: "objectArray",
       description: "Each discount should be on a new line. Format: (discount_code : discount_type((f)ixed/(p)ercent/(c)ode) : discount_amount)",
@@ -43620,25 +44141,36 @@ var campaigns = [{
       outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{text}"}'
     }
   },
-  dependants: ["PercentageDiscount", "FixedDiscount"]
+  dependants: ["PercentageDiscount", "FixedTotalDiscount"]
 }, {
   value: "DiscountCodePattern",
   label: "Discount Code Pattern Discount",
   description: "Apply different discounts based on a pattern in a discount code",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     percent_pattern: {
       type: "text",
       description: "Percentage discount pattern (# = will always be a number PD## = PD10ABCDE for 10% discount)"
     },
     fixed_pattern: {
       type: "text",
-      description: "Fixed discount pattern (# = will always be a number FD### = ABCFD075EF for $75 discount)"
+      description: "Fixed discount pattern (# = will always be a number FD### = ABCFD075EF for $75 total discount)"
     }
   },
-  dependants: ["PercentageDiscount", "FixedDiscount"]
+  dependants: ["PercentageDiscount", "FixedTotalDiscount"]
 }];
 
 exports.default = {
@@ -43648,7 +44180,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 456 */
+/* 457 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43667,40 +44199,48 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
-  AllSelector: "\nclass AllSelector\n  def match?(rate)\n    return true\n  end\nend",
+  AllRatesSelector: "\nclass AllRatesSelector\n  def match?(rate)\n    return true\n  end\nend",
 
-  RateNameSelector: "\nclass RateNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    name = shipping_rate.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
+  RateNameSelector: "\nclass RateNameSelector < Selector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    name = shipping_rate.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      else\n        return @invert ^ partial_match(@match_condition, name, @names)\n    end\n  end\nend",
 
-  RateCodeSelector: "\nclass RateCodeSelector\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    code = shipping_rate.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      when :contains\n        return @invert ^ @codes.any? do |partial_code|\n          code.include?(partial_code)\n        end\n      when :starts_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.start_with?(partial_code)\n        end\n      when :ends_with\n        return @invert ^ @codes.any? do |partial_code|\n          code.end_with?(partial_code)\n        end\n    end\n  end\nend",
+  RateCodeSelector: "\nclass RateCodeSelector < Selector\n  def initialize(match_type, match_condition, codes)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @codes = codes.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    code = shipping_rate.code.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @codes.include?(code)\n      else\n        return @invert ^ partial_match(@match_condition, code, @codes)\n    end\n  end\nend",
 
-  RateSourceSelector: "\nclass RateSourceSelector\n  def initialize(match_type, sources)\n    @invert = match_type == :not_one;\n    @sources = sources.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    source = shipping_rate.source.downcase\n    @invert ^ @sources.include?(source)\n  end\nend",
+  RateSourceSelector: "\nclass RateSourceSelector < Selector\n  def initialize(match_type, sources)\n    @invert = match_type == :not_one\n    @sources = sources.map(&:downcase)\n  end\n\n  def match?(shipping_rate)\n    source = shipping_rate.source.downcase\n    @invert ^ @sources.include?(source)\n  end\nend",
+
+  ReducedRateSelector: "\nclass ReducedRateSelector < Selector\n  def initialize(match_type)\n    @invert = match_type == :not\n  end\n  \n  def match?(rate)\n    return @invert if rate.instance_variable_get(:@adjustments).empty?\n    return @invert ^ rate.instance_variable_get(:@adjustments).any? do |adjustment|\n      next unless adjustment&.property == :price\n      adjustment.old_value.cents > adjustment.new_value.cents\n    end\n  end\nend",
 
   PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100\n    @message = message\n  end\n  \n  def apply(rate)\n    rate.apply_discount(rate.price * @percent, { message: @message })\n  end \nend",
 
   FixedDiscount: "\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n  end\n  \n  def apply(rate)\n    discount_amount = rate.price - @amount < 0 ? rate.price : @amount\n    rate.apply_discount(discount_amount, { message: @message })\n  end\nend",
 
-  // TODO: Not sure if this is feasable or not (Array of objects). Logix may be too complex
-  AddressQualifier: "\n# ----- Qualifying Addresses ----- #\n# Example: {\n#   address1: [\"150 Elgin St\", \"150 Elgin Street\"],\n#   address2: \"8th floor\",\n#   phone: 123-456-7890,\n#   city: \"Ottawa\",\n#   province: \"Ontario\",\n#   country_code: \"CA\",\n#   zip: \"K2P 1L4\",\n#   match_type: :exact\n# }\n# Matches a given address to an array of addresses given\n# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)\n# If no match type is specified, :partial will be the default\n# Only the given paramaters will be compared. Arrays can be used to match different options\nclass AddressQualifier\n  def initialize(addresses)\n    @addresses = addresses\n  end\n  \n  def match?(cart)\n    return false if cart.shipping_address.nil?\n    \n    @addresses.any? do |accepted_address|\n      match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial\n\n      cart.shipping_address.to_hash.all? do |key, value|\n        next true if value.empty?\n        match = true\n        key = key.to_sym\n        value.downcase!\n        \n        unless accepted_address[key].nil?\n          if accepted_address[key].kind_of?(Array)\n            match = accepted_address[key].any? do |potential_address|\n              potential_address.downcase!\n              case match_type\n                when :partial\n                  value.include?(potential_address)\n                when :exact\n                  potential_address == value\n              end\n            end\n          else\n            accepted_address[key].downcase!\n            case match_type\n              when :partial\n                match = value.include?(accepted_address[key])\n              when :exact\n                match = accepted_address[key] == value\n            end\n          end\n        end\n        match\n      end\n    end\n  end\nend",
+  // TODO: Not sure if this is feasable or not (object is too big - how would I format this?)
+  // [exactly : 150 Elgin St, 150 Elgin Street : 8th floor : 123-456-7890 : Ottawa : Ontario : CA : K2P 1L4]- but every input would be required?
+  // I think feasable if I set up a UI to enter instead of the text box and do nil if that one isn't filled in
+  AddressQualifier: "\n# ----- Qualifying Addresses ----- #\n# Example: {\n#   address1: [\"150 Elgin St\", \"150 Elgin Street\"],\n#   address2: \"8th floor\",\n#   phone: 123-456-7890,\n#   city: \"Ottawa\",\n#   province: \"Ontario\",\n#   country_code: \"CA\",\n#   zip: \"K2P 1L4\",\n#   match_type: :exact\n# }\n# Matches a given address to an array of addresses given\n# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)\n# If no match type is specified, :partial will be the default\n# Only the given paramaters will be compared. Arrays can be used to match different options\nclass AddressQualifier\n  def initialize(addresses)\n    @addresses = addresses\n  end\n  \n  def match?(cart)\n  # TODO: ADD checks to make sure every field wanted exists\n    return false if cart.shipping_address.nil?\n    \n    @addresses.any? do |accepted_address|\n      match_type = accepted_address[:match_type] ? accepted_address[:match_type] : :partial\n\n      cart.shipping_address.to_hash.all? do |key, value|\n        next true if value.empty?\n        match = true\n        key = key.to_sym\n        value.downcase!\n        \n        unless accepted_address[key].nil?\n          if accepted_address[key].kind_of?(Array)\n            match = accepted_address[key].any? do |potential_address|\n              potential_address.downcase!\n              case match_type\n                when :partial\n                  value.include?(potential_address)\n                when :exact\n                  potential_address == value\n              end\n            end\n          else\n            accepted_address[key].downcase!\n            case match_type\n              when :partial\n                match = value.include?(accepted_address[key])\n              when :exact\n                match = accepted_address[key] == value\n            end\n          end\n        end\n        match\n      end\n    end\n  end\nend",
 
-  ShippingDiscount: "\nclass ShippingDiscount\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector, discount)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @rate_selector = rate_selector\n    @discount = discount\n  end\n  \n  def run(rates, cart)\n    return unless @discount\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) }\n    rates.each do |rate|\n      next unless @rate_selector.nil? || @rate_selector.match?(rate)\n      @discount.apply(rate)\n    end\n  end\nend",
+  ShippingDiscount: "\nclass ShippingDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, discount)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @rate_selector = rate_selector\n    @discount = discount\n  end\n  \n  def run(rates, cart)\n    return unless @discount\n    return unless qualifies?(cart)\n    rates.each do |rate|\n      next unless @rate_selector.nil? || @rate_selector.match?(rate)\n      @discount.apply(rate)\n    end\n  end\nend",
 
-  HideRateUnlessConditionsMet: "\nclass HideRateUnlessConditionsMet\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, rate_selector)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @rate_selector = rate_selector\n  end\n\n  def run(rates, cart)\n    met = @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    met = met ? @cart_qualifier.nil? || @cart_qualifier.match?(cart) : false\n    met = met ? @line_item_qualifier.nil? || cart.line_items.any? { |item| @line_item_qualifier.match?(item) } : false\n    unless met\n      rates.delete_if do |rate|\n        @rate_selector.match?(rate)\n      end\n    end\n  end\nend"
+  ConditionallyHideRates: "\nclass ConditionallyHideRates < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @rate_selector = rate_selector\n  end\n\n  def run(rates, cart)\n    rates.delete_if { |rate| @rate_selector.match?(rate) } if qualifies?(cart)\n  end\nend",
+
+  ChangeRateName: "\nclass ChangeRateName < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, new_name)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @rate_selector = rate_selector\n    @new_name = new_name\n  end\n\n  def run(rates, cart)\n    return unless qualifies?(cart) && @rate_selector\n    rates.each do|rate| \n      rate.change_name(@new_name, {message: \"\"}) if @rate_selector.match?(rate)\n    end\n  end\nend",
+
+  ReorderShippingRates: "\nclass ReorderShippingRates < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, order_from, desired_order)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @reverse = order_from == :last_to_first\n    @desired_order = desired_order.map(&:downcase)\n  end\n\n  def run(rates, cart)\n    return unless qualifies?(cart)\n    new_rate_order = []\n    leftover_rates = []\n    rates.each { |rate| new_rate_order << rate.name if @desired_order.include?(rate.name.downcase) }\n    return if new_rate_order.empty?\n    new_rate_order = new_rate_order.sort_by { |name| @desired_order.index(name.downcase) }\n    rates.each { |rate| leftover_rates << rate.name unless new_rate_order.include?(rate.name) }\n    if @reverse\n      new_rate_order.reverse!\n      leftover_rates.reverse.each { |name| new_rate_order.unshift(name) }\n    else\n      leftover_rates.each { |name| new_rate_order << name }\n    end\n    rates.sort_by! { |rate| new_rate_order.index(rate.name) }\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.shipping_rates, Input.cart)\nend\n\nOutput.shipping_rates = Input.shipping_rates";
 
-var CUSTOMER_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.customer_qualifiers));
+var CUSTOMER_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.customerQualifiers));
 
-var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cart_qualifiers));
+var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cartQualifiers));
 
-var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.line_item_qualifiers));
+var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.lineItemSelectors));
 
 var RATE_SELECTORS = [{
   value: "none",
   label: "None",
   description: "No rates are selected"
 }, {
-  value: "AllSelector",
+  value: "AllRatesSelector",
   label: "All",
   description: "All rates are selected"
 }, {
@@ -43726,13 +44266,13 @@ var RATE_SELECTORS = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -43764,13 +44304,13 @@ var RATE_SELECTORS = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -43798,6 +44338,23 @@ var RATE_SELECTORS = [{
     rate_sources: {
       type: "array",
       description: "Seperate individual sources with a comma (,)"
+    }
+  }
+}, {
+  value: "ReducedRateSelector",
+  label: "Rate Discounted",
+  description: "Matches shipping rates if they have/have not been discounted",
+  inputs: {
+    match_type: {
+      type: "select",
+      description: "Set how the rates are matched",
+      options: [{
+        value: "is",
+        label: "Is discounted"
+      }, {
+        value: "not",
+        label: "Is not discounted"
+      }]
     }
   }
 }];
@@ -43929,21 +44486,147 @@ var campaigns = [{
   label: "Shipping Discount",
   description: "Specify conditions to apply a shipping discount to selected rates",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     rate_to_discount_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR]),
     discount_to_apply: [].concat(DISCOUNTS)
   }
 }, {
-  value: "HideRateUnlessConditionsMet",
-  label: "Hide Rates If Not Qualified",
-  description: "Selected shipping rates will be hidden unless conditions are met",
+  value: "ConditionallyHideRates",
+  label: "Conditionally Hide Rates",
+  description: "Selected shipping rates will be hidden based on conditions",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Hide if all qualify"
+      }, {
+        value: "any",
+        label: "Hide if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     rate_to_hide_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR])
+  }
+}, {
+  value: "ChangeRateName",
+  label: "Change Name",
+  description: "Selected shipping rate names will be changed",
+  inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Change name if all qualify"
+      }, {
+        value: "any",
+        label: "Change name if any qualify"
+      }]
+    },
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
+    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    rate_to_change_selector: [].concat(RATE_SELECTORS, [RATE_AND_SELECTOR, RATE_OR_SELECTOR]),
+    new_name: {
+      type: "text",
+      description: "Selected rates will use this name"
+    }
+  }
+}, {
+  value: "ReorderShippingRates",
+  label: "Reorder Rates",
+  description: "Shipping rate order will be changed to the specified order",
+  inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Reorder if all qualify"
+      }, {
+        value: "any",
+        label: "Reorder if any qualify"
+      }]
+    },
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
+    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    order_from: {
+      type: "select",
+      description: "Set how the rates are ordered",
+      options: [{
+        value: "first_to_last",
+        label: "Order from first to last"
+      }, {
+        value: "last_to_first",
+        "label": "Order from last to first"
+      }]
+    },
+    desired_order: {
+      type: "array",
+      description: "Rates will appear in the order specified (use rate names seperated by a comma). Only rates specified will be reordered."
+    }
   }
 }];
 
@@ -43954,7 +44637,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 457 */
+/* 458 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -43973,27 +44656,31 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 var classes = {
-  AllSelector: "\n  class AllSelector\n    def match?(gateway)\n      return true\n    end\n  end",
+  AllGatewaysSelector: "\n  class AllGatewaysSelector\n    def match?(gateway)\n      return true\n    end\n  end",
 
-  GatewayNameSelector: "\nclass GatewayNameSelector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :undefined ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(gateway)\n    name = gateway.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      when :contains\n        return @invert ^ @names.any? do |partial_name|\n          name.include?(partial_name)\n        end\n      when :starts_with\n        return @invert ^ @names.any? do |partial_name|\n          name.start_with?(partial_name)\n        end\n      when :ends_with\n        return @invert ^ @names.any? do |partial_name|\n          name.end_with?(partial_name)\n        end\n    end\n  end\nend",
+  GatewayNameSelector: "\nclass GatewayNameSelector < Selector\n  def initialize(match_type, match_condition, names)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @names = names.map(&:downcase)\n  end\n\n  def match?(gateway)\n    name = gateway.name.downcase\n    case @match_condition\n      when :match\n        return @invert ^ @names.include?(name)\n      else\n        return @invert ^ partial_match(@match_condition, name, @names)\n    end\n  end\nend",
 
-  ConditionallyRemoveGateway: "\nclass ConditionallyRemoveGateway\n  def initialize(customer_qualifier, cart_qualifier, line_item_qualifier, gateway_selector)\n    @customer_qualifier = customer_qualifier\n    @cart_qualifier = cart_qualifier\n    @line_item_qualifier = line_item_qualifier\n    @gateway_selector = gateway_selector\n  end\n\n  def run(gateways, cart)\n    return unless @customer_qualifier.nil? || @customer_qualifier.match?(cart)\n    return unless @cart_qualifier.nil? || @cart_qualifier.match?(cart)\n    return unless @line_item_qualifier.nil? || cart.line_items.any? do |item|\n      @line_item_qualifier.match?(item)\n    end\n    gateways.delete_if do |gateway|\n      @gateway_selector.match?(gateway)\n    end\n  end\nend"
+  ConditionallyRemoveGateway: "\nclass ConditionallyRemoveGateway < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @gateway_selector = gateway_selector\n  end\n\n  def run(gateways, cart)\n    gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } unless qualifies?(cart)\n  end\nend",
+
+  ReorderPaymentGateways: "\nclass ReorderPaymentGateways < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, order_from, desired_order)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @reverse = order_from == :last_to_first\n    @desired_order = desired_order.map(&:downcase)\n  end\n\n  def run(gateways, cart)\n    return unless qualifies?(cart)\n    new_order = []\n    leftover_gateways = []\n    gateways.each { |gateway| new_order << gateway.name if @desired_order.include?(gateway.name.downcase) }\n    return if new_order.empty?\n    new_order = new_order.sort_by { |name| @desired_order.index(name.downcase) }\n    gateways.each { |gateway| leftover_gateways << gateway.name unless new_order.include?(gateway.name) }\n    if @reverse\n      new_order.reverse!\n      leftover_gateways.reverse.each { |name| new_order.unshift(name) }\n    else\n      leftover_gateways.each { |name| new_order << name }\n    end\n    gateways.sort_by! { |gateway| new_order.index(gateway.name) }\n  end\nend",
+
+  ChangeGatewayName: "\nclass ChangeGatewayName < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector, new_name)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @gateway_selector = gateway_selector\n    @new_name = new_name\n  end\n\n  def run(gateways, cart)\n    return unless qualifies?(cart) && @gateway_selector\n    gateways.each do|gateway| \n      gateway.change_name(@new_name) if @gateway_selector.match?(gateway)\n    end\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.payment_gateways, Input.cart)\nend\n\nOutput.payment_gateways = Input.payment_gateways";
 
-var CUSTOMER_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.customer_qualifiers));
+var CUSTOMER_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.customerQualifiers));
 
-var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cart_qualifiers));
+var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cartQualifiers));
 
-var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.line_item_qualifiers));
+var LINE_ITEM_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.lineItemSelectors));
 
 var GATEWAY_SELECTORS = [{
   value: "none",
   label: "None",
   description: "No effects"
 }, {
-  value: "AllSelector",
+  value: "AllGatewaysSelector",
   label: "All",
   description: "Selects all gateways"
 }, {
@@ -44019,13 +44706,13 @@ var GATEWAY_SELECTORS = [{
         value: "match",
         label: "Match one of"
       }, {
-        value: "contains",
+        value: "include",
         label: "Contain one of"
       }, {
-        value: "starts_with",
+        value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -44107,10 +44794,114 @@ var campaigns = [{
   label: "Conditionally Remove Gateways",
   description: "Removes any gateways that the conditions match",
   inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Remove if all qualify"
+      }, {
+        value: "any",
+        label: "Remove if any qualify"
+      }]
+    },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
     line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     gateway_to_remove_selector: [].concat(GATEWAY_SELECTORS)
+  }
+}, {
+  value: "ChangeGatewayName",
+  label: "Change Name",
+  description: "Selected gateway names will be changed",
+  inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Change name if all qualify"
+      }, {
+        value: "any",
+        label: "Change name if any qualify"
+      }]
+    },
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
+    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    gateway_to_change_selector: [].concat(GATEWAY_SELECTORS),
+    new_name: {
+      type: "text",
+      description: "Selected gateways will use this name"
+    }
+  }
+}, {
+  value: "ReorderPaymentGateways",
+  label: "Reorder Gateways",
+  description: "Payment gateway order will be changed to the specified order",
+  inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Reorder if all qualify"
+      }, {
+        value: "any",
+        label: "Reorder if any qualify"
+      }]
+    },
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    line_item_qualify_condition: {
+      type: "select",
+      description: "Set how line items are qualified",
+      options: [{
+        value: "any",
+        label: "Qualify if any item in cart matches"
+      }, {
+        value: "all",
+        label: "Qualify if all items in cart match"
+      }]
+    },
+    line_item_qualifier: [].concat(_toConsumableArray(LINE_ITEM_QUALIFIERS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    order_from: {
+      type: "select",
+      description: "Set how the gateways are ordered",
+      options: [{
+        value: "first_to_last",
+        label: "Order from first to last"
+      }, {
+        value: "last_to_first",
+        "label": "Order from last to first"
+      }]
+    },
+    desired_order: {
+      type: "array",
+      description: "Gateways will appear in the order specified (use gateway names seperated by a comma). Only gateways specified will be reordered."
+    }
   }
 }];
 
@@ -44121,7 +44912,7 @@ exports.default = {
 };
 
 /***/ }),
-/* 458 */
+/* 459 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -44131,8 +44922,8 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.0.13",
-  incompatibleVersions: ["0.0.1", "0.0.2"]
+  currentVersion: "0.1.0",
+  minimumVersion: "0.1.0"
 };
 
 /***/ })
