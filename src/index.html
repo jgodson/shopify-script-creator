@@ -8,6 +8,8 @@
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-85041190-3"></script>
+  <script src="//d2wy8f7a9ursnm.cloudfront.net/v4/bugsnag.min.js"></script>
+  <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-plugins/v1/bugsnag-react.min.js"></script>
   <script>
     // Prevent analytics errors and allows debugging on localhost
     var events = undefined;
@@ -36,6 +38,9 @@
         });
       };
     }
+
+    // Bugsnag for capturing errors
+    window.bugsnagClient = bugsnag('b5c7553f622953ed2e930932c74bd43d');
   </script>
   
   <!-- Polaris Styles -->

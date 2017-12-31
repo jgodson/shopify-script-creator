@@ -698,11 +698,11 @@ const campaigns = [
         options: [
           {
             value: "any",
-            label: "Qualify if any item matches"
+            label: "Qualify if any item in cart matches"
           },
           {
             value: "all",
-            label: "Qualify if all items match"
+            label: "Qualify if all items in cart match"
           }
         ]
       },

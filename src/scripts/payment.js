@@ -65,6 +65,23 @@ class ReorderPaymentGateways < Campaign
     end
     gateways.sort_by! { |gateway| new_order.index(gateway.name) }
   end
+end`,
+
+  ChangeGatewayName: `
+class ChangeGatewayName < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector, new_name)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @gateway_selector = gateway_selector
+    @new_name = new_name
+  end
+
+  def run(gateways, cart)
+    return unless qualifies?(cart) && @gateway_selector
+    gateways.each do|gateway| 
+      gateway.change_name(@new_name) if @gateway_selector.match?(gateway)
+    end
+  end
 end`
 };
 
@@ -245,16 +262,59 @@ const campaigns = [
         options: [
           {
             value: "any",
-            label: "Qualify if any item matches"
+            label: "Qualify if any item in cart matches"
           },
           {
             value: "all",
-            label: "Qualify if all items match"
+            label: "Qualify if all items in cart match"
           }
         ]
       },
       line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       gateway_to_remove_selector: [...GATEWAY_SELECTORS]
+    }
+  },
+  {
+    value: "ChangeGatewayName",
+    label: "Change Name",
+    description: "Selected gateway names will be changed",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Change name if all qualify"
+          },
+          {
+            value: "any",
+            label: "Change name if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      line_item_qualify_condition: {
+        type: "select",
+        description: "Set how line items are qualified",
+        options: [
+          {
+            value: "any",
+            label: "Qualify if any item in cart matches"
+          },
+          {
+            value: "all",
+            label: "Qualify if all items in cart match"
+          }
+        ]
+      },
+      line_item_qualifier: [...LINE_ITEM_QUALIFIERS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      gateway_to_change_selector: [...GATEWAY_SELECTORS],
+      new_name: {
+        type: "text",
+        description: "Selected gateways will use this name"
+      }
     }
   },
   {
@@ -284,11 +344,11 @@ const campaigns = [
         options: [
           {
             value: "any",
-            label: "Qualify if any item matches"
+            label: "Qualify if any item in cart matches"
           },
           {
             value: "all",
-            label: "Qualify if all items match"
+            label: "Qualify if all items in cart match"
           }
         ]
       },
