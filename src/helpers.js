@@ -146,7 +146,7 @@
     return true;
   }
 
-  // Finds the index of an array using a function
+  // Finds the index of an array element using a given function
   function findIndexOf(array, comparison) {
     if (typeof comparison !== 'function') {
       throw Error("Must pass in a comparison function");

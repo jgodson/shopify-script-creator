@@ -37,6 +37,9 @@ export default class App extends Component {
     this.version = Versions.currentVersion;
     this.minimumVersion = Versions.minimumVersion;
 
+    // Set the app version for bugsnag
+    bugsnagClient.app.version = this.version;
+
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
     this.typeChange = this.typeChange.bind(this);
