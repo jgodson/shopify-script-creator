@@ -11467,7 +11467,7 @@ function meetsMinimumVersion(version, minimumVersion) {
   return true;
 }
 
-// Finds the index of an array using a function
+// Finds the index of an array element using a given function
 function findIndexOf(array, comparison) {
   if (typeof comparison !== 'function') {
     throw Error("Must pass in a comparison function");
@@ -32094,6 +32094,9 @@ var App = function (_Component) {
     _this.version = _versions2.default.currentVersion;
     _this.minimumVersion = _versions2.default.minimumVersion;
 
+    // Set the app version for bugsnag
+    bugsnagClient.app.version = _this.version;
+
     _this.state = JSON.parse(JSON.stringify(_this.defaultState));
 
     _this.typeChange = _this.typeChange.bind(_this);
@@ -45013,7 +45016,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.1.4",
+  currentVersion: "0.1.5",
   minimumVersion: "0.1.0"
 };
 
