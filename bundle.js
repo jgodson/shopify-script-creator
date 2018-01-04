@@ -44922,7 +44922,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.1.0",
+  currentVersion: "0.1.1",
   minimumVersion: "0.1.0"
 };
 
