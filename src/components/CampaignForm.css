@@ -14,19 +14,3 @@
 form {
   border-top: 1px solid #dfe3e8;
 }
-
-/* TODO: Remove when released */
-.beta-tag {
-  position: absolute;
-  font-family: monospace;
-  font-size: 14px;
-  width: 60px;
-  background: #47C1BF;
-  top: 5px;
-  right: 5px;
-  text-align: center;
-}
-
-.beta-tag a, .beta-tag a:focus, .beta-tag a:visited {
-  color: inherit;
-}

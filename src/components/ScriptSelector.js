@@ -1,14 +1,21 @@
 import React, { Component } from 'react';
-import { ButtonGroup, Button, Card, Layout, Stack, Heading, TextStyle, Subheading } from '@shopify/polaris';
+import { 
+  ButtonGroup,
+  Button,
+  Card,
+  Stack,
+  Heading,
+  TextStyle 
+} from '@shopify/polaris';
 
-export default class Step1Buttons extends Component {
+export default class ScriptSelector extends Component {
   constructor(props) {
     super(props);
 
     this.descriptions = {
-      line_item: "Line item scripts apply discounts to invididual line items in the cart. These can be used for BOGO (Buy one, get one), tiered discounts, percentage discounts, etc. They are also able to reject discount codes.",
-      shipping: "Shipping scripts can be used to reorder, rename, discount or remove shipping rates.",
-      payment: "Payment scripts can be used to reorder or rename payment methods."
+      line_item: "Line item scripts can be used for various item discounts (eg: BOGO (Buy one, get one), tiered discount, percent discount), limit item quantities, remove items from the cart, and reject discount codes.",
+      shipping: "Shipping scripts can be used to reorder, rename, discount, and remove shipping rates.",
+      payment: "Payment scripts can be used to reorder, rename, and remove payment methods."
     };
   }
 
@@ -46,9 +53,11 @@ export default class Step1Buttons extends Component {
             </Stack.Item>
             <Stack.Item>
               <ButtonGroup segmented>
-                {buttons.map((button) => {
-                  return <Button key={button.name} disabled={button.disabled} onClick={button.onClick}>{button.name}</Button>
-                })}
+                {
+                  buttons.map((button) => {
+                    return <Button key={button.name} disabled={button.disabled} onClick={button.onClick}>{button.name}</Button>
+                  })
+                }
               </ButtonGroup>
             </Stack.Item>
             </Stack>

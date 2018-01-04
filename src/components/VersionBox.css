@@ -1,0 +1,15 @@
+.version-box {
+  position: absolute;
+  font-family: monospace;
+  font-size: 14px;
+  width: 60px;
+  background: #47C1BF;
+  top: 5px;
+  right: 5px;
+  text-align: center;
+  border-radius: 3px;
+}
+
+.version-box a, .version-box a:focus, .version-box a:visited {
+  color: inherit;
+}

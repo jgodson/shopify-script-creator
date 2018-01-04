@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import {
   Layout,
   Card,
@@ -8,10 +8,20 @@ import {
   TextStyle,
   Select,
 } from '@shopify/polaris';
-import styles from './CampaignForm.css';
-import { capitalize, splitAndCapitalize, splitCamelCase, isCampaignSelect, getInputType, getObjectFormats, formatObject } from '../helpers';
 
-export default class Step2Form extends Component {
+import styles from './CampaignForm.css';
+
+import { 
+  capitalize,
+  splitAndCapitalize,
+  splitCamelCase,
+  isCampaignSelect,
+  getInputType,
+  getObjectFormats,
+  formatObject 
+} from '../helpers';
+
+export default class CampaignForm extends Component {
   constructor(props) {
     super(props);
 

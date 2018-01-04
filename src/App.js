@@ -1,5 +1,6 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import { Layout, Page, PageActions, EmptyState } from '@shopify/polaris';
+import VersionBox from './components/VersionBox';
 import ScriptSelector from './components/ScriptSelector';
 import CampaignForm from './components/CampaignForm';
 import CampaignsList from './components/CampaignsList';
@@ -480,7 +481,7 @@ ${INDENT[this.IL]})`;
     
     return (
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
-        <div className="beta-tag"><a href="https://github.com/jgodson/shopify-script-creator/releases">ALPHA {this.version}</a></div>
+        <VersionBox currentVersion={this.version} />
         <Layout>
           <Layout.Section>
             <ScriptSelector changeType={this.typeChange} currentType={this.state.scriptType} />
