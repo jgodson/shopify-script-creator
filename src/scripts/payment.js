@@ -36,7 +36,7 @@ class ConditionallyRemoveGateway < Campaign
   end
 
   def run(gateways, cart)
-    gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } unless qualifies?(cart)
+    gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } if qualifies?(cart)
   end
 end`,
 
