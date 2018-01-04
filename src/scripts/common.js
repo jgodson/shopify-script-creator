@@ -37,7 +37,7 @@ class Qualifier
   end
 
   def compare_amounts(compare, comparison_type, compare_to)
-    case @comparison_type
+    case comparison_type
       when :greater_than
         return compare > compare_to
       when :greater_than_or_equal
@@ -71,75 +71,6 @@ class Selector
 end`,
 
   AndSelector: `
-class Campaign
-  def initialize(condition, *qualifiers)
-    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym
-    @qualifiers = qualifiers.compact
-  end
-  
-  def qualifies?(cart)
-    return true if @qualifiers.empty?
-    @qualifiers.send(@condition) do |qualifier|
-      if qualifier.is_a?(Selector)
-        raise "Missing line item match type" if @li_match_type.nil?
-        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }
-      else
-        qualifier.match?(cart)
-      end
-    end
-  end
-end
-
-class Qualifier
-  def partial_match(match_type, item_info, possible_matches)
-    match_type = (match_type.to_s + '?').to_sym
-    if item_info.kind_of?(Array)
-      possible_matches.any? do |possibility|
-        item_info.any? do |search|
-          search.send(match_type, possibility)
-        end
-      end
-    else
-      possible_matches.any? do |possibility|
-        item_info.send(match_type, possibility)
-      end
-    end
-  end
-
-  def compare_amounts(compare, comparison_type, compare_to)
-    case @comparison_type
-      when :greater_than
-        return compare > compare_to
-      when :greater_than_or_equal
-        return compare >= compare_to
-      when :less_than
-        return compare < compare_to
-      when :less_than_or_equal
-        return compare <= compare_to
-      else
-        raise "Invalid comparison type"
-    end
-  end
-end
-
-class Selector
-  def partial_match(match_type, item_info, possible_matches)
-    match_type = (match_type.to_s + '?').to_sym
-    if item_info.kind_of?(Array)
-      possible_matches.any? do |possibility|
-        item_info.any? do |search|
-          search.send(match_type, possibility)
-        end
-      end
-    else
-      possible_matches.any? do |possibility|
-        item_info.send(match_type, possibility)
-      end
-    end
-  end
-end
-
-
 class AndSelector
   def initialize(*conditions)
     @conditions = conditions.compact
@@ -248,7 +179,7 @@ class CustomerOrderCountQualifier < Qualifier
   def match?(cart)
     return false if cart.customer.nil?
     total = cart.customer.orders_count
-    
+    compare_amounts(total, @comparison_type, @amount)
   end
 end`,
 
