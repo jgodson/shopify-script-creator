@@ -8,8 +8,12 @@
 
   <!-- Global site tag (gtag.js) - Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=UA-85041190-3"></script>
+  <!-- Bugsnag javascript files -->
   <script src="//d2wy8f7a9ursnm.cloudfront.net/v4/bugsnag.min.js"></script>
   <script src="//d2wy8f7a9ursnm.cloudfront.net/bugsnag-plugins/v1/bugsnag-react.min.js"></script>
+  <!-- Polyfills for older browsers -->
+  <script src="https://cdn.polyfill.io/v2/polyfill.min.js"></script>
+
   <script>
     // Prevent analytics errors and allows debugging on localhost
     var events = undefined;
@@ -18,6 +22,7 @@
     var dataLayer = undefined;
 
     if (location.hostname !== "localhost") {
+      // Load Google Analytics
       dataLayer = dataLayer || [];
       gtag = function() { dataLayer.push(arguments); };
       gtag('js', new Date());
