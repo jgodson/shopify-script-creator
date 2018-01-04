@@ -13,7 +13,7 @@ import PaymentScript from './scripts/payment';
 import Common from './scripts/common';
 
 import Versions from './versions';
-import { meetsMinimumVersion } from './helpers';
+import { meetsMinimumVersion, findIndexOf } from './helpers';
 
 export default class App extends Component {
   constructor(props) {
@@ -111,11 +111,11 @@ export default class App extends Component {
   }
 
   getCampaignInfo(name) {
-    return this.state.availableCampaigns.find((campaign) => campaign.value === name);
+    return this.state.availableCampaigns.filter((campaign) => campaign.value === name)[0];
   }
 
   getCampaignById(id) {
-    return this.state.campaigns.find((campaign) => campaign.id === id);
+    return this.state.campaigns.filter((campaign) => campaign.id === id)[0];
   }
 
   editCampaign(campaignId) {
@@ -147,7 +147,7 @@ export default class App extends Component {
     gtag('event', 'removeCampaign');
 
     const newState = this.state;
-    const index = this.state.campaigns.findIndex((campaign) => campaign.id === campaignId);
+    const index = findIndexOf(this.state.campaigns, (campaign) => campaign.id === campaignId);
     newState.campaigns.splice(index, 1);
     this.setState(newState);
   }
@@ -174,7 +174,7 @@ export default class App extends Component {
       newState.campaigns.splice(newState.campaigns.length - 1, 0, campaign);
     } else {
       const existingId = campaign.id
-      const index = this.state.campaigns.findIndex((campaign) => campaign.id === existingId);
+      const index = findIndexOf(this.state.campaigns, (campaign) => campaign.id === existingId);
       newState.campaigns.splice(index, 1, campaign);
     }
     newState.currentCampaign = null;

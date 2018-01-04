@@ -146,6 +146,20 @@
     return true;
   }
 
+  // Finds the index of an array using a function
+  function findIndexOf(array, comparison) {
+    if (typeof comparison !== 'function') {
+      throw Error("Must pass in a comparison function");
+    }
+
+    for (let index = 0; index < array.length; index++) {
+      if (comparison(array[index])) {
+        return index;
+      }
+    }
+    return -1;
+  }
+
 export {
   capitalize,
   splitAndCapitalize,
@@ -154,5 +168,6 @@ export {
   getInputType,
   getObjectFormats,
   formatObject,
-  meetsMinimumVersion
+  meetsMinimumVersion,
+  findIndexOf
 }
