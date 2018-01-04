@@ -6,10 +6,10 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "prebuild": "rimraf ./build",
+    "prebuild": "rimraf ./docs",
     "build": "webpack",
     "predeploy": "yarn run build",
-    "deploy": "git subtree split --prefix output -b gh-pages && git push deploy gh-pages:master && git branch -D gh-pages"
+    "deploy": "git subtree split --prefix docs -b gh-pages && git push deploy gh-pages:master && git branch -D gh-pages"
   },
   "dependencies": {
     "@shopify/polaris": "^1.9.1",
