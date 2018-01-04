@@ -11467,6 +11467,20 @@ function meetsMinimumVersion(version, minimumVersion) {
   return true;
 }
 
+// Finds the index of an array using a function
+function findIndexOf(array, comparison) {
+  if (typeof comparison !== 'function') {
+    throw Error("Must pass in a comparison function");
+  }
+
+  for (var index = 0; index < array.length; index++) {
+    if (comparison(array[index])) {
+      return index;
+    }
+  }
+  return -1;
+}
+
 exports.capitalize = capitalize;
 exports.splitAndCapitalize = splitAndCapitalize;
 exports.splitCamelCase = splitCamelCase;
@@ -11475,6 +11489,7 @@ exports.getInputType = getInputType;
 exports.getObjectFormats = getObjectFormats;
 exports.formatObject = formatObject;
 exports.meetsMinimumVersion = meetsMinimumVersion;
+exports.findIndexOf = findIndexOf;
 
 /***/ }),
 /* 102 */
@@ -32162,16 +32177,16 @@ var App = function (_Component) {
   }, {
     key: 'getCampaignInfo',
     value: function getCampaignInfo(name) {
-      return this.state.availableCampaigns.find(function (campaign) {
+      return this.state.availableCampaigns.filter(function (campaign) {
         return campaign.value === name;
-      });
+      })[0];
     }
   }, {
     key: 'getCampaignById',
     value: function getCampaignById(id) {
-      return this.state.campaigns.find(function (campaign) {
+      return this.state.campaigns.filter(function (campaign) {
         return campaign.id === id;
-      });
+      })[0];
     }
   }, {
     key: 'editCampaign',
@@ -32207,7 +32222,7 @@ var App = function (_Component) {
       gtag('event', 'removeCampaign');
 
       var newState = this.state;
-      var index = this.state.campaigns.findIndex(function (campaign) {
+      var index = (0, _helpers.findIndexOf)(this.state.campaigns, function (campaign) {
         return campaign.id === campaignId;
       });
       newState.campaigns.splice(index, 1);
@@ -32238,7 +32253,7 @@ var App = function (_Component) {
         newState.campaigns.splice(newState.campaigns.length - 1, 0, campaign);
       } else {
         var existingId = campaign.id;
-        var index = this.state.campaigns.findIndex(function (campaign) {
+        var index = (0, _helpers.findIndexOf)(this.state.campaigns, function (campaign) {
           return campaign.id === existingId;
         });
         newState.campaigns.splice(index, 1, campaign);
@@ -44998,7 +45013,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.1.3",
+  currentVersion: "0.1.4",
   minimumVersion: "0.1.0"
 };
 
