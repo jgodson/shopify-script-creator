@@ -232,7 +232,7 @@ end`,
   ProductIdSelector: `
 class ProductIdSelector < Selector
   def initialize(match_type, product_ids)
-    @invert = match_type == :not_one;
+    @invert = match_type == :not_one
     @product_ids = product_ids.map { |id| id.to_i }
   end
 
@@ -260,7 +260,7 @@ end`,
   CountryCodeQualifier: `
 class CountryCodeQualifier < Qualifier
   def initialize(match_type, country_codes)
-    @invert = match_type == :not_one;
+    @invert = match_type == :not_one
     @country_codes = country_codes.map(&:upcase)
   end
 
