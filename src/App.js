@@ -56,8 +56,18 @@ export default class App extends Component {
     this.processFile = this.processFile.bind(this);
     this.showForm = this.showForm.bind(this);
     this.download = this.download.bind(this);
-    this.downloadCampaigns = this.downloadCampaigns.bind(this);
+    this.prepareAndExportTo = this.prepareAndExportTo.bind(this);
     this.uploadFile = this.uploadFile.bind(this);
+    this.loadImportedData = this.loadImportedData.bind(this);
+    this.saveDataToStorage = this.saveDataToStorage.bind(this);
+  }
+
+  componentDidMount() {
+    // Retrive from local storage and set state if anything is there
+    const data = localStorage.getItem('lastState');
+    if (!data) { return; }
+    const result = this.processFile(data, true);
+    this.loadImportedData(result);
   }
 
   typeChange(newType) {
@@ -153,6 +163,8 @@ export default class App extends Component {
     const index = findIndexOf(this.state.campaigns, (campaign) => campaign.id === campaignId);
     newState.campaigns.splice(index, 1);
     this.setState(newState);
+    // Persist data in local storage
+    this.prepareAndExportTo('localStorage');
   }
 
   showForm(boolean) {
@@ -184,6 +196,8 @@ export default class App extends Component {
     newState.editCampaignInfo = null;
     newState.showForm = false;
     this.setState(newState);
+    // Persist data in local storage
+    this.prepareAndExportTo('localStorage');
   }
 
   generateScript() {
@@ -311,18 +325,19 @@ ${INDENT[this.IL]})`;
   }
 
   download(data, filename, type) {
-    const file = new Blob([data], {type: type});
-    if (window.navigator.msSaveOrOpenBlob)
+    data = JSON.stringify(data);
+    const file = new Blob([data], {type});
+    if (window.navigator.msSaveOrOpenBlob) {
       // IE10+
       window.navigator.msSaveOrOpenBlob(file, filename);
-    else {
+    } else {
       const link = document.createElement("a");
       const url = URL.createObjectURL(file);
       link.href = url;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      setTimeout(function() {
+      setTimeout(() => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);  
       }, 0); 
@@ -347,31 +362,46 @@ ${INDENT[this.IL]})`;
       fileInput.addEventListener('change', (evt) => {
         // Google Analytics
         gtag('event', 'importAttempt');
-
+        
         this.readFile(evt.target, (results) => {
-          if (results && results.campaigns.length > 0) {
-            const newState = JSON.parse(JSON.stringify(this.defaultState));
-            if (results.type !== 'line_item') {
-              newState.scriptType = results.type;
-              newState.availableCampaigns = this.getCampaigns(results.type);
-            }
-            let loadedCampaigns = results.campaigns;
-            loadedCampaigns.reverse().forEach((campaign) => {
-              newState.campaigns.unshift(campaign);
-            });
-            const newId = loadedCampaigns.sort((a, b) => a.id - b.id)[0].id + 1;
-            newState.currentId = newId;
-            
+          if (this.loadImportedData(results)) {
+            this.prepareAndExportTo('localStorage');
             // Google Analytics
-            gtag('event', 'importSuccess', {'campaigns': newState.campaigns.length - 1});
-
-            this.setState(newState);
+            gtag('event', 'importSuccess');
           }
           document.body.removeChild(evt.target);
         });
       });
     }
     fileInput.click();
+  }
+
+  loadImportedData(data) {
+    if (data && data.campaigns.length > 0) {
+      const newState = JSON.parse(JSON.stringify(this.defaultState));
+      if (data.type !== 'line_item') {
+        newState.scriptType = data.type;
+        newState.availableCampaigns = this.getCampaigns(data.type);
+      }
+      let loadedCampaigns = data.campaigns;
+      loadedCampaigns.reverse().forEach((campaign) => {
+        newState.campaigns.unshift(campaign);
+      });
+      const newId = loadedCampaigns.sort((a, b) => a.id - b.id)[0].id + 1;
+      newState.currentId = newId;
+
+      this.setState(newState);
+      return true;
+    }
+    return false;
+  }
+
+  saveDataToStorage(data) {
+    if (!data) {
+      localStorage.removeItem('lastState');
+    } else {
+      localStorage.setItem('lastState', JSON.stringify(data));
+    }
   }
 
   readFile(fileInput, callback) {
@@ -383,17 +413,16 @@ ${INDENT[this.IL]})`;
       reader.readAsText(textFile);
       // When it's loaded, process it
       reader.addEventListener('load', (evt) => {
-        const result = this.processFile(evt);
+        const result = this.processFile(evt.target.result);
         callback(result);
       });
     }
   }
 
-  processFile(evt) {
-    const file = evt.target.result;
+  processFile(file, localData) {
     const validFileSignature = 'ShopifyScriptCreatorFile';
     let results = null;
-    if (file && file.length) {
+    if (file && (localData || file.length)) {
       try {
         results = JSON.parse(file);
         if (results.version.indexOf(validFileSignature) < 0) { throw Error; }
@@ -402,7 +431,12 @@ ${INDENT[this.IL]})`;
           if (!results.type || !results.campaigns) { throw Error; }
           return results;
         } else {
-          alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
+          if (localData) {
+            alert('The current saved data appears to be from an older version of Shopify Script Creator and will not work with the current version. This data will be cleared from storage.');
+            this.saveDataToStorage(null);
+          } else {
+            alert('This file appears to be from an older version of Shopify Script Creator and will not work with the current version');
+          }
         }
       } catch (error) {
         alert('File does not appear to be a valid script creator file');
@@ -413,10 +447,7 @@ ${INDENT[this.IL]})`;
     return null;
   }
 
-  downloadCampaigns() {
-    // Google Analytics
-    gtag('event', 'export', {'campaigns': this.state.campaigns.length - 1});
-
+  prepareAndExportTo(exportType) {
     const filename = `SSC-V${this.version}-script-${parseInt(Math.random() * 100000000)}.txt`;
     const campaigns = this.state.campaigns.filter((campaign) => !campaign.skip);
     const data = {
@@ -424,7 +455,14 @@ ${INDENT[this.IL]})`;
       type: this.state.scriptType,
       campaigns: campaigns
     };
-    this.download(JSON.stringify(data), filename, 'text/plain');
+
+    if (exportType === 'file') {
+      // Google Analytics
+      gtag('event', 'export', {'campaigns': this.state.campaigns.length - 1});
+      this.download(data, filename, 'text/plain');
+    } else {
+      this.saveDataToStorage(data);
+    }
   }
 
   render() {
@@ -449,7 +487,7 @@ ${INDENT[this.IL]})`;
     const secondaryActions = [
       {
         content: 'Export campaigns',
-        onAction: this.downloadCampaigns,
+        onAction: () => this.prepareAndExportTo('file'),
         icon: 'export'
       },
       {
