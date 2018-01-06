@@ -3,19 +3,38 @@ const classes = {
 class Campaign
   def initialize(condition, *qualifiers)
     @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym
-    @qualifiers = qualifiers.compact
+    @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact
+    @line_item_selector = qualifiers.last unless @line_item_selector
+    qualifiers.compact.each do |qualifier|
+      is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)
+      if is_multi_select
+        qualifier.instance_variable_get(:@conditions).each do |nested_q| 
+          @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)
+          @qualifiers << qualifier
+        end
+      else
+        @post_amount_qualifier = qualifier if qualifier.is_a?(PostCartAmountQualifier)
+        @qualifiers << qualifier
+      end
+    end if @qualifiers.empty?
   end
   
   def qualifies?(cart)
     return true if @qualifiers.empty?
+    @unmodified_line_items = cart.line_items.map(&:to_hash) if @post_amount_qualifier
     @qualifiers.send(@condition) do |qualifier|
-      if qualifier.is_a?(Selector)
+      is_selector = qualifier.is_a?(Selector) rescue false
+      if is_selector
         raise "Missing line item match type" if @li_match_type.nil?
         cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }
       else
-        qualifier.match?(cart)
+        qualifier.match?(cart, @line_item_selector)
       end
     end
+  end
+
+  def revert_changes(cart)
+    cart.instance_variable_set(:@line_items, @unmodified_line_items)
   end
 end`,
 
@@ -76,9 +95,9 @@ class AndSelector
     @conditions = conditions.compact
   end
 
-  def match?(item)
+  def match?(item, selector = nil)
     @conditions.all? do |condition|
-      condition.match?(item) 
+      condition.match?(item, selector) 
     end
   end
 end`,
@@ -89,9 +108,9 @@ class OrSelector
     @conditions = conditions.compact
   end
 
-  def match?(item)
+  def match?(item, selector = nil)
     @conditions.any? do |condition|
-      condition.match?(item) 
+      condition.match?(item, selector) 
     end
   end
 end`,
@@ -137,7 +156,7 @@ class CustomerEmailQualifier < Qualifier
     @emails = emails.map(&:downcase)
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return false if cart.customer.nil?
     customer_email = cart.customer.email
     case @match_condition
@@ -157,7 +176,7 @@ class CustomerTagQualifier < Qualifier
     @tags = tags.map(&:downcase)
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return false if cart.customer.nil?
     customer_tags = cart.customer.tags.to_a.map(&:downcase)
     case @match_condition
@@ -176,7 +195,7 @@ class CustomerOrderCountQualifier < Qualifier
     @amount = amount
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return false if cart.customer.nil?
     total = cart.customer.orders_count
     compare_amounts(total, @comparison_type, @amount)
@@ -190,7 +209,7 @@ class CustomerTotalSpentQualifier < Qualifier
     @amount = Money.new(cents: amount * 100)
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return false if cart.customer.nil?
     total = cart.customer.total_spent
     compare_amounts(total, @comparison_type, @amount)
@@ -203,7 +222,7 @@ class CustomerAcceptsMarketingQualifier < Qualifier
     @invert = match_type == :does_not
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return false if cart.customer.nil?
     return @invert ^ cart.customer.accepts_marketing?
   end
@@ -217,7 +236,7 @@ class CodeQualifier < Qualifier
     @codes = codes.map(&:downcase)
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return false if cart.discount_code.nil?
     code = cart.discount_code.code.downcase
     case @match_condition
@@ -248,7 +267,7 @@ class CountryAndProvinceQualifier < Qualifier
     @country_map = country_map
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     return if cart.shipping_address.nil?
     country_code = cart.shipping_address.country_code.upcase
     return @invert unless @country_map.key?(country_code) && cart.shipping_address.province_code
@@ -264,7 +283,7 @@ class CountryCodeQualifier < Qualifier
     @country_codes = country_codes.map(&:upcase)
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     shipping_address = cart.shipping_address
     return false if shipping_address.nil?
     @invert ^ @country_codes.include?(shipping_address.country_code.upcase)
@@ -361,14 +380,20 @@ class LineItemPropertiesSelector < Selector
 end`,
 
   CartAmountQualifier: `
-class CartAmountQualifier < Qualifier
-  def initialize(comparison_type, amount)
+  class CartAmountQualifier < Qualifier
+  def initialize(cart_or_item, comparison_type, amount)
+    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item
     @comparison_type = comparison_type == :default ? :greater_than : comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     total = cart.subtotal_price
+    if @cart_or_item == :item
+      total = cart.line_items.reduce(Money.zero) do |total, item|
+        total += selector.match?(item) ? item.original_line_price : Money.zero
+      end
+    end
     compare_amounts(total, @comparison_type, @amount)
   end
 end`,
@@ -606,9 +631,23 @@ const cartQualifiers = [
   },
   {
     value: "CartAmountQualifier",
-    label: "Cart Subtotal",
-    description: "Will only apply if cart subtotal meets conditions",
+    label: "Cart/Item Total",
+    description: "Will only apply if cart subtotal or qualified item total meets conditions",
     inputs: {
+      cart_or_item_total: {
+        type: "select",
+        description: "Cart subtotal or item total",
+        options: [
+          {
+            value: "cart",
+            label: "Cart subtotal"
+          },
+          {
+            value: "item",
+            label: "Qualified item total"
+          },
+        ]
+      },
       condition: {
         type: "select",
         description: "Type of comparison",

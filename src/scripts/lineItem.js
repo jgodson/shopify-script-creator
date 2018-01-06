@@ -1,6 +1,19 @@
 import Common from './common';
 
 const classes = {
+  PostCartAmountQualifier: `
+class PostCartAmountQualifier < Qualifier
+  def initialize(comparison_type, amount)
+    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @amount = Money.new(cents: amount * 100)
+  end
+
+  def match?(cart, selector = nil)
+    total = cart.subtotal_price
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
   PercentageDiscount: `
 class PercentageDiscount
   def initialize(percent, message)
@@ -67,7 +80,7 @@ class ExcludeDiscountCodes < Qualifier
     @message = message == "" ? "Discount codes cannot be used with this offer" : message
   end
   
-  def match?(cart)
+  def match?(cart, selector = nil)
     cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})
   end
 end`,
@@ -98,6 +111,7 @@ class ConditionalDiscount < Campaign
         @items_to_discount -= item.quantity if !@items_to_discount.nil?
       end
     end
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -118,7 +132,7 @@ class BuyXGetX < Campaign
     raise "buy_x must be greater than or equal to get_x" unless buy_x >= get_x
 
     super(condition, customer_qualifier, cart_qualifier)
-    @buy_item_selector = buy_item_selector
+    @line_item_selector = buy_item_selector
     @get_item_selector = get_item_selector
     @discount = discount
     @buy_x = buy_x + get_x
@@ -135,10 +149,10 @@ class BuyXGetX < Campaign
     discountable_sets = 0
     
     # Find the items that qualify for buy_x
-    if @buy_item_selector.nil?
+    if @line_item_selector.nil?
       applicable_buy_items = cart.line_items
     else
-      applicable_buy_items = cart.line_items.select { |item| @buy_item_selector.match?(item) }
+      applicable_buy_items = cart.line_items.select { |item| @line_item_selector.match?(item) }
     end
     
     # Find the items that qualify for get_x
@@ -167,6 +181,7 @@ class BuyXGetX < Campaign
         discountable_quantity = 0
       end
     end
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -239,14 +254,15 @@ class QuantityLimit < Campaign
       end
       
     end
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
   TieredDiscount: `
 class TieredDiscount < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, item_selector, discount_type, tier_type, discount_tiers)
+  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, tier_type, discount_tiers)
     super(condition, customer_qualifier, cart_qualifier)
-    @item_selector = item_selector
+    @line_item_selector = line_item_selector
     @discount_type = discount_type
     @tier_type = tier_type == :default ? :customer_tag : tier_type
     @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }
@@ -263,7 +279,7 @@ class TieredDiscount < Campaign
   def run(cart)
     return unless qualifies?(cart)
     
-    applicable_items = cart.line_items.select { |item| @item_selector.nil? || @item_selector.match?(item) }
+    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
     case @tier_type
       when :customer_tag
         return if cart.customer.nil?
@@ -283,13 +299,14 @@ class TieredDiscount < Campaign
     
     discount = init_discount(discount_amount, discount_message)
     applicable_items.each { |item| discount.apply(item) }
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
   DiscountCodeList: `
 class DiscountCodeList < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_list)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    super(condition, customer_qualifier, cart_qualifier)
     @line_item_selector = line_item_selector
     @discount_list = discount_list
   end
@@ -339,13 +356,14 @@ class DiscountCodeList < Campaign
       next unless @line_item_selector.nil? || @line_item_selector.match?(item)
       discount.apply(item)
     end
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
   DiscountCodePattern: `
 class DiscountCodePattern < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    super(condition, customer_qualifier, cart_qualifier)
     @line_item_selector = line_item_selector
     @percent_format = percent_format
     @fixed_format = fixed_format
@@ -405,6 +423,7 @@ class DiscountCodePattern < Campaign
       next unless @line_item_selector.nil? || @line_item_selector.match?(item)
       discount.apply(item)
     end
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`
 };
@@ -426,6 +445,39 @@ const CUSTOMER_QUALIFIERS = [
 
 const CART_QUALIFIERS = [
   ...Common.cartQualifiers,
+  {
+    value: "PostCartAmountQualifier",
+    label: "Discounted Cart Subtotal (applied by scripts)",
+    description: "Will only apply if the cart subtotal, after applying the campaign, meets conditions",
+    inputs: {
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Amount in dollars"
+      }
+    }
+  },
   {
     value: "ExcludeDiscountCodes",
     label: "Cart Has No Discount Codes",
