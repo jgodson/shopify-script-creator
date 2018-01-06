@@ -32124,12 +32124,25 @@ var App = function (_Component) {
     _this.processFile = _this.processFile.bind(_this);
     _this.showForm = _this.showForm.bind(_this);
     _this.download = _this.download.bind(_this);
-    _this.downloadCampaigns = _this.downloadCampaigns.bind(_this);
+    _this.prepareAndExportTo = _this.prepareAndExportTo.bind(_this);
     _this.uploadFile = _this.uploadFile.bind(_this);
+    _this.loadImportedData = _this.loadImportedData.bind(_this);
+    _this.saveDataToStorage = _this.saveDataToStorage.bind(_this);
     return _this;
   }
 
   _createClass(App, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      // Retrive from local storage and set state if anything is there
+      var data = localStorage.getItem('lastState');
+      if (!data) {
+        return;
+      }
+      var result = this.processFile(data, true);
+      this.loadImportedData(result);
+    }
+  }, {
     key: 'typeChange',
     value: function typeChange(newType) {
       // Google Analytics
@@ -32241,6 +32254,8 @@ var App = function (_Component) {
       });
       newState.campaigns.splice(index, 1);
       this.setState(newState);
+      // Persist data in local storage
+      this.prepareAndExportTo('localStorage');
     }
   }, {
     key: 'showForm',
@@ -32276,6 +32291,8 @@ var App = function (_Component) {
       newState.editCampaignInfo = null;
       newState.showForm = false;
       this.setState(newState);
+      // Persist data in local storage
+      this.prepareAndExportTo('localStorage');
     }
   }, {
     key: 'generateScript',
@@ -32412,10 +32429,12 @@ var App = function (_Component) {
   }, {
     key: 'download',
     value: function download(data, filename, type) {
+      data = JSON.stringify(data);
       var file = new Blob([data], { type: type });
-      if (window.navigator.msSaveOrOpenBlob)
+      if (window.navigator.msSaveOrOpenBlob) {
         // IE10+
-        window.navigator.msSaveOrOpenBlob(file, filename);else {
+        window.navigator.msSaveOrOpenBlob(file, filename);
+      } else {
         var link = document.createElement("a");
         var url = URL.createObjectURL(file);
         link.href = url;
@@ -32452,31 +32471,48 @@ var App = function (_Component) {
           gtag('event', 'importAttempt');
 
           _this4.readFile(evt.target, function (results) {
-            if (results && results.campaigns.length > 0) {
-              var newState = JSON.parse(JSON.stringify(_this4.defaultState));
-              if (results.type !== 'line_item') {
-                newState.scriptType = results.type;
-                newState.availableCampaigns = _this4.getCampaigns(results.type);
-              }
-              var loadedCampaigns = results.campaigns;
-              loadedCampaigns.reverse().forEach(function (campaign) {
-                newState.campaigns.unshift(campaign);
-              });
-              var newId = loadedCampaigns.sort(function (a, b) {
-                return a.id - b.id;
-              })[0].id + 1;
-              newState.currentId = newId;
-
+            if (_this4.loadImportedData(results)) {
+              _this4.prepareAndExportTo('localStorage');
               // Google Analytics
-              gtag('event', 'importSuccess', { 'campaigns': newState.campaigns.length - 1 });
-
-              _this4.setState(newState);
+              gtag('event', 'importSuccess');
             }
             document.body.removeChild(evt.target);
           });
         });
       }
       fileInput.click();
+    }
+  }, {
+    key: 'loadImportedData',
+    value: function loadImportedData(data) {
+      if (data && data.campaigns.length > 0) {
+        var newState = JSON.parse(JSON.stringify(this.defaultState));
+        if (data.type !== 'line_item') {
+          newState.scriptType = data.type;
+          newState.availableCampaigns = this.getCampaigns(data.type);
+        }
+        var loadedCampaigns = data.campaigns;
+        loadedCampaigns.reverse().forEach(function (campaign) {
+          newState.campaigns.unshift(campaign);
+        });
+        var newId = loadedCampaigns.sort(function (a, b) {
+          return a.id - b.id;
+        })[0].id + 1;
+        newState.currentId = newId;
+
+        this.setState(newState);
+        return true;
+      }
+      return false;
+    }
+  }, {
+    key: 'saveDataToStorage',
+    value: function saveDataToStorage(data) {
+      if (!data) {
+        localStorage.removeItem('lastState');
+      } else {
+        localStorage.setItem('lastState', JSON.stringify(data));
+      }
     }
   }, {
     key: 'readFile',
@@ -32491,18 +32527,17 @@ var App = function (_Component) {
         reader.readAsText(textFile);
         // When it's loaded, process it
         reader.addEventListener('load', function (evt) {
-          var result = _this5.processFile(evt);
+          var result = _this5.processFile(evt.target.result);
           callback(result);
         });
       }
     }
   }, {
     key: 'processFile',
-    value: function processFile(evt) {
-      var file = evt.target.result;
+    value: function processFile(file, localData) {
       var validFileSignature = 'ShopifyScriptCreatorFile';
       var results = null;
-      if (file && file.length) {
+      if (file && (localData || file.length)) {
         try {
           results = JSON.parse(file);
           if (results.version.indexOf(validFileSignature) < 0) {
@@ -32515,7 +32550,12 @@ var App = function (_Component) {
             }
             return results;
           } else {
-            alert('This file is from an older version of Shopify Script Creator and will not work with the current version');
+            if (localData) {
+              alert('The current saved data appears to be from an older version of Shopify Script Creator and will not work with the current version. This data will be cleared from storage.');
+              this.saveDataToStorage(null);
+            } else {
+              alert('This file appears to be from an older version of Shopify Script Creator and will not work with the current version');
+            }
           }
         } catch (error) {
           alert('File does not appear to be a valid script creator file');
@@ -32526,11 +32566,8 @@ var App = function (_Component) {
       return null;
     }
   }, {
-    key: 'downloadCampaigns',
-    value: function downloadCampaigns() {
-      // Google Analytics
-      gtag('event', 'export', { 'campaigns': this.state.campaigns.length - 1 });
-
+    key: 'prepareAndExportTo',
+    value: function prepareAndExportTo(exportType) {
       var filename = 'SSC-V' + this.version + '-script-' + parseInt(Math.random() * 100000000) + '.txt';
       var campaigns = this.state.campaigns.filter(function (campaign) {
         return !campaign.skip;
@@ -32540,7 +32577,14 @@ var App = function (_Component) {
         type: this.state.scriptType,
         campaigns: campaigns
       };
-      this.download(JSON.stringify(data), filename, 'text/plain');
+
+      if (exportType === 'file') {
+        // Google Analytics
+        gtag('event', 'export', { 'campaigns': this.state.campaigns.length - 1 });
+        this.download(data, filename, 'text/plain');
+      } else {
+        this.saveDataToStorage(data);
+      }
     }
   }, {
     key: 'render',
@@ -32567,7 +32611,9 @@ var App = function (_Component) {
 
       var secondaryActions = [{
         content: 'Export campaigns',
-        onAction: this.downloadCampaigns,
+        onAction: function onAction() {
+          return _this6.prepareAndExportTo('file');
+        },
         icon: 'export'
       }, {
         content: 'Import campaigns',
@@ -45056,7 +45102,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.2.0",
+  currentVersion: "0.3.0",
   minimumVersion: "0.1.0"
 };
 
