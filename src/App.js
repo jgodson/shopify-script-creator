@@ -340,7 +340,7 @@ ${INDENT[this.IL]})`;
       setTimeout(() => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);  
-      }, 0); 
+      }, 10); 
     }
   }
 
