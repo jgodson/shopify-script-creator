@@ -32444,7 +32444,7 @@ var App = function (_Component) {
         setTimeout(function () {
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
-        }, 0);
+        }, 10);
       }
     }
   }, {
