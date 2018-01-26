@@ -1,5 +1,5 @@
-# Example app using webpack
-Demonstrates Polaris inside a React app served via `webpack` and `webpack-dev-server`.
+# Shopify Script Creator
+This project was intended to be a UI to generate Ruby code to paste into the Shopify Script Editor application, no extra coding needed.
 
 ## Dependencies
 - [yarn](https://github.com/yarnpkg/yarn/) or [npm](https://www.npmjs.com/)
@@ -36,21 +36,23 @@ yarn start
 npm start
 ```
 
-Open http://localhost:8080 in your browser and you should see the Polaris example application.
+Open http://localhost:8080 in your browser and you should see the application running.
 
-### Build
-You can bundle up your application using the preconfigured webpack build.
+### Deploying
+- Be sure to update the version in `src/versions.js` and `package.json` prior to deploying
+- Commit and push your changes to the source repo. You don't need to build manually, this is done in the next step.
+- Deployment scripts are preconfigured in `package.json` to run with one easy command.
 
 **With Yarn**
 
 ```bash
-yarn build
+yarn deploy
 ```
 
 **With npm**
 
 ```bash
-npm build
+npm deploy
 ```
 
-This generates a `build` directory containing `index.html` and `bundle.js`.  The index loads all Polaris styles via the Polaris CDN and the application scripts via `bundle.js`
+This generates a `docs` directory containing `index.html` and `bundle.js`. The index loads all Polaris styles via the Polaris CDN and the application scripts via `bundle.js`
