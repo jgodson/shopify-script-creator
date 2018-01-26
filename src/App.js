@@ -478,10 +478,10 @@ ${INDENT[this.IL]})`;
     };
 
     const reportIssue = {
-      content: 'Report an Issue',
+      content: 'Leave feedback',
       external: true,
       plain: true,
-      url: 'https://github.com/jgodson/shopify-script-creator/issues/new' 
+      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform' 
     }
 
     const secondaryActions = [

@@ -95,7 +95,7 @@ class ConditionalDiscount < Campaign
   end
 
   def run(cart)
-    return unless @discount
+    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
     applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
     applicable_items = applicable_items.sort_by { |item| item.variant.price }
@@ -141,7 +141,7 @@ class BuyXGetX < Campaign
   end
   
   def run(cart)
-    return unless @discount
+    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
     return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x
     applicable_buy_items = nil

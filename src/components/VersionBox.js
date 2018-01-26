@@ -5,7 +5,7 @@ export default function VersionBox(props) {
   return (
     <div className="version-box">
       <a href="https://github.com/jgodson/shopify-script-creator/releases">
-        ALPHA {props.currentVersion}
+        BETA {props.currentVersion}
       </a>
     </div>
   )

@@ -173,7 +173,7 @@ class ShippingDiscount < Campaign
   end
   
   def run(rates, cart)
-    return unless @discount
+    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
     rates.each do |rate|
       next unless @rate_selector.nil? || @rate_selector.match?(rate)
