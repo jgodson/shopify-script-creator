@@ -97,7 +97,11 @@ class AndSelector
 
   def match?(item, selector = nil)
     @conditions.all? do |condition|
-      condition.match?(item, selector) 
+      if selector
+        condition.match?(item, selector)
+      else
+        condition.match?(item)
+      end
     end
   end
 end`,
@@ -110,7 +114,11 @@ class OrSelector
 
   def match?(item, selector = nil)
     @conditions.any? do |condition|
-      condition.match?(item, selector) 
+      if selector
+        condition.match?(item, selector)
+      else
+        condition.match?(item)
+      end
     end
   end
 end`,
