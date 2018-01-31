@@ -387,7 +387,7 @@ ${INDENT[this.IL]})`;
       loadedCampaigns.reverse().forEach((campaign) => {
         newState.campaigns.unshift(campaign);
       });
-      const newId = loadedCampaigns.sort((a, b) => a.id - b.id)[0].id + 1;
+      const newId = loadedCampaigns.sort((a, b) => b.id - a.id)[0].id + 1;
       newState.currentId = newId;
 
       this.setState(newState);
