@@ -32496,7 +32496,7 @@ var App = function (_Component) {
           newState.campaigns.unshift(campaign);
         });
         var newId = loadedCampaigns.sort(function (a, b) {
-          return a.id - b.id;
+          return b.id - a.id;
         })[0].id + 1;
         newState.currentId = newId;
 
