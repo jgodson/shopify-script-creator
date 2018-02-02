@@ -863,9 +863,9 @@ const campaigns = [
       },
       discount_tiers: {
         type: "objectArray",
-        description: "Each tier should be on a new line. Format: (tier : discount_amount : discount_message)",
-        inputFormat: "{tier:text} : {discount:text} : {message:text}",
-        outputFormat: '{:tier => "{text}", :discount => "{text}", :message => "{text}"}'
+        description: "Set the discount tiers to be applied. Format: (Tier condition : Discount amount : Message)",
+        inputFormat: "{tier_condition:text:The tag, subtotal, or item total to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
+        outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
       }
     },
     dependants: ["PercentageDiscount", "FixedTotalDiscount"]
@@ -894,9 +894,9 @@ const campaigns = [
       dicountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discounts: {
         type: "objectArray",
-        description: "Each discount should be on a new line. Format: (discount_code : discount_type((f)ixed/(p)ercent/(c)ode) : discount_amount)",
-        inputFormat: "{code:text} : {type:text} : {amount:text}",
-        outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{text}"}'
+        description: "Set the discount codes and the discount to apply for each code. Format: (Discount code : Discount type : Discount amount)",
+        inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount ((f)ixed/(p)ercent/(c)ode)} : {discount_amount:number:The amount of the discount}",
+        outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{number}"}'
       }
     },
     dependants: ["PercentageDiscount", "FixedTotalDiscount"]

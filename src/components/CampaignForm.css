@@ -1,14 +1,18 @@
+.select-wrapper + .input-container {
+  margin-top: 17px;
+}
+
 .select-wrapper span {
   display: block;
   margin-top: 0.4rem;
 }
 
 .input-container {
-  margin-top: 0.7rem;
+  margin-top: 10px;
 }
 
 .input-container__single-line {
-  margin-top: 2.4rem;
+  margin-top: 30px;
 }
 
 form {

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Layout, Page, PageActions, EmptyState } from '@shopify/polaris';
 import VersionBox from './components/VersionBox';
+import Modal from './components/Modal';
 import ScriptSelector from './components/ScriptSelector';
 import CampaignForm from './components/CampaignForm';
 import CampaignsList from './components/CampaignsList';
@@ -27,7 +28,15 @@ export default class App extends Component {
       campaigns: [{name: "Create new campaign", skip: true}],
       currentId: 0,
       output: '',
-      editCampaignInfo: null
+      editCampaignInfo: null,
+      modal: {
+        isOpen: false,
+        title: "",
+        content: "",
+        inputs: [],
+        closeFn: null,
+        actions: []
+      }
     };
 
     // Indent level for script output
@@ -60,6 +69,8 @@ export default class App extends Component {
     this.uploadFile = this.uploadFile.bind(this);
     this.loadImportedData = this.loadImportedData.bind(this);
     this.saveDataToStorage = this.saveDataToStorage.bind(this);
+    this.openModal = this.openModal.bind(this);
+    this.closeModal = this.closeModal.bind(this);
   }
 
   componentDidMount() {
@@ -68,6 +79,25 @@ export default class App extends Component {
     if (!data) { return; }
     const result = this.processFile(data, true);
     this.loadImportedData(result);
+  }
+
+  openModal(modalInfo) {
+    const newState = this.state;
+    const {title, content, inputs, closeFn, actions} = modalInfo;
+    newState.modal.isOpen = true;
+    newState.modal.title = title;
+    newState.modal.content = content;
+    newState.modal.inputs = inputs;
+    newState.modal.closeFn = (returnData) => this.closeModal(closeFn, returnData)
+    newState.modal.actions = actions;
+    this.setState(newState);
+  }
+
+  closeModal(closeFn, returnData) {
+    if (typeof closeFn === 'function') {
+      closeFn(returnData);
+    }
+    this.setState({modal: {isOpen: false}});
   }
 
   typeChange(newType) {
@@ -522,6 +552,16 @@ ${INDENT[this.IL]})`;
     
     return (
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
+        {this.state.modal.isOpen && 
+          <Modal
+            title={this.state.modal.title}
+            content={this.state.modal.content}
+            inputs={this.state.modal.inputs}
+            isOpen={this.state.modal.isOpen}
+            onClose={this.state.modal.closeFn}
+            actions={this.state.modal.actions}
+          />
+        }
         <VersionBox currentVersion={this.version} />
         <Layout>
           <Layout.Section>
@@ -534,6 +574,7 @@ ${INDENT[this.IL]})`;
                 addCampaign={this.addCampaign}
                 showForm={this.showForm}
                 existingInfo={this.state.editCampaignInfo}
+                openModal={this.openModal}
               />
             }
             {this.state.output && <ScriptOutput output={this.state.output} />}

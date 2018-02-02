@@ -137,7 +137,7 @@ class AddressQualifier
         value.downcase!
         
         unless accepted_address[key].nil?
-          if accepted_address[key].kind_of?(Array)
+          if accepted_address[key].is_a?(Array)
             match = accepted_address[key].any? do |potential_address|
               potential_address.downcase!
               case match_type

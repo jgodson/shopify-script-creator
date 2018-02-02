@@ -76,8 +76,8 @@
         const values = line.split('=>').map((value) => value.trim());
         let output = inputFmt;
         for (let index = 0; index < values.length; index++) {
-          const type = output.match(/{\w+:(\w+)}/)[1];
-          if (type === "text") {
+          const type = output.match(/{\w+:(\w+):[\w\s'.(),]+}/)[1];
+          if (type === "text" || type === "number") {
             // Only grab what's in "". Removes unncessary stuff like :discount or ,
             const value = values[index].match(/"(.+)"/);
             values[index] = value ? value[1] : value;
@@ -93,14 +93,14 @@
           }
           // Skip null values
           if (values[index] !== null) {
-            output = output.replace(/{\w+:\w+}/i, values[index]);
+            output = output.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[index]);
           }
         }
         return output;
       }).join('\n');
       return lines;
     } else {
-      const inputFormatRepl = inputFmt.replace(/{\w+:(\w+)}/gi, '').trim();
+      const inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+}/g, '').trim();
       const splitter = inputFormatRepl[0];
       const requiredInputs = inputFormatRepl.split(splitter).length;
       const lines = value.split('\n').map((line) => {

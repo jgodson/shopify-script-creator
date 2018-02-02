@@ -808,8 +808,8 @@ const cartQualifiers = [
       },
       countries_and_provinces: {
         type: "object",
-        description: "Place each country/province combination on a new line. Seperate country codes from province codes with a : (eg: CA: AB, SK, ON, BC)",
-        inputFormat: "{country:text}: {provinces:array}",
+        description: "Country codes and the provice/state codes to match. Format: (Country: Provinces)",
+        inputFormat: "{country:text:The country code}: {provinces:array:The provinces included. Seperate each with a comma. (AB, SK, MB)}",
         outputFormat: '"{text}" => [{array}]'
       }
     }
@@ -1048,8 +1048,8 @@ const lineItemSelectors = [
     inputs: {
       keys_and_values: {
         type: "object",
-        description: "Seperate keys and values with : and individual key/values with a new line (eg: key1: value1)",
-        inputFormat: "{key:text}: {value:text}",
+        description: "Properties must match all entered key/value pairs. Format: (Key : Value)",
+        inputFormat: "{key:text:The property's key} : {value:text:The value of the property}",
         outputFormat: '"{text}" => "{text}"'
       }
     }
