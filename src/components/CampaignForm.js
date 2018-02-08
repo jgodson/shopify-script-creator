@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import {
   Layout,
   Card,
@@ -8,10 +8,10 @@ import {
   TextStyle,
   Select,
   Stack,
-  Button
+  Button,
+  Tag
 } from '@shopify/polaris';
-
-import EditableTag from './EditableTag';
+import CardList from './CardList';
 
 import styles from './CampaignForm.css';
 
@@ -257,6 +257,18 @@ export default class CampaignForm extends Component {
   }
 
   inputGenerator(input, isMain) {
+    const MODAL_ACTIONS = [
+      {
+        content: "Cancel",
+        onClick: 'close'
+      },
+      {
+        content: "Save",
+        submit: true,
+        primary: true
+      }
+    ];
+
     const INPUT_TYPES = {
       text: {
         generate: (input) => {
@@ -321,34 +333,81 @@ export default class CampaignForm extends Component {
       },
       array: {
         generate: (input) => {
+          const hasValues = !!this.state.inputs[input.type][input.name];
+          const currentValues = hasValues ? this.state.inputs[input.type][input.name].split(',').map((val) => val.trim()) : '';
           return (
-            <TextField
-              label={input.label}
-              placeholder={`Enter some ${input.label.toLowerCase()}...`}
-              key={input.name}
-              name={input.name}
-              multiline={3}
-              helpText={input.description}
-              value={this.state.inputs[input.type][input.name]}
-              onChange={(val) => this.handleInputChange(val, input.type, input.name)}
-            />
+            <Stack vertical key={input.name}>
+              <Stack alignment="leading">
+                <Stack.Item fill>{input.label}</Stack.Item>
+                <Stack.Item>
+                  <Button
+                    plain 
+                    icon="circlePlus"
+                    onClick={() => {
+                      this.props.openModal({
+                        title: input.label,
+                        inputs: [{
+                          name: input.name,
+                          label: splitAndCapitalize('_', input.label),
+                          type: "text",
+                          value: "",
+                          description: "Add several at once by separating each with a comma"
+                        }],
+                        closeFn: (values) => this.handleModalReturn(values, input),
+                        actions: MODAL_ACTIONS
+                      })
+                    }}
+                  >
+                    Add more
+                  </Button>
+                </Stack.Item>
+              </Stack>
+              {hasValues ?
+                <Stack spacing="extraTight">
+                  {currentValues.map((value, index) => {
+                    return (
+                      <Tag
+                        key={`Tag_${index}`}
+                        onRemove={(evt) => {
+                          evt.preventDefault();
+                          currentValues.splice(index, 1);
+                          this.handleInputChange(currentValues.join(','), input.type, input.name);
+                        }}
+                      >
+                        {value}
+                      </Tag>
+                    );
+                  })}
+                </Stack>
+              :
+                <Button
+                  plain
+                  fullWidth
+                  onClick={() => {
+                    this.props.openModal({
+                      title: input.label,
+                      inputs: [{
+                        name: input.name,
+                        label: splitAndCapitalize('_', input.label),
+                        type: "text",
+                        value: "",
+                        description: "Add several at once by separating each with a comma"
+                      }],
+                      closeFn: (values) => this.handleModalReturn(values, input),
+                      actions: MODAL_ACTIONS
+                    })
+                  }}
+                >
+                  Add {input.label.toLowerCase()}
+                </Button>
+              }
+                <TextStyle variation="subdued">{input.description}</TextStyle>
+            </Stack>
           );
         }
       },
       object: {
         generate: (input) => {
-          const modalActions = [
-            {
-              content: "Cancel",
-              onClick: 'close'
-            },
-            {
-              content: "Save",
-              submit: true,
-              primary: true
-            }
-          ];
-
           const hasValues = !!this.state.inputs[input.type][input.name];
           const currentValues = hasValues ? this.state.inputs[input.type][input.name].split('\n') : '';
           return (
@@ -364,7 +423,7 @@ export default class CampaignForm extends Component {
                         title: input.label,
                         inputs: this.generateModalInputs(input),
                         closeFn: (values) => this.handleModalReturn(values, input),
-                        actions: modalActions
+                        actions: MODAL_ACTIONS
                       })
                     }}
                   >
@@ -373,31 +432,26 @@ export default class CampaignForm extends Component {
                 </Stack.Item>
               </Stack>
               {hasValues ?
-                <Stack spacing="extraTight">
-                  {currentValues.map((value, index) => {
-                    return (
-                      <EditableTag
-                        key={`${input.name}-tag_${index}`}
-                        onEdit={(evt) => {
-                          evt.preventDefault();
-                          this.props.openModal({
-                          title: input.label,
-                          inputs: this.generateModalInputs(input, currentValues[index]),
-                          closeFn: (values) => this.handleModalReturn(values, input, index),
-                          actions: modalActions
-                          })
-                        }}
-                        onRemove={(evt) => {
-                          evt.preventDefault();
-                          currentValues.splice(index, 1);
-                          this.handleInputChange(currentValues.join('\n'), input.type, input.name);
-                        }}
-                      >
-                      {value}
-                    </EditableTag>
-                    );
+                <CardList
+                  headers={this.generateModalInputs(input).map((input) => input.label)}
+                  items={currentValues.map((value, index) => {
+                    return {
+                      values: value.split(':'),
+                      onEdit: () => {
+                        this.props.openModal({
+                        title: input.label,
+                        inputs: this.generateModalInputs(input, currentValues[index]),
+                        closeFn: (values) => this.handleModalReturn(values, input, index),
+                        actions: MODAL_ACTIONS
+                        })
+                      },
+                      onRemove: () => {
+                        currentValues.splice(index, 1);
+                        this.handleInputChange(currentValues.join('\n'), input.type, input.name);
+                      }
+                    }
                   })}
-                </Stack>
+                />
               :
                 <Button
                   plain
@@ -407,7 +461,7 @@ export default class CampaignForm extends Component {
                       title: input.label,
                       inputs: this.generateModalInputs(input),
                       closeFn: (values) => this.handleModalReturn(values, input),
-                      actions: modalActions
+                      actions: MODAL_ACTIONS
                     })
                   }}
                 >
@@ -500,26 +554,38 @@ export default class CampaignForm extends Component {
 
   handleModalReturn(values, input, index) {
     if (!values) { return; }
-    // Build input value for text box
-    let newValue = input.options.inputFormat;
-    for (let index = 0; index < values.length; index++) {
-      newValue = newValue.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[index]);
-    }
-
     let currentValue = this.state.inputs[input.type][input.name];
-    // Add new content, or replace old content if editing
-    if (!index) {
-      // Add value to text box with a new line if there is already content
+
+    // Handle array and objects
+    if (input.type === "array") {
+
       if (currentValue) {
-        currentValue += `\n${newValue}`;
+        currentValue += `,${values.join('')}`;
       } else {
-        currentValue = newValue;
+        currentValue = values.join('');
       }
     } else {
-      currentValue = currentValue.split('\n');
-      currentValue.splice(index, 1, newValue);
-      currentValue = currentValue.join('\n');
+      // Build input value for text box
+      let newValue = input.options.inputFormat;
+      for (let index = 0; index < values.length; index++) {
+        newValue = newValue.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[index]);
+      }
+
+      // Add new content, or replace old content if editing
+      if (index === undefined) {
+        // Add value to text box with a new line if there is already content
+        if (currentValue) {
+          currentValue += `\n${newValue}`;
+        } else {
+          currentValue = newValue;
+        }
+      } else {
+        currentValue = currentValue.split('\n');
+        currentValue.splice(index, 1, newValue);
+        currentValue = currentValue.join('\n');
+      }
     }
+
     const newState = this.state;
     newState.inputs[input.type][input.name] = currentValue;
     this.setState(newState);

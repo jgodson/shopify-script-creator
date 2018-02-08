@@ -129,13 +129,11 @@ end`,
   BuyXGetX: `
 class BuyXGetX < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, buy_item_selector, get_item_selector, discount, buy_x, get_x, max_sets)
-    raise "buy_x must be greater than or equal to get_x" unless buy_x >= get_x
-
     super(condition, customer_qualifier, cart_qualifier)
     @line_item_selector = buy_item_selector
     @get_item_selector = get_item_selector
     @discount = discount
-    @buy_x = buy_x + get_x
+    @buy_x = buy_x
     @get_x = get_x
     @max_sets = max_sets == 0 ? nil : max_sets
   end
@@ -863,7 +861,7 @@ const campaigns = [
       },
       discount_tiers: {
         type: "objectArray",
-        description: "Set the discount tiers to be applied. Format: (Tier condition : Discount amount : Message)",
+        description: "Set the discount tiers to be applied",
         inputFormat: "{tier_condition:text:The tag, subtotal, or item total to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
         outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
       }
@@ -894,7 +892,7 @@ const campaigns = [
       dicountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discounts: {
         type: "objectArray",
-        description: "Set the discount codes and the discount to apply for each code. Format: (Discount code : Discount type : Discount amount)",
+        description: "Set the discount codes and the discount to apply for each code",
         inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount ((f)ixed/(p)ercent/(c)ode)} : {discount_amount:number:The amount of the discount}",
         outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{number}"}'
       }

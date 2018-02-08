@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Card, Stack, Button, TextStyle } from '@shopify/polaris';
 import { splitCamelCase } from '../helpers';
+
 import styles from './CampaignsList.css';
 
 export default class CampaignsList extends Component {

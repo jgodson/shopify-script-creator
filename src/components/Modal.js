@@ -1,5 +1,13 @@
 import React, { Component, Fragment } from 'react';
-import { Stack, Heading, Button, Card, TextField, FormLayout } from '@shopify/polaris';
+import { 
+  Stack,
+  Heading,
+  Button,
+  Card,
+  TextField,
+  FormLayout
+} from '@shopify/polaris';
+
 import styles from './Modal.css';
 
 export default class Modal extends Component {
@@ -96,6 +104,8 @@ export default class Modal extends Component {
                             label={input.label}
                             key={input.name}
                             type={input.type}
+                            min={input.type === "number" ? 0 : undefined}
+                            step={input.type === "number" ? 0.01 : undefined}
                             name={input.name}
                             autoFocus={index === 0}
                             helpText={input.description}

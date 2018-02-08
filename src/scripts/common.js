@@ -491,7 +491,7 @@ const customerQualifiers = [
       },
       customer_emails: {
         type: "array",
-        description: "Seperate individual emails with a comma (,)"
+        description: "Enter the applicable emails"
       }
     }
   },
@@ -538,7 +538,7 @@ const customerQualifiers = [
       },
       customer_tags: {
         type: "array",
-        description: "Seperate individual tags with a comma (,)"
+        description: "Enter the applicable tags"
       }
     }
   },
@@ -782,7 +782,7 @@ const cartQualifiers = [
       },
       discount_codes: {
         type: "array",
-        description: "Seperate individual codes with a comma (,)"
+        description: "Enter the applicable codes"
       }
     }
   },
@@ -808,7 +808,7 @@ const cartQualifiers = [
       },
       countries_and_provinces: {
         type: "object",
-        description: "Country codes and the provice/state codes to match. Format: (Country: Provinces)",
+        description: "Country codes and the provice/state codes to match",
         inputFormat: "{country:text:The country code}: {provinces:array:The provinces included. Seperate each with a comma. (AB, SK, MB)}",
         outputFormat: '"{text}" => [{array}]'
       }
@@ -835,7 +835,7 @@ const cartQualifiers = [
       },
       country_codes: {
         type: "array",
-        description: "Seperate individual country codes with a comma (,)"
+        description: "Enter the applicable country codes"
       }
     }
   }
@@ -868,7 +868,7 @@ const lineItemSelectors = [
       },
       product_IDs: {
         type: "array",
-        description: "Seperate individual product ID's with a comma (,)"
+        description: "Enter the applicable ID's"
       }
     }
   },
@@ -893,7 +893,7 @@ const lineItemSelectors = [
       },
       product_types: {
         type: "array",
-        description: "Seperate individual product types with a comma (,)"
+        description: "Enter the applicable types"
       }
     }
   },
@@ -918,7 +918,7 @@ const lineItemSelectors = [
       },
       product_vendors: {
         type: "array",
-        description: "Seperate individual product vendors with a comma (,)"
+        description: "Enter the applicable vendors"
       }
     }
   },
@@ -965,7 +965,7 @@ const lineItemSelectors = [
       },
       product_tags: {
         type: "array",
-        description: "Seperate individual product tags with a comma (,)"
+        description: "Enter the applicable tags"
       }
     }
   },
@@ -1012,7 +1012,7 @@ const lineItemSelectors = [
       },
       variant_skus: {
         type: "array",
-        description: "Seperate individual skus with a comma (,)"
+        description: "Enter the applicable skus"
       }
     }
   },
@@ -1037,7 +1037,7 @@ const lineItemSelectors = [
       },
       variant_IDs: {
         type: "array",
-        description: "Seperate individual variant ID's with a comma (,)"
+        description: "Enter the applicable ID's"
       }
     }
   },
@@ -1048,7 +1048,7 @@ const lineItemSelectors = [
     inputs: {
       keys_and_values: {
         type: "object",
-        description: "Properties must match all entered key/value pairs. Format: (Key : Value)",
+        description: "Properties must match all entered key/value pairs",
         inputFormat: "{key:text:The property's key} : {value:text:The value of the property}",
         outputFormat: '"{text}" => "{text}"'
       }

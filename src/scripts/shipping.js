@@ -317,7 +317,7 @@ const RATE_SELECTORS = [
       },
       rate_names: {
         type: "array",
-        description: "Seperate individual names with a comma (,)"
+        description: "Enter the applicable names"
       }
     }
   },
@@ -364,7 +364,7 @@ const RATE_SELECTORS = [
       },
       rate_codes: {
         type: "array",
-        description: "Seperate individual codes with a comma (,)"
+        description: "Applicable codes"
       }
     }
   },
@@ -389,7 +389,7 @@ const RATE_SELECTORS = [
       },
       rate_sources: {
         type: "array",
-        description: "Seperate individual sources with a comma (,)"
+        description: "Applicable sources"
       }
     }
   },
@@ -717,7 +717,7 @@ const campaigns = [
       },
       desired_order: {
         type: "array",
-        description: "Rates will appear in the order specified (use rate names seperated by a comma). Only rates specified will be reordered."
+        description: "Rates will appear in the order specified. Only rates specified will be reordered."
       }
     }
   }

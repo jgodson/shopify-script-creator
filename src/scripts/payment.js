@@ -162,7 +162,7 @@ const GATEWAY_SELECTORS = [
       },
       gateway_names: {
         type: "array",
-        description: "Seperate individual names with a comma (,)"
+        description: "Enter the applicable names"
       }
     }
   }
@@ -369,7 +369,7 @@ const campaigns = [
       },
       desired_order: {
         type: "array",
-        description: "Gateways will appear in the order specified (use gateway names seperated by a comma). Only gateways specified will be reordered."
+        description: "Gateways will appear in the order specified. Only gateways specified will be reordered."
       }
     }
   }

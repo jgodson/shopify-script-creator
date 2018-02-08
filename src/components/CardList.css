@@ -1,0 +1,23 @@
+.CardList .Polaris-Button--iconOnly {
+  margin: 0;
+}
+
+.CardList table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.CardList thead th {
+  padding-bottom: 1rem;
+}
+
+.CardList tbody tr td {
+  padding: 1.6rem;
+  border-top: 1px solid #dfe3e8;
+  border-bottom: 1px solid #dfe3e8;
+}
+
+.CardList td:last-child {
+  text-align: right;
+}
