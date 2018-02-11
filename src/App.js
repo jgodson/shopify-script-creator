@@ -7,6 +7,7 @@ import CampaignForm from './components/CampaignForm';
 import CampaignsList from './components/CampaignsList';
 import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
+import ChangeLogContent from './components/ChangeLogContent';
 
 import LineItemScript from './scripts/lineItem';
 import ShippingScript from './scripts/shipping';
@@ -34,7 +35,7 @@ export default class App extends Component {
         title: "",
         content: "",
         inputs: [],
-        closeFn: null,
+        onClose: null,
         actions: []
       }
     };
@@ -73,7 +74,7 @@ export default class App extends Component {
     this.closeModal = this.closeModal.bind(this);
   }
 
-  componentDidMount() {
+  componentWillMount() {
     // Retrive from local storage and set state if anything is there
     const data = localStorage.getItem('lastState');
     if (!data) { return; }
@@ -81,21 +82,33 @@ export default class App extends Component {
     this.loadImportedData(result);
   }
 
+  componentDidMount() {
+    // Show change log modal if different than last version
+    const lastVersion = localStorage.getItem('lastVersion');
+    if (this.version !== lastVersion) {
+      this.openModal({
+        title: `Version ${this.version} BETA release`,
+        content: <ChangeLogContent newVersion={this.version} />,
+        onClose: () => localStorage.setItem('lastVersion', this.version)
+      });
+    }
+  }
+
   openModal(modalInfo) {
     const newState = this.state;
-    const {title, content, inputs, closeFn, actions} = modalInfo;
+    const {title, content, inputs, onClose, actions} = modalInfo;
     newState.modal.isOpen = true;
     newState.modal.title = title;
     newState.modal.content = content;
     newState.modal.inputs = inputs;
-    newState.modal.closeFn = (returnData) => this.closeModal(closeFn, returnData)
+    newState.modal.onClose = (returnData) => this.closeModal(onClose, returnData)
     newState.modal.actions = actions;
     this.setState(newState);
   }
 
-  closeModal(closeFn, returnData) {
-    if (typeof closeFn === 'function') {
-      closeFn(returnData);
+  closeModal(onClose, returnData) {
+    if (typeof onClose === 'function') {
+      onClose(returnData);
     }
     this.setState({modal: {isOpen: false}});
   }
@@ -110,7 +123,7 @@ export default class App extends Component {
     }
 
     // Google Analytics
-    gtag('event', 'typeChange', {'type' : newType});
+    gtag('event', 'typeChange', {'event_label' : newType});
 
     const newState = JSON.parse(JSON.stringify(this.defaultState));
     newState.scriptType = newType;
@@ -210,7 +223,7 @@ export default class App extends Component {
   addCampaign(campaign) {
     // Google Analytics
     const event = campaign.id ? 'editCampaign' : 'addCampaign';
-    gtag('event', event, {'name': campaign.name});
+    gtag('event', event, {'event_label': campaign.name});
 
     const newState = this.state;
     if (campaign.id === null) {
@@ -232,7 +245,7 @@ export default class App extends Component {
 
   generateScript() {
     // Google Analytics
-    gtag('event', 'generateButtonClick', {'campaigns': this.state.campaigns.length - 1});
+    gtag('event', 'generateButtonClick', {'value': this.state.campaigns.length - 1});
 
     if (this.state.showForm) {
       alert("Save or discard changes to the current campaign first.");
@@ -288,7 +301,8 @@ export default class App extends Component {
 
     function generateClassCode(allClasses, classesUsed) {
       // Google Analytics
-      gtag('event', 'scriptGenerated', {'usedClasses': classesUsed});
+      const used = classesUsed.filter((name) => !name.match(/^(Selector|Qualifier|Campaign)$/)).join(', ');
+      gtag('event', 'scriptGenerated', {'event_label': used});
 
       let code = '';
       classesUsed.forEach((className) => {
@@ -488,7 +502,7 @@ ${INDENT[this.IL]})`;
 
     if (exportType === 'file') {
       // Google Analytics
-      gtag('event', 'export', {'campaigns': this.state.campaigns.length - 1});
+      gtag('event', 'export', {'value': this.state.campaigns.length - 1});
       this.download(data, filename, 'text/plain');
     } else {
       this.saveDataToStorage(data);
@@ -558,7 +572,7 @@ ${INDENT[this.IL]})`;
             content={this.state.modal.content}
             inputs={this.state.modal.inputs}
             isOpen={this.state.modal.isOpen}
-            onClose={this.state.modal.closeFn}
+            onClose={this.state.modal.onClose}
             actions={this.state.modal.actions}
           />
         }

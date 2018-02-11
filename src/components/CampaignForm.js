@@ -353,7 +353,7 @@ export default class CampaignForm extends Component {
                           value: "",
                           description: "Add several at once by separating each with a comma"
                         }],
-                        closeFn: (values) => this.handleModalReturn(values, input),
+                        onClose: (values) => this.handleModalReturn(values, input),
                         actions: MODAL_ACTIONS
                       })
                     }}
@@ -393,7 +393,7 @@ export default class CampaignForm extends Component {
                         value: "",
                         description: "Add several at once by separating each with a comma"
                       }],
-                      closeFn: (values) => this.handleModalReturn(values, input),
+                      onClose: (values) => this.handleModalReturn(values, input),
                       actions: MODAL_ACTIONS
                     })
                   }}
@@ -422,7 +422,7 @@ export default class CampaignForm extends Component {
                       this.props.openModal({
                         title: input.label,
                         inputs: this.generateModalInputs(input),
-                        closeFn: (values) => this.handleModalReturn(values, input),
+                        onClose: (values) => this.handleModalReturn(values, input),
                         actions: MODAL_ACTIONS
                       })
                     }}
@@ -441,7 +441,7 @@ export default class CampaignForm extends Component {
                         this.props.openModal({
                         title: input.label,
                         inputs: this.generateModalInputs(input, currentValues[index]),
-                        closeFn: (values) => this.handleModalReturn(values, input, index),
+                        onClose: (values) => this.handleModalReturn(values, input, index),
                         actions: MODAL_ACTIONS
                         })
                       },
@@ -460,7 +460,7 @@ export default class CampaignForm extends Component {
                     this.props.openModal({
                       title: input.label,
                       inputs: this.generateModalInputs(input),
-                      closeFn: (values) => this.handleModalReturn(values, input),
+                      onClose: (values) => this.handleModalReturn(values, input),
                       actions: MODAL_ACTIONS
                     })
                   }}

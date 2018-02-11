@@ -3,7 +3,7 @@ import { Button, TextStyle } from '@shopify/polaris';
 
 import styles from './CardList.css';
 
-export default function CardList({headers, items} = props) {
+export default function CardList({ headers, items } = props) {
   return (
     <div className="CardList">
       <table>

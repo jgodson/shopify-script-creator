@@ -24,10 +24,10 @@ export default class Modal extends Component {
     this.isEditing = false;
   }
 
-  componentWillMount() {
+  componentDidMount() {
     // When first opened, focus on the close button if there are no inputs
-    const numInputs = this.props.inputs.length;
-    if (numInputs > 0) {
+    const numInputs = this.props.inputs && this.props.inputs.length;
+    if (numInputs && numInputs > 0) {
       // Initialize the values. We need the exact order when returning
       const newState = this.state;
       const iterations = numInputs;
@@ -76,7 +76,13 @@ export default class Modal extends Component {
   }
 
   render() {
-    if (!this.props.isOpen) { return null; }
+    const hasInputs = this.props.inputs && this.props.inputs.length > 0;
+    const hasActions = this.props.actions && this.props.actions.length > 0;
+
+    const title = hasInputs 
+      ? (this.isEditing ? 'Edit' : 'Add') + this.props.title.toLowerCase()
+      : this.props.title;
+
     return (
       <Fragment>
         <div className="Modal__Backdrop" onClick={() => this.props.onClose(false)}></div>
@@ -84,7 +90,7 @@ export default class Modal extends Component {
           <Card>
             <Card.Section>
               <Stack alignment="trailing" distribution="equalSpacing">
-                <Heading>{this.isEditing ? 'Edit' : 'Add'} {this.props.title.toLowerCase()}</Heading>
+                <Heading>{title}</Heading>
                 <Button
                   plain
                   icon="cancel"
@@ -96,7 +102,7 @@ export default class Modal extends Component {
               <Card.Section>
                 <div className="Modal__Content">
                   {this.props.content}
-                  {!!this.props.inputs.length &&
+                  {hasInputs &&
                     <FormLayout>
                       {this.props.inputs.map((input, index) => {
                         return (
@@ -119,7 +125,7 @@ export default class Modal extends Component {
                   }
                 </div>
               </Card.Section>
-              {!!this.props.actions.length &&
+              {hasActions &&
                 <Card.Section>
                   <Stack
                     distribution="trailing"

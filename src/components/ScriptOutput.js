@@ -10,7 +10,7 @@ export default class ScriptOutput extends Component {
 
   copyOutputCode() {
     // Google Analytics
-    gtag('event', 'copyButtonClick');
+    gtag('event', 'copyButtonClick', {'value': this.props.output.length});
     this.textField.input.select();
     document.execCommand('selectAll');
     document.execCommand('copy');
