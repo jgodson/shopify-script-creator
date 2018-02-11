@@ -42841,7 +42841,7 @@ var Modal = function (_Component) {
       var hasInputs = this.props.inputs && this.props.inputs.length > 0;
       var hasActions = this.props.actions && this.props.actions.length > 0;
 
-      var title = hasInputs ? (this.isEditing ? 'Edit' : 'Add') + this.props.title.toLowerCase() : this.props.title;
+      var title = hasInputs ? (this.isEditing ? 'Edit' : 'Add') + ' ' + this.props.title.toLowerCase() : this.props.title;
 
       return _react2.default.createElement(
         _react.Fragment,
