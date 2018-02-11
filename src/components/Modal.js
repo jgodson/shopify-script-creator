@@ -80,7 +80,7 @@ export default class Modal extends Component {
     const hasActions = this.props.actions && this.props.actions.length > 0;
 
     const title = hasInputs 
-      ? (this.isEditing ? 'Edit' : 'Add') + this.props.title.toLowerCase()
+      ? `${(this.isEditing ? 'Edit' : 'Add')} ${this.props.title.toLowerCase()}`
       : this.props.title;
 
     return (
