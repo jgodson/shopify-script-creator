@@ -534,6 +534,7 @@ export default class CampaignForm extends Component {
       values = value.split(':').map((value) => value.trim());
     }
     let fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
+    console.log(fullMatch);
     let index = 0;
     while(fullMatch) {
       let [name, type, description] = [fullMatch[1], fullMatch[2], fullMatch[3]];

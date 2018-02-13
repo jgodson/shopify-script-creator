@@ -893,7 +893,7 @@ const campaigns = [
       discounts: {
         type: "objectArray",
         description: "Set the discount codes and the discount to apply for each code",
-        inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount ((f)ixed/(p)ercent/(c)ode)} : {discount_amount:number:The amount of the discount}",
+        inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount. One of (f)ixed, (p)ercent, or use the (c)ode} : {discount_amount:number:The amount of the discount}",
         outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{number}"}'
       }
     },
