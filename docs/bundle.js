@@ -668,68 +668,6 @@ function __makeTemplateObject(cooked, raw) {
 
 /***/ }),
 /* 12 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-function __export(m) {
-    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
-}
-Object.defineProperty(exports, "__esModule", { value: true });
-__export(__webpack_require__(124));
-__export(__webpack_require__(235));
-__export(__webpack_require__(237));
-__export(__webpack_require__(239));
-__export(__webpack_require__(125));
-__export(__webpack_require__(252));
-__export(__webpack_require__(253));
-__export(__webpack_require__(132));
-//# sourceMappingURL=utils.js.map
-
-/***/ }),
-/* 13 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Copyright (c) 2013-present, Facebook, Inc.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- *
- * 
- */
-
-function makeEmptyFunction(arg) {
-  return function () {
-    return arg;
-  };
-}
-
-/**
- * This function accepts and discards inputs; it has no side effects. This is
- * primarily useful idiomatically for overridable function endpoints which
- * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
- */
-var emptyFunction = function emptyFunction() {};
-
-emptyFunction.thatReturns = makeEmptyFunction;
-emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
-emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
-emptyFunction.thatReturnsNull = makeEmptyFunction(null);
-emptyFunction.thatReturnsThis = function () {
-  return this;
-};
-emptyFunction.thatReturnsArgument = function (arg) {
-  return arg;
-};
-
-module.exports = emptyFunction;
-
-/***/ }),
-/* 14 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -7598,6 +7536,68 @@ function useLinkComponent(LinkComponent) {
 /* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(3)))
 
 /***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+function __export(m) {
+    for (var p in m) if (!exports.hasOwnProperty(p)) exports[p] = m[p];
+}
+Object.defineProperty(exports, "__esModule", { value: true });
+__export(__webpack_require__(124));
+__export(__webpack_require__(235));
+__export(__webpack_require__(237));
+__export(__webpack_require__(239));
+__export(__webpack_require__(125));
+__export(__webpack_require__(252));
+__export(__webpack_require__(253));
+__export(__webpack_require__(132));
+//# sourceMappingURL=utils.js.map
+
+/***/ }),
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Copyright (c) 2013-present, Facebook, Inc.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * 
+ */
+
+function makeEmptyFunction(arg) {
+  return function () {
+    return arg;
+  };
+}
+
+/**
+ * This function accepts and discards inputs; it has no side effects. This is
+ * primarily useful idiomatically for overridable function endpoints which
+ * always need to be callable, since JS lacks a null-call idiom ala Cocoa.
+ */
+var emptyFunction = function emptyFunction() {};
+
+emptyFunction.thatReturns = makeEmptyFunction;
+emptyFunction.thatReturnsFalse = makeEmptyFunction(false);
+emptyFunction.thatReturnsTrue = makeEmptyFunction(true);
+emptyFunction.thatReturnsNull = makeEmptyFunction(null);
+emptyFunction.thatReturnsThis = function () {
+  return this;
+};
+emptyFunction.thatReturnsArgument = function (arg) {
+  return arg;
+};
+
+module.exports = emptyFunction;
+
+/***/ }),
 /* 15 */
 /***/ (function(module, exports) {
 
@@ -8893,7 +8893,7 @@ module.exports = emptyObject;
 
 
 
-var emptyFunction = __webpack_require__(13);
+var emptyFunction = __webpack_require__(14);
 
 /**
  * Similar to invariant but only logs a warning if the condition is not met.
@@ -11557,7 +11557,7 @@ module.exports = ExecutionEnvironment;
  * @typechecks
  */
 
-var emptyFunction = __webpack_require__(13);
+var emptyFunction = __webpack_require__(14);
 
 /**
  * Upstream version of event listener. Does not take into account specific
@@ -12236,7 +12236,7 @@ module.exports = freeGlobal;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 exports.InstanceChainMap = new utils_1.CompositeKeyWeakMap();
 //# sourceMappingURL=common.js.map
 
@@ -14775,7 +14775,7 @@ _reactDom2.default.render(_react2.default.createElement(
  * LICENSE file in the root directory of this source tree.
  */
 
-var m=__webpack_require__(33),n=__webpack_require__(44),p=__webpack_require__(13),q="function"===typeof Symbol&&Symbol["for"],r=q?Symbol["for"]("react.element"):60103,t=q?Symbol["for"]("react.call"):60104,u=q?Symbol["for"]("react.return"):60105,v=q?Symbol["for"]("react.portal"):60106,w=q?Symbol["for"]("react.fragment"):60107,x="function"===typeof Symbol&&Symbol.iterator;
+var m=__webpack_require__(33),n=__webpack_require__(44),p=__webpack_require__(14),q="function"===typeof Symbol&&Symbol["for"],r=q?Symbol["for"]("react.element"):60103,t=q?Symbol["for"]("react.call"):60104,u=q?Symbol["for"]("react.return"):60105,v=q?Symbol["for"]("react.portal"):60106,w=q?Symbol["for"]("react.fragment"):60107,x="function"===typeof Symbol&&Symbol.iterator;
 function y(a){for(var b=arguments.length-1,e="Minified React error #"+a+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant\x3d"+a,c=0;c<b;c++)e+="\x26args[]\x3d"+encodeURIComponent(arguments[c+1]);b=Error(e+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.");b.name="Invariant Violation";b.framesToPop=1;throw b;}
 var z={isMounted:function(){return!1},enqueueForceUpdate:function(){},enqueueReplaceState:function(){},enqueueSetState:function(){}};function A(a,b,e){this.props=a;this.context=b;this.refs=n;this.updater=e||z}A.prototype.isReactComponent={};A.prototype.setState=function(a,b){"object"!==typeof a&&"function"!==typeof a&&null!=a?y("85"):void 0;this.updater.enqueueSetState(this,a,b,"setState")};A.prototype.forceUpdate=function(a){this.updater.enqueueForceUpdate(this,a,"forceUpdate")};
 function B(a,b,e){this.props=a;this.context=b;this.refs=n;this.updater=e||z}function C(){}C.prototype=A.prototype;var D=B.prototype=new C;D.constructor=B;m(D,A.prototype);D.isPureReactComponent=!0;function E(a,b,e){this.props=a;this.context=b;this.refs=n;this.updater=e||z}var F=E.prototype=new C;F.constructor=E;m(F,A.prototype);F.unstable_isAsyncReactComponent=!0;F.render=function(){return this.props.children};var G={current:null},H=Object.prototype.hasOwnProperty,I={key:!0,ref:!0,__self:!0,__source:!0};
@@ -14815,7 +14815,7 @@ var _assign = __webpack_require__(33);
 var emptyObject = __webpack_require__(44);
 var invariant = __webpack_require__(34);
 var warning = __webpack_require__(45);
-var emptyFunction = __webpack_require__(13);
+var emptyFunction = __webpack_require__(14);
 var checkPropTypes = __webpack_require__(62);
 
 // TODO: this is special because it gets imported during build.
@@ -16171,7 +16171,7 @@ module.exports = react;
 /*
  Modernizr 3.0.0pre (Custom Build) | MIT
 */
-var aa=__webpack_require__(2),l=__webpack_require__(102),B=__webpack_require__(33),C=__webpack_require__(13),ba=__webpack_require__(103),da=__webpack_require__(104),ea=__webpack_require__(105),fa=__webpack_require__(106),ia=__webpack_require__(107),D=__webpack_require__(44);
+var aa=__webpack_require__(2),l=__webpack_require__(102),B=__webpack_require__(33),C=__webpack_require__(14),ba=__webpack_require__(103),da=__webpack_require__(104),ea=__webpack_require__(105),fa=__webpack_require__(106),ia=__webpack_require__(107),D=__webpack_require__(44);
 function E(a){for(var b=arguments.length-1,c="Minified React error #"+a+"; visit http://facebook.github.io/react/docs/error-decoder.html?invariant\x3d"+a,d=0;d<b;d++)c+="\x26args[]\x3d"+encodeURIComponent(arguments[d+1]);b=Error(c+" for the full message or use the non-minified dev environment for full errors and additional helpful warnings.");b.name="Invariant Violation";b.framesToPop=1;throw b;}aa?void 0:E("227");
 var oa={children:!0,dangerouslySetInnerHTML:!0,defaultValue:!0,defaultChecked:!0,innerHTML:!0,suppressContentEditableWarning:!0,suppressHydrationWarning:!0,style:!0};function pa(a,b){return(a&b)===b}
 var ta={MUST_USE_PROPERTY:1,HAS_BOOLEAN_VALUE:4,HAS_NUMERIC_VALUE:8,HAS_POSITIVE_NUMERIC_VALUE:24,HAS_OVERLOADED_BOOLEAN_VALUE:32,HAS_STRING_BOOLEAN_VALUE:64,injectDOMPropertyConfig:function(a){var b=ta,c=a.Properties||{},d=a.DOMAttributeNamespaces||{},e=a.DOMAttributeNames||{};a=a.DOMMutationMethods||{};for(var f in c){ua.hasOwnProperty(f)?E("48",f):void 0;var g=f.toLowerCase(),h=c[f];g={attributeName:g,attributeNamespace:null,propertyName:f,mutationMethod:null,mustUseProperty:pa(h,b.MUST_USE_PROPERTY),
@@ -16473,7 +16473,7 @@ var invariant = __webpack_require__(34);
 var warning = __webpack_require__(45);
 var ExecutionEnvironment = __webpack_require__(102);
 var _assign = __webpack_require__(33);
-var emptyFunction = __webpack_require__(13);
+var emptyFunction = __webpack_require__(14);
 var EventListener = __webpack_require__(103);
 var getActiveElement = __webpack_require__(104);
 var shallowEqual = __webpack_require__(105);
@@ -32023,7 +32023,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 var _VersionBox = __webpack_require__(444);
 
@@ -33984,7 +33984,7 @@ exports.DecoratorConfig = DecoratorConfig;
 Object.defineProperty(exports, "__esModule", { value: true });
 var isFunction = __webpack_require__(23);
 var common_1 = __webpack_require__(123);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var InternalDecoratorFactory = (function () {
     function InternalDecoratorFactory() {
     }
@@ -36035,7 +36035,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(11);
 var identity = __webpack_require__(28);
 var Applicator_1 = __webpack_require__(8);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var ComposeApplicator = (function (_super) {
     tslib_1.__extends(ComposeApplicator, _super);
     function ComposeApplicator(_config) {
@@ -36084,7 +36084,7 @@ exports.ComposeApplicator = ComposeApplicator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(11);
 var Applicator_1 = __webpack_require__(8);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var PartialApplicator = (function (_super) {
     tslib_1.__extends(PartialApplicator, _super);
     function PartialApplicator() {
@@ -36779,7 +36779,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(11);
 var isFunction = __webpack_require__(23);
 var Applicator_1 = __webpack_require__(8);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var PartialValueApplicator = (function (_super) {
     tslib_1.__extends(PartialValueApplicator, _super);
     function PartialValueApplicator() {
@@ -36861,7 +36861,7 @@ exports.PreValueApplicator = PreValueApplicator;
 Object.defineProperty(exports, "__esModule", { value: true });
 var tslib_1 = __webpack_require__(11);
 var Applicator_1 = __webpack_require__(8);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var WrapApplicator = (function (_super) {
     tslib_1.__extends(WrapApplicator, _super);
     function WrapApplicator() {
@@ -36948,7 +36948,7 @@ var tslib_1 = __webpack_require__(11);
 var isFunction = __webpack_require__(23);
 var isObject = __webpack_require__(6);
 var Applicator_1 = __webpack_require__(8);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var MemoizeApplicator = (function (_super) {
     tslib_1.__extends(MemoizeApplicator, _super);
     function MemoizeApplicator() {
@@ -37307,7 +37307,7 @@ module.exports = bind;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var isFunction = __webpack_require__(23);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var factory_1 = __webpack_require__(0);
 /**
  * Binds methods of an object to the object itself, overwriting the existing method.
@@ -40350,7 +40350,7 @@ module.exports = baseSlice;
 Object.defineProperty(exports, "__esModule", { value: true });
 var factory_1 = __webpack_require__(0);
 var applicators_1 = __webpack_require__(1);
-var utils_1 = __webpack_require__(12);
+var utils_1 = __webpack_require__(13);
 var decorator = factory_1.DecoratorFactory.createDecorator(new factory_1.DecoratorConfig(function (fn) { return utils_1.returnAtIndex(fn, 0); }, new applicators_1.PreValueApplicator()));
 /**
  * Returns the first argument from the function regardless of
@@ -40765,7 +40765,7 @@ exports.createUniqueIDFactory = createUniqueIDFactory;
 
 
 
-var emptyFunction = __webpack_require__(13);
+var emptyFunction = __webpack_require__(14);
 var invariant = __webpack_require__(34);
 var warning = __webpack_require__(45);
 var assign = __webpack_require__(33);
@@ -41315,7 +41315,7 @@ module.exports = function(isValidElement, throwOnDirectAccess) {
 
 
 
-var emptyFunction = __webpack_require__(13);
+var emptyFunction = __webpack_require__(14);
 var invariant = __webpack_require__(34);
 var ReactPropTypesSecret = __webpack_require__(63);
 
@@ -42744,7 +42744,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 var _Modal = __webpack_require__(449);
 
@@ -43009,7 +43009,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -43141,7 +43141,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 var _CardList = __webpack_require__(453);
 
@@ -43780,6 +43780,7 @@ var CampaignForm = function (_Component) {
         });
       }
       var fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
+      console.log(fullMatch);
       var index = 0;
       while (fullMatch) {
         var _ref = [fullMatch[1], fullMatch[2], fullMatch[3]],
@@ -44074,7 +44075,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 var _CardList = __webpack_require__(454);
 
@@ -44250,7 +44251,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 var _helpers = __webpack_require__(101);
 
@@ -44439,7 +44440,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 var _ScriptOutput = __webpack_require__(462);
 
@@ -44568,7 +44569,7 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
-var _polaris = __webpack_require__(14);
+var _polaris = __webpack_require__(12);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -44606,6 +44607,8 @@ var _react = __webpack_require__(2);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _polaris = __webpack_require__(12);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function ChangeLogContent() {
@@ -44616,13 +44619,9 @@ function ChangeLogContent() {
     'div',
     null,
     _react2.default.createElement(
-      'h2',
+      'h3',
       null,
-      _react2.default.createElement(
-        'strong',
-        null,
-        'Change Log'
-      )
+      'Change Log'
     ),
     _react2.default.createElement(
       'ul',
@@ -44630,75 +44629,19 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        _react2.default.createElement(
-          'p',
-          null,
-          _react2.default.createElement(
-            'strong',
-            null,
-            'IMPORTANT'
-          ),
-          ' Buy X Get X now supports buy ',
-          _react2.default.createElement(
-            'strong',
-            null,
-            '1'
-          ),
-          ' get X. This means that the number that you had previously entered in buy x will probably need to be incremented by 1 to function the same as it had in previous releases.'
-        )
-      ),
+        'Fixed a bug when using the Discount Code List campaign. The proper inputs weren\'t coming up in the modal.'
+      )
+    ),
+    _react2.default.createElement(
+      'div',
+      { style: { paddingTop: '2rem' } },
       _react2.default.createElement(
-        'li',
-        null,
+        _polaris.Stack,
+        { distribution: 'trailing' },
         _react2.default.createElement(
-          'p',
-          null,
-          'Fixed unable to add decimal number as a discount amount (note some generated scripts could ignore a decimal, or not work properly when one is present. Make sure to verify they work correctly before publishing and please leave feedback to let me know if something doesn\'t work)'
-        )
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        _react2.default.createElement(
-          'p',
-          null,
-          'Added icon to Copy button for script output to make it more visible'
-        )
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        _react2.default.createElement(
-          'p',
-          null,
-          'Adjusted spacing on some of the inputs'
-        )
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        _react2.default.createElement(
-          'p',
-          null,
-          'Object inputs no longer are input in a single text area. The values are now shown in a table and editing/adding is done via a pop-up modal.'
-        )
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        _react2.default.createElement(
-          'p',
-          null,
-          'Array inputs are also no longer input in a single text area. The values are shown as tags and are added in a pop-up modal. Removal is done with a click on the X button attached to the tag.'
-        )
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        _react2.default.createElement(
-          'p',
-          null,
-          'Used the same modal to show the change log the first time a new version is released. This will ensure no one misses important information.'
+          _polaris.Link,
+          { url: 'https://github.com/jgodson/shopify-script-creator/releases' },
+          'View previous releases'
         )
       )
     )
@@ -45151,7 +45094,7 @@ var campaigns = [{
     discounts: {
       type: "objectArray",
       description: "Set the discount codes and the discount to apply for each code",
-      inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount ((f)ixed/(p)ercent/(c)ode)} : {discount_amount:number:The amount of the discount}",
+      inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount. One of (f)ixed, (p)ercent, or use the (c)ode} : {discount_amount:number:The amount of the discount}",
       outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{number}"}'
     }
   },
@@ -45936,7 +45879,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.4.0",
+  currentVersion: "0.4.1",
   minimumVersion: "0.1.0"
 };
 
