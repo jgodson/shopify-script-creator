@@ -44629,7 +44629,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed a bug when using the Discount Code List campaign. The proper inputs weren\'t coming up in the modal.'
+        'Fixed wording of "Conditionally Reject Discount Code" campaign. It should have been "Conditionally Allow Discount Code".'
       )
     ),
     _react2.default.createElement(
@@ -44686,7 +44686,7 @@ var classes = {
 
   BuyXGetX: "\nclass BuyXGetX < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, buy_item_selector, get_item_selector, discount, buy_x, get_x, max_sets)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = buy_item_selector\n    @get_item_selector = get_item_selector\n    @discount = discount\n    @buy_x = buy_x\n    @get_x = get_x\n    @max_sets = max_sets == 0 ? nil : max_sets\n  end\n  \n  def run(cart)\n    raise \"Campaign requires a discount\" unless @discount\n    return unless qualifies?(cart)\n    return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x\n    applicable_buy_items = nil\n    eligible_get_items = nil\n    discountable_sets = 0\n    \n    # Find the items that qualify for buy_x\n    if @line_item_selector.nil?\n      applicable_buy_items = cart.line_items\n    else\n      applicable_buy_items = cart.line_items.select { |item| @line_item_selector.match?(item) }\n    end\n    \n    # Find the items that qualify for get_x\n    if @get_item_selector.nil?\n      eligible_get_items = cart.line_items\n    else\n      eligible_get_items = cart.line_items.select {|item| @get_item_selector.match?(item) }\n    end\n    \n    # Check if cart qualifies for discounts and limit the discount sets\n    purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }\n    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x\n    return if discountable_sets < 1\n    discountable_quantity = (discountable_sets * @get_x).to_i\n    # Apply the discounts (sort to discount lower priced items first)\n    eligible_get_items = eligible_get_items.sort_by { |item| item.variant.price }\n    eligible_get_items.each do |item|\n      break if discountable_quantity == 0\n      if item.quantity <= discountable_quantity\n        @discount.apply(item)\n        discountable_quantity -= item.quantity\n      else\n        new_item = item.split({ take: discountable_quantity })\n        @discount.apply(new_item)\n        cart.line_items << new_item\n        discountable_quantity = 0\n      end\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
-  ConditionalDiscountCodeRejection: "\nclass ConditionalDiscountCodeRejection < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @message = message == \"\" ? \"Discount codes are disabled\" : message\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    cart.discount_code.reject({message: @message}) unless qualifies?(cart)\n  end\nend",
+  ConditionalDiscountCodeRejection: "\nclass ConditionalDiscountCodeRejection < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @message = message == \"\" ? \"This discount code cannot be used at this time\" : message\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    cart.discount_code.reject({message: @message}) unless qualifies?(cart)\n  end\nend",
 
   QuantityLimit: "\nclass QuantityLimit < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    super(condition, customer_qualifier, cart_qualifier)\n    @limit_by = limit_by == :default ? :product : limit_by\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return unless qualifies?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
@@ -44731,7 +44731,7 @@ var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cartQualifie
 }, {
   value: "ExcludeDiscountCodes",
   label: "Cart Has No Discount Codes",
-  description: "Do not allow discount codes and script discount to combine",
+  description: "Do not allow discount code and script discounts to combine",
   inputs: {
     behaviour: {
       type: "select",
@@ -44952,18 +44952,18 @@ var campaigns = [{
   }
 }, {
   value: "ConditionalDiscountCodeRejection",
-  label: "Conditionally Reject Discount Code",
-  description: "Rejects discount codes based on conditions",
+  label: "Conditionally Allow Discount Code",
+  description: "Allows discount codes based on conditions",
   inputs: {
     qualifer_behaviour: {
       type: "select",
       description: "Set the qualifier behaviour",
       options: [{
         value: "all",
-        label: "Reject code if all qualify"
+        label: "Allow code if all qualify"
       }, {
         value: "any",
-        label: "Reject code if any qualify"
+        label: "Allow code if any qualify"
       }]
     },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
@@ -45879,7 +45879,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.4.1",
+  currentVersion: "0.4.2",
   minimumVersion: "0.1.0"
 };
 
