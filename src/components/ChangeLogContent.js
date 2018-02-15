@@ -5,9 +5,9 @@ export default function ChangeLogContent({newVersion} = props) {
   return (
     <div>
       <h3>Change Log</h3>
-
+      
       <ul>
-      <li>Fixed a bug when using the Discount Code List campaign. The proper inputs weren't coming up in the modal.</li>
+      <li>Fixed wording of "Conditionally Reject Discount Code" campaign. It should have been "Conditionally Allow Discount Code".</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

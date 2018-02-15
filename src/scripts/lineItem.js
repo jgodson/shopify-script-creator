@@ -188,7 +188,7 @@ class ConditionalDiscountCodeRejection < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
     @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
-    @message = message == "" ? "Discount codes are disabled" : message
+    @message = message == "" ? "This discount code cannot be used at this time" : message
   end
 
   def run(cart)
@@ -479,7 +479,7 @@ const CART_QUALIFIERS = [
   {
     value: "ExcludeDiscountCodes",
     label: "Cart Has No Discount Codes",
-    description: "Do not allow discount codes and script discount to combine",
+    description: "Do not allow discount code and script discounts to combine",
     inputs: {
       behaviour: {
         type: "select",
@@ -723,8 +723,8 @@ const campaigns = [
   },
   {
     value: "ConditionalDiscountCodeRejection",
-    label: "Conditionally Reject Discount Code",
-    description: "Rejects discount codes based on conditions",
+    label: "Conditionally Allow Discount Code",
+    description: "Allows discount codes based on conditions",
     inputs: {
       qualifer_behaviour: {
         type: "select",
@@ -732,11 +732,11 @@ const campaigns = [
         options: [
           {
             value: "all",
-            label: "Reject code if all qualify"
+            label: "Allow code if all qualify"
           },
           {
             value: "any",
-            label: "Reject code if any qualify"
+            label: "Allow code if any qualify"
           }
         ]
       },
