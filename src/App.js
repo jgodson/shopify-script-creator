@@ -123,7 +123,7 @@ export default class App extends Component {
     }
 
     // Google Analytics
-    gtag('event', 'typeChange', {'event_label' : newType});
+    gtag('event', 'typeChange');
 
     const newState = JSON.parse(JSON.stringify(this.defaultState));
     newState.scriptType = newType;
@@ -223,7 +223,7 @@ export default class App extends Component {
   addCampaign(campaign) {
     // Google Analytics
     const event = campaign.id ? 'editCampaign' : 'addCampaign';
-    gtag('event', event, {'event_label': campaign.name});
+    gtag('event', event);
 
     const newState = this.state;
     if (campaign.id === null) {
@@ -245,7 +245,7 @@ export default class App extends Component {
 
   generateScript() {
     // Google Analytics
-    gtag('event', 'generateButtonClick', {'value': this.state.campaigns.length - 1});
+    gtag('event', 'generateButtonClick');
 
     if (this.state.showForm) {
       alert("Save or discard changes to the current campaign first.");
@@ -255,6 +255,14 @@ export default class App extends Component {
     newState.showForm = false;
     newState.output = this.generateCampaignsOutput();
     this.setState(newState);
+
+    // Usage Tracking
+    const data = JSON.stringify(this.prepareAndExportTo('raw'));
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", 'https://script.google.com/macros/s/AKfycbz9jBq3xUeeCtSbpVdP9yTuq0GTU4egckvoNaYqYWy4dcR_uiI/exec', true);
+    //Send the proper header information along with the request
+    xhr.setRequestHeader("Content-type", "text/plain");
+    xhr.send(data);
   }
 
   generateCampaignsOutput() {
@@ -500,12 +508,17 @@ ${INDENT[this.IL]})`;
       campaigns: campaigns
     };
 
-    if (exportType === 'file') {
-      // Google Analytics
-      gtag('event', 'export', {'value': this.state.campaigns.length - 1});
-      this.download(data, filename, 'text/plain');
-    } else {
-      this.saveDataToStorage(data);
+    switch (exportType) {
+      case "file":
+        // Google Analytics
+        gtag('event', 'export');
+        this.download(data, filename, 'text/plain');
+        break;
+      case 'localStorage':
+        this.saveDataToStorage(data);
+        break;
+      default:
+        return data;
     }
   }
 

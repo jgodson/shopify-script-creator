@@ -48,6 +48,7 @@ export default class CampaignForm extends Component {
     this.mainCampaignName = 'mainCampaign';
 
     this.inputMap = {};
+    this.defaults = {};
     this.updateCount = 0;
 
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -316,6 +317,7 @@ export default class CampaignForm extends Component {
       },
       select: {
         generate: (input) => {
+          this.defaults[input.name] = input.options[0].value;
           const helpText = <TextStyle variation="subdued">{input.description}</TextStyle>;
           return (
             <div key={input.name} className="select-wrapper">
@@ -534,7 +536,6 @@ export default class CampaignForm extends Component {
       values = value.split(':').map((value) => value.trim());
     }
     let fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
-    console.log(fullMatch);
     let index = 0;
     while(fullMatch) {
       let [name, type, description] = [fullMatch[1], fullMatch[2], fullMatch[3]];
@@ -643,7 +644,7 @@ export default class CampaignForm extends Component {
       case 'text':
         return value ? `"${value}"` : '""';
       case 'select':
-        return `:${value || 'default'}`;
+        return `:${value || this.defaults[inputName]}`;
       case 'boolean':
         return value ? true : false;
       case 'number':
@@ -710,7 +711,10 @@ export default class CampaignForm extends Component {
   }
 
   render() {
+    // Reset input map and defaults for selects
     this.inputMap = {};
+    this.defaults = {};
+
     const campaignSelector = (
       <Select
         name={this.mainCampaignName}

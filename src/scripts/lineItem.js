@@ -193,7 +193,7 @@ class ConditionalDiscountCodeRejection < Campaign
 
   def run(cart)
     return unless cart.discount_code
-    cart.discount_code.reject({message: @message}) unless qualifies?(cart)
+    cart.discount_code.reject({message: @message}) if qualifies?(cart)
   end
 end`,
 
@@ -729,8 +729,8 @@ const campaigns = [
   },
   {
     value: "ConditionalDiscountCodeRejection",
-    label: "Conditionally Allow Discount Code",
-    description: "Allows discount codes based on conditions",
+    label: "Conditionally Reject Discount Code",
+    description: "Reject discount codes based on conditions",
     inputs: {
       qualifer_behaviour: {
         type: "select",
@@ -738,11 +738,11 @@ const campaigns = [
         options: [
           {
             value: "all",
-            label: "Allow code if all qualify"
+            label: "Reject code if all qualify"
           },
           {
             value: "any",
-            label: "Allow code if any qualify"
+            label: "Reject code if any qualify"
           }
         ]
       },
