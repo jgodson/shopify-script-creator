@@ -39,7 +39,8 @@ npm start
 Open http://localhost:8080 in your browser and you should see the application running.
 
 ### Deploying
-- Be sure to update the version in `src/versions.js` and `package.json` prior to deploying
+- Update the version in `src/versions.js` and `package.json` prior to deploying
+- Add any significant changes to the `components/ChangeLogContent.js` file (you can [convert markdown to html](https://www.browserling.com/tools/markdown-to-html)).
 - Commit and push your changes to the source repo. You don't need to build manually, this is done in the next step.
 - Deployment scripts are preconfigured in `package.json` to run with one easy command.
 
@@ -56,3 +57,5 @@ npm deploy
 ```
 
 This generates a `docs` directory containing `index.html` and `bundle.js`. The index loads all Polaris styles via the Polaris CDN and the application scripts via `bundle.js`
+
+- Finally, create a release on gitHub detailing the significant changes.
