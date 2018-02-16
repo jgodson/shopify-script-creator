@@ -4,15 +4,11 @@ import { Link, Stack } from '@shopify/polaris';
 export default function ChangeLogContent({newVersion} = props) {
   return (
     <div>
-      <h3>Change Log</h3>
+    <h3>Change Log</h3>
 
-      <ul>
-      <li>Added "Discountable Items Total Quantity" and "Cart Items Total Quantity" to the tier options of the "Tiered Discount Campaign".</li>
-
-      <li>Renamed "Discountable Items Total"  to "Discountable Items Subtotal"</li>
-
-      <li>Fixed a bug in the "Tiered Discount Campaign" where tiered discounts would only apply the first qualified tier and ignore the later ones (only an issue when customer qualifies for multiple tiers). If you have generated a script previously that customers might qualify for multiple tiers, either import or recreate the script and generate again to fix this.</li>
-      </ul>
+    <ul>
+      <li><strong>IMPORTANT</strong> Reverted the wording of "Conditionally Allow Discount Codes" to "Conditionally Reject Discount Codes". Changed the functionality to work as it was originally intended instead (reject code if conditions match). If you import your previous campaigns that used this, you may need to make some adjustments to accommodate. Setting up this campaign as reject instead of allow seems to be easier to set up in most cases.</li>
+    </ul>
 
       <div style={{paddingTop: '2rem'}}>
         <Stack distribution="trailing">
