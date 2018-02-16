@@ -44629,7 +44629,17 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed wording of "Conditionally Reject Discount Code" campaign. It should have been "Conditionally Allow Discount Code".'
+        'Added "Discountable Items Total Quantity" and "Cart Items Total Quantity" to the tier options of the "Tiered Discount Campaign".'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Renamed "Discountable Items Total"  to "Discountable Items Subtotal"'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Fixed a bug in the "Tiered Discount Campaign" where tiered discounts would only apply the first qualified tier and ignore the later ones (only an issue when customer qualifies for multiple tiers). If you have generated a script previously that customers might qualify for multiple tiers, either import or recreate the script and generate again to fix this.'
       )
     ),
     _react2.default.createElement(
@@ -44690,7 +44700,7 @@ var classes = {
 
   QuantityLimit: "\nclass QuantityLimit < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)\n    super(condition, customer_qualifier, cart_qualifier)\n    @limit_by = limit_by == :default ? :product : limit_by\n    @line_item_selector = line_item_selector\n    @per_item_limit = limit\n  end\n\n  def run(cart)\n    return unless qualifies?(cart)\n    item_limits = {}\n    to_delete = []\n    if @per_item_limit == 0\n      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    else\n      cart.line_items.each_with_index do |item, index|\n        next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n        key = nil\n        case @limit_by\n          when :product\n            key = item.variant.product.id\n          when :variant\n            key = item.variant.id\n        end\n        \n        if key\n          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)\n          needs_limiting = true if item.quantity > item_limits[key]\n          needs_deleted = true if item_limits[key] <= 0\n          max_amount = item.quantity - item_limits[key]\n          item_limits[key] -= needs_limiting ? max_amount : item.quantity\n        else\n          needs_limiting = true if item.quantity > @per_item_limit\n          max_amount = item.quantity - @per_item_limit\n        end\n        \n        if needs_limiting\n          if needs_deleted\n            to_delete << index\n          else\n            item.split(take: max_amount)\n          end\n        end\n      end\n      \n      if to_delete.length > 0\n        del_index = -1\n        cart.line_items.delete_if do |item|\n          del_index += 1\n          true if to_delete.include?(del_index)\n        end\n      end\n      \n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
-  TieredDiscount: "\nclass TieredDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, tier_type, discount_tiers)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_type = discount_type\n    @tier_type = tier_type == :default ? :customer_tag : tier_type\n    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }\n  end\n  \n  def init_discount(amount, message)\n    if @discount_type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n  \n  def run(cart)\n    return unless qualifies?(cart)\n    \n    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    case @tier_type\n      when :customer_tag\n        return if cart.customer.nil?\n        customer_tags = cart.customer.tags.map(&:downcase)\n        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }\n      when :cart_subtotal\n        cart_total = cart.subtotal_price\n        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total\n        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }\n    end\n\n    return if qualified_tiers.empty?\n    discount_amount = qualified_tiers.last[:discount].to_i\n    discount_message = qualified_tiers.last[:message]\n    \n    discount = init_discount(discount_amount, discount_message)\n    applicable_items.each { |item| discount.apply(item) }\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
+  TieredDiscount: "\nclass TieredDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, tier_type, discount_tiers)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_type = discount_type\n    @tier_type = tier_type == :default ? :customer_tag : tier_type\n    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_i }\n  end\n  \n  def init_discount(amount, message)\n    if @discount_type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n  \n  def run(cart)\n    return unless qualifies?(cart)\n    \n    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    case @tier_type\n      when :customer_tag\n        return if cart.customer.nil?\n        customer_tags = cart.customer.tags.map(&:downcase)\n        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }\n      when :cart_subtotal\n        cart_total = cart.subtotal_price\n        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total\n        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total + item.line_price }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total_items\n        discountable_quantity = applicable_items.reduce(0) { |total, item| total + item.quantity }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }\n      when :cart_items\n        cart_quantity = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n        qualified_tiers = @discount_tiers.select { |tier| cart_quantity >= tier[:tier].to_i }\n    end\n\n    return if qualified_tiers.empty?\n    discount_amount = qualified_tiers.last[:discount].to_i\n    discount_message = qualified_tiers.last[:message]\n    \n    discount = init_discount(discount_amount, discount_message)\n    applicable_items.each { |item| discount.apply(item) }\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
   DiscountCodeList: "\nclass DiscountCodeList < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_list)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_list = discount_list\n  end\n\n  def init_discount(type, amount, message)\n    if type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n\n  def get_discount_code_type(discount_code)\n    case discount_code\n      when CartDiscount::Percentage\n        return :percent\n      when CartDiscount::FixedAmount\n        return :fixed\n      else\n        return nil\n    end\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n\n    applied_code = cart.discount_code.code.downcase\n    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }\n    return if applicable_discount.empty?\n    raise \"#{applied_code} matches multiple discounts\" if applicable_discount.length > 1\n    \n    applicable_discount = applicable_discount.first\n    case applicable_discount[:type].downcase\n      when 'p', 'percent'\n        discount_type = :percent\n      when 'f', 'fixed'\n        discount_type = :fixed\n      when 'c', 'code'\n        discount_type = get_discount_code_type(cart.discount_code)\n    end\n    return if discount_type.nil?\n\n    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)\n\n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
@@ -45060,14 +45070,20 @@ var campaigns = [{
         value: "cart_subtotal",
         label: "Cart Subtotal"
       }, {
+        value: "cart_items",
+        label: "Cart Items Total Quantity"
+      }, {
         value: "discountable_total",
-        label: "Discountable Items Total"
+        label: "Discountable Items Subtotal"
+      }, {
+        value: "discountable_total_items",
+        label: "Discountable Items Total Quantity"
       }]
     },
     discount_tiers: {
       type: "objectArray",
       description: "Set the discount tiers to be applied",
-      inputFormat: "{tier_condition:text:The tag, subtotal, or item total to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
+      inputFormat: "{tier_condition:text:The tag, subtotal, item total, etc to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
       outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
     }
   },
@@ -45879,7 +45895,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.4.2",
+  currentVersion: "0.5.0",
   minimumVersion: "0.1.0"
 };
 
