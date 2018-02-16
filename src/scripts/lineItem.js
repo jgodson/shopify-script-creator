@@ -263,7 +263,7 @@ class TieredDiscount < Campaign
     @line_item_selector = line_item_selector
     @discount_type = discount_type
     @tier_type = tier_type == :default ? :customer_tag : tier_type
-    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount] }
+    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_i }
   end
   
   def init_discount(amount, message)
@@ -287,8 +287,14 @@ class TieredDiscount < Campaign
         cart_total = cart.subtotal_price
         qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
       when :discountable_total
-        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total += item.line_price }
+        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total + item.line_price }
         qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }
+      when :discountable_total_items
+        discountable_quantity = applicable_items.reduce(0) { |total, item| total + item.quantity }
+        qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }
+      when :cart_items
+        cart_quantity = cart.line_items.reduce(0) { |total, item| total + item.quantity }
+        qualified_tiers = @discount_tiers.select { |tier| cart_quantity >= tier[:tier].to_i }
     end
 
     return if qualified_tiers.empty?
@@ -854,15 +860,23 @@ const campaigns = [
             label: "Cart Subtotal"
           },
           {
+            value: "cart_items",
+            label: "Cart Items Total Quantity"
+          },
+          {
             value: "discountable_total",
-            label: "Discountable Items Total"
+            label: "Discountable Items Subtotal"
+          },
+          {
+            value: "discountable_total_items",
+            label: "Discountable Items Total Quantity"
           }
         ]
       },
       discount_tiers: {
         type: "objectArray",
         description: "Set the discount tiers to be applied",
-        inputFormat: "{tier_condition:text:The tag, subtotal, or item total to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
+        inputFormat: "{tier_condition:text:The tag, subtotal, item total, etc to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
         outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
       }
     },

@@ -5,9 +5,13 @@ export default function ChangeLogContent({newVersion} = props) {
   return (
     <div>
       <h3>Change Log</h3>
-      
+
       <ul>
-      <li>Fixed wording of "Conditionally Reject Discount Code" campaign. It should have been "Conditionally Allow Discount Code".</li>
+      <li>Added "Discountable Items Total Quantity" and "Cart Items Total Quantity" to the tier options of the "Tiered Discount Campaign".</li>
+
+      <li>Renamed "Discountable Items Total"  to "Discountable Items Subtotal"</li>
+
+      <li>Fixed a bug in the "Tiered Discount Campaign" where tiered discounts would only apply the first qualified tier and ignore the later ones (only an issue when customer qualifies for multiple tiers). If you have generated a script previously that customers might qualify for multiple tiers, either import or recreate the script and generate again to fix this.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
