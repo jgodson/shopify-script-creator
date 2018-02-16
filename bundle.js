@@ -44646,17 +44646,12 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Added "Discountable Items Total Quantity" and "Cart Items Total Quantity" to the tier options of the "Tiered Discount Campaign".'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Renamed "Discountable Items Total"  to "Discountable Items Subtotal"'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Fixed a bug in the "Tiered Discount Campaign" where tiered discounts would only apply the first qualified tier and ignore the later ones (only an issue when customer qualifies for multiple tiers). If you have generated a script previously that customers might qualify for multiple tiers, either import or recreate the script and generate again to fix this.'
+        _react2.default.createElement(
+          'strong',
+          null,
+          'IMPORTANT'
+        ),
+        ' Reverted the wording of "Conditionally Allow Discount Codes" to "Conditionally Reject Discount Codes". Changed the functionality to work as it was originally intended instead (reject code if conditions match). If you import your previous campaigns that used this, you may need to make some adjustments to accommodate. Setting up this campaign as reject instead of allow seems to be easier to set up in most cases.'
       )
     ),
     _react2.default.createElement(
