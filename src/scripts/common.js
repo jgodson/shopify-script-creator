@@ -23,7 +23,10 @@ class Campaign
     return true if @qualifiers.empty?
     @unmodified_line_items = cart.line_items.map(&:to_hash) if @post_amount_qualifier
     @qualifiers.send(@condition) do |qualifier|
-      is_selector = qualifier.is_a?(Selector) rescue false
+      is_selector = false
+      if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }
+        is_selector = true
+      end rescue nil
       if is_selector
         raise "Missing line item match type" if @li_match_type.nil?
         cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }
@@ -388,7 +391,7 @@ class LineItemPropertiesSelector < Selector
 end`,
 
   CartAmountQualifier: `
-  class CartAmountQualifier < Qualifier
+class CartAmountQualifier < Qualifier
   def initialize(cart_or_item, comparison_type, amount)
     @cart_or_item = cart_or_item == :default ? :cart : cart_or_item
     @comparison_type = comparison_type == :default ? :greater_than : comparison_type
