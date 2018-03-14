@@ -44646,12 +44646,12 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        _react2.default.createElement(
-          'strong',
-          null,
-          'IMPORTANT'
-        ),
-        ' Reverted the wording of "Conditionally Allow Discount Codes" to "Conditionally Reject Discount Codes". Changed the functionality to work as it was originally intended instead (reject code if conditions match). If you import your previous campaigns that used this, you may need to make some adjustments to accommodate. Setting up this campaign as reject instead of allow seems to be easier to set up in most cases.'
+        'Fixed Multi-select causing script errors for line item selector/qualifier'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Other minor bug fixes/tweaks'
       )
     ),
     _react2.default.createElement(
@@ -45907,7 +45907,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.6.0",
+  currentVersion: "0.6.1",
   minimumVersion: "0.1.0"
 };
 
