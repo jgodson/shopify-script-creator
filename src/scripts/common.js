@@ -68,6 +68,8 @@ class Qualifier
         return compare < compare_to
       when :less_than_or_equal
         return compare <= compare_to
+      when :equal_to
+        return compare == compare_to
       else
         raise "Invalid comparison type"
     end
@@ -409,6 +411,26 @@ class CartAmountQualifier < Qualifier
   end
 end`,
 
+  CartQuantityQualifier: `
+class CartQuantityQualifier < Qualifier
+  def initialize(cart_or_item, comparison_type, quantity)
+    @cart_or_item = cart_or_item
+    @comparison_type = comparison_type
+    @quantity = quantity
+  end
+
+  def match?(cart, selector = nil)
+    if @cart_or_item == :item
+      total = cart.line_items.reduce(0) do |total, item|
+        total + selector.match?(item) ? item.quantity : 0
+      end
+    else
+      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
+    end
+    compare_amounts(total, @comparison_type, @quantity)
+  end
+end`,
+
   TotalWeightQualifier: `
 class TotalWeightQualifier < Qualifier
   def initialize(comparison_type, amount, units)
@@ -642,12 +664,12 @@ const cartQualifiers = [
   },
   {
     value: "CartAmountQualifier",
-    label: "Cart/Item Total",
-    description: "Will only apply if cart subtotal or qualified item total meets conditions",
+    label: "Cart/Item subtotal",
+    description: "Will only apply if cart subtotal or qualified item subtotal meets conditions",
     inputs: {
       cart_or_item_total: {
         type: "select",
-        description: "Cart subtotal or item total",
+        description: "Cart subtotal or item subtotal",
         options: [
           {
             value: "cart",
@@ -655,7 +677,7 @@ const cartQualifiers = [
           },
           {
             value: "item",
-            label: "Qualified item total"
+            label: "Qualified item subtotal"
           },
         ]
       },
@@ -684,6 +706,57 @@ const cartQualifiers = [
       amount: {
         type: "number",
         description: "Amount in dollars"
+      }
+    }
+  },
+  {
+    value: "CartQuantityQualifier",
+    label: "Cart/Item quantity total",
+    description: "Will only apply if cart quantity or qualified item quantity meets conditions",
+    inputs: {
+      cart_or_item_total: {
+        type: "select",
+        description: "Cart quantity or item quantity",
+        options: [
+          {
+            value: "cart",
+            label: "Cart total quantity"
+          },
+          {
+            value: "item",
+            label: "Qualified item total quantity"
+          },
+        ]
+      },
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+          {
+            value: "equal_to",
+            label: "Equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Total quantity of items"
       }
     }
   },
