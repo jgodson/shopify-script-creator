@@ -9427,7 +9427,7 @@ Object.defineProperty(exports, "__esModule", {
 var classes = {
   Campaign: "\nclass Campaign\n  def initialize(condition, *qualifiers)\n    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym\n    @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact\n    @line_item_selector = qualifiers.last unless @line_item_selector\n    qualifiers.compact.each do |qualifier|\n      is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)\n      if is_multi_select\n        qualifier.instance_variable_get(:@conditions).each do |nested_q| \n          @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)\n          @qualifiers << qualifier\n        end\n      else\n        @post_amount_qualifier = qualifier if qualifier.is_a?(PostCartAmountQualifier)\n        @qualifiers << qualifier\n      end\n    end if @qualifiers.empty?\n  end\n  \n  def qualifies?(cart)\n    return true if @qualifiers.empty?\n    @unmodified_line_items = cart.line_items.map(&:to_hash) if @post_amount_qualifier\n    @qualifiers.send(@condition) do |qualifier|\n      is_selector = false\n      if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }\n        is_selector = true\n      end rescue nil\n      if is_selector\n        raise \"Missing line item match type\" if @li_match_type.nil?\n        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }\n      else\n        qualifier.match?(cart, @line_item_selector)\n      end\n    end\n  end\n\n  def revert_changes(cart)\n    cart.instance_variable_set(:@line_items, @unmodified_line_items)\n  end\nend",
 
-  Qualifier: "\nclass Qualifier\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\n\n  def compare_amounts(compare, comparison_type, compare_to)\n    case comparison_type\n      when :greater_than\n        return compare > compare_to\n      when :greater_than_or_equal\n        return compare >= compare_to\n      when :less_than\n        return compare < compare_to\n      when :less_than_or_equal\n        return compare <= compare_to\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend",
+  Qualifier: "\nclass Qualifier\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\n\n  def compare_amounts(compare, comparison_type, compare_to)\n    case comparison_type\n      when :greater_than\n        return compare > compare_to\n      when :greater_than_or_equal\n        return compare >= compare_to\n      when :less_than\n        return compare < compare_to\n      when :less_than_or_equal\n        return compare <= compare_to\n      when :equal_to\n        return compare == compare_to\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend",
 
   Selector: "\nclass Selector\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\nend",
 
@@ -9472,6 +9472,8 @@ var classes = {
   LineItemPropertiesSelector: "\nclass LineItemPropertiesSelector < Selector\n  def initialize(target_properties)\n    @target_properties = target_properties\n  end\n\n  def match?(line_item)\n    line_item_props = line_item.properties\n    @target_properties.all? do |key, value|\n      next unless line_item_props.has_key?(key)\n      true if line_item_props[key].downcase == value.downcase\n    end\n  end\nend",
 
   CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total += selector.match?(item) ? item.original_line_price : Money.zero\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
+
+  CartQuantityQualifier: "\nclass CartQuantityQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, quantity)\n    @cart_or_item = cart_or_item\n    @comparison_type = comparison_type\n    @quantity = quantity\n  end\n\n  def match?(cart, selector = nil)\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(0) do |total, item|\n        total + selector.match?(item) ? item.quantity : 0\n      end\n    else\n      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n    end\n    compare_amounts(total, @comparison_type, @quantity)\n  end\nend",
 
   TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart, selector = nil)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(cart_weight, @comparison_type, @amount)\n  end\nend"
 };
@@ -9635,18 +9637,18 @@ var cartQualifiers = [{
   description: "No effects"
 }, {
   value: "CartAmountQualifier",
-  label: "Cart/Item Total",
-  description: "Will only apply if cart subtotal or qualified item total meets conditions",
+  label: "Cart/Item subtotal",
+  description: "Will only apply if cart subtotal or qualified item subtotal meets conditions",
   inputs: {
     cart_or_item_total: {
       type: "select",
-      description: "Cart subtotal or item total",
+      description: "Cart subtotal or item subtotal",
       options: [{
         value: "cart",
         label: "Cart subtotal"
       }, {
         value: "item",
-        label: "Qualified item total"
+        label: "Qualified item subtotal"
       }]
     },
     condition: {
@@ -9669,6 +9671,47 @@ var cartQualifiers = [{
     amount: {
       type: "number",
       description: "Amount in dollars"
+    }
+  }
+}, {
+  value: "CartQuantityQualifier",
+  label: "Cart/Item quantity total",
+  description: "Will only apply if cart quantity or qualified item quantity meets conditions",
+  inputs: {
+    cart_or_item_total: {
+      type: "select",
+      description: "Cart quantity or item quantity",
+      options: [{
+        value: "cart",
+        label: "Cart total quantity"
+      }, {
+        value: "item",
+        label: "Qualified item total quantity"
+      }]
+    },
+    condition: {
+      type: "select",
+      description: "Type of comparison",
+      options: [{
+        value: "greater_than",
+        label: "Greater than"
+      }, {
+        value: "less_than",
+        label: "Less than"
+      }, {
+        value: "greater_than_or_equal",
+        label: "Greater than or equal to"
+      }, {
+        value: "less_than_or_equal",
+        label: "Less than or equal to"
+      }, {
+        value: "equal_to",
+        label: "Equal to"
+      }]
+    },
+    amount: {
+      type: "number",
+      description: "Total quantity of items"
     }
   }
 }, {
@@ -44646,17 +44689,17 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed Multi-select causing script errors for line item selector/qualifier'
+        'Fixed Total Weight Qualifier'
       ),
       _react2.default.createElement(
         'li',
         null,
-        'Fixed Cart Total Weight Qualifier'
+        'Reworded Cart Amount Qualifier a bit to clarify that it\'s the subtotal amount'
       ),
       _react2.default.createElement(
         'li',
         null,
-        'Other minor bug fixes/tweaks'
+        'Added a Cart Quantity Qualifier to check for a specific number of items in the cart (total items or total qualified items)'
       )
     ),
     _react2.default.createElement(
@@ -45912,7 +45955,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.6.1",
+  currentVersion: "0.7.0",
   minimumVersion: "0.1.0"
 };
 
