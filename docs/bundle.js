@@ -9473,7 +9473,7 @@ var classes = {
 
   CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total += selector.match?(item) ? item.original_line_price : Money.zero\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
-  TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend"
+  TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart, selector = nil)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(cart_weight, @comparison_type, @amount)\n  end\nend"
 };
 
 var customerQualifiers = [{
@@ -44647,6 +44647,11 @@ function ChangeLogContent() {
         'li',
         null,
         'Fixed Multi-select causing script errors for line item selector/qualifier'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Fixed Cart Total Weight Qualifier'
       ),
       _react2.default.createElement(
         'li',
