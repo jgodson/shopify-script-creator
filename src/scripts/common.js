@@ -429,7 +429,7 @@ class TotalWeightQualifier < Qualifier
     grams * 0.001
   end
 
-  def match?(cart)
+  def match?(cart, selector = nil)
     cart_weight = cart.total_weight
     case @units
       when :lb
@@ -440,7 +440,7 @@ class TotalWeightQualifier < Qualifier
         cart_weight = g_to_oz(cart_weight)
     end
 
-    compare_amounts(total, @comparison_type, @amount)
+    compare_amounts(cart_weight, @comparison_type, @amount)
   end
 end`
 };

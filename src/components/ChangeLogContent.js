@@ -8,7 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
       <li>Fixed Multi-select causing script errors for line item selector/qualifier</li>
-
+      <li>Fixed Cart Total Weight Qualifier</li>
       <li>Other minor bug fixes/tweaks</li>
       </ul>
 
