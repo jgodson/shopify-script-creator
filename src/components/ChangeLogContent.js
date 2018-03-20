@@ -7,11 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3>Change Log</h3>
 
       <ul>
-      <li>Fixed Total Weight Qualifier</li>
-
-      <li>Reworded Cart Amount Qualifier a bit to clarify that it's the subtotal amount</li>
-
-      <li>Added a Cart Quantity Qualifier to check for a specific number of items in the cart (total items or total qualified items)</li>
+      <li>Fixed ends with option causing errors in script for Customer Email qualifier, Customer Tag qualifier, Discount Code qualifier, Product Tag selector, and Variant SKU selector.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

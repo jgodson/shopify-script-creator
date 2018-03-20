@@ -509,7 +509,7 @@ const customerQualifiers = [
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -556,7 +556,7 @@ const customerQualifiers = [
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -851,7 +851,7 @@ const cartQualifiers = [
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -1034,7 +1034,7 @@ const lineItemSelectors = [
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
@@ -1081,7 +1081,7 @@ const lineItemSelectors = [
             label: "Start with one of"
           },
           {
-            value: "ends_with",
+            value: "end_with",
             label: "End with one of"
           }
         ]
