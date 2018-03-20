@@ -9511,7 +9511,7 @@ var customerQualifiers = [{
         value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -9549,7 +9549,7 @@ var customerQualifiers = [{
         value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -9787,7 +9787,7 @@ var cartQualifiers = [{
         value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -9939,7 +9939,7 @@ var lineItemSelectors = [{
         value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -9977,7 +9977,7 @@ var lineItemSelectors = [{
         value: "start_with",
         label: "Start with one of"
       }, {
-        value: "ends_with",
+        value: "end_with",
         label: "End with one of"
       }]
     },
@@ -44689,17 +44689,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed Total Weight Qualifier'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Reworded Cart Amount Qualifier a bit to clarify that it\'s the subtotal amount'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Added a Cart Quantity Qualifier to check for a specific number of items in the cart (total items or total qualified items)'
+        'Fixed ends with option causing errors in script for Customer Email qualifier, Customer Tag qualifier, Discount Code qualifier, Product Tag selector, and Variant SKU selector.'
       )
     ),
     _react2.default.createElement(
@@ -45955,7 +45945,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.7.0",
+  currentVersion: "0.7.1",
   minimumVersion: "0.1.0"
 };
 
