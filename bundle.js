@@ -9473,6 +9473,8 @@ var classes = {
 
   CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total += selector.match?(item) ? item.original_line_price : Money.zero\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
+  ReducedCartAmountQualifier: "\nclass ReducedCartAmountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total =\n      case cart.discount_code\n        when CartDiscount::Percentage\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item| \n              total += item.variant.product.gift_card? ? Money.zero : item.line_price\n            end\n            gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc\n            cart_subtotal_without_gc * ((Decimal.new(100) - cart.discount_code.percentage) / 100) + gift_card_amount\n          else\n            cart.subtotal_price\n          end\n        when CartDiscount::FixedAmount\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            [cart.subtotal_price - cart.discount_code.amount, Money.zero].max\n          else\n            cart.subtotal_price\n          end\n        else\n          cart.subtotal_price\n      end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
+
   CartQuantityQualifier: "\nclass CartQuantityQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, quantity)\n    @cart_or_item = cart_or_item\n    @comparison_type = comparison_type\n    @quantity = quantity\n  end\n\n  def match?(cart, selector = nil)\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(0) do |total, item|\n        total + selector.match?(item) ? item.quantity : 0\n      end\n    else\n      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n    end\n    compare_amounts(total, @comparison_type, @quantity)\n  end\nend",
 
   TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart, selector = nil)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(cart_weight, @comparison_type, @amount)\n  end\nend"
@@ -9839,6 +9841,33 @@ var cartQualifiers = [{
     country_codes: {
       type: "array",
       description: "Enter the applicable country codes"
+    }
+  }
+}, {
+  value: "ReducedCartAmountQualifier",
+  label: "Discounted Cart Subtotal (applied by discount code)",
+  description: "Will only apply if the cart subtotal, subtracting cart discounts, meets conditions. NOTE: Works for discount codes that apply to entire cart only.",
+  inputs: {
+    condition: {
+      type: "select",
+      description: "Type of comparison",
+      options: [{
+        value: "greater_than",
+        label: "Greater than"
+      }, {
+        value: "less_than",
+        label: "Less than"
+      }, {
+        value: "greater_than_or_equal",
+        label: "Greater than or equal to"
+      }, {
+        value: "less_than_or_equal",
+        label: "Less than or equal to"
+      }]
+    },
+    amount: {
+      type: "number",
+      description: "Amount in dollars"
     }
   }
 }];
@@ -44689,7 +44718,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed ends with option causing errors in script for Customer Email qualifier, Customer Tag qualifier, Discount Code qualifier, Product Tag selector, and Variant SKU selector.'
+        'Add Discounted Cart Subtotal (applied by discount codes) to the cart qualifiers. This allows you to check the value of the cart after discount codes are applied. (Only for entire cart discount codes. Discount codes that are only for specific items will cause issues with this)'
       )
     ),
     _react2.default.createElement(
@@ -45945,7 +45974,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.7.1",
+  currentVersion: "0.8.0",
   minimumVersion: "0.1.0"
 };
 
