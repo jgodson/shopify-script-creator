@@ -281,7 +281,7 @@ class CountryAndProvinceQualifier < Qualifier
   end
 
   def match?(cart, selector = nil)
-    return if cart.shipping_address.nil?
+    return if cart.shipping_address&.country_code.nil?
     country_code = cart.shipping_address.country_code.upcase
     return @invert unless @country_map.key?(country_code) && cart.shipping_address.province_code
     province_code = cart.shipping_address.province_code.upcase
@@ -298,7 +298,7 @@ class CountryCodeQualifier < Qualifier
 
   def match?(cart, selector = nil)
     shipping_address = cart.shipping_address
-    return false if shipping_address.nil?
+    return false if shipping_address&.country_code.nil?
     @invert ^ @country_codes.include?(shipping_address.country_code.upcase)
   end
 end`,
@@ -411,7 +411,7 @@ class CartAmountQualifier < Qualifier
   end
 end`,
 
-ReducedCartAmountQualifier: `
+  ReducedCartAmountQualifier: `
 class ReducedCartAmountQualifier < Qualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type
