@@ -9455,9 +9455,9 @@ var classes = {
 
   ProductIdSelector: "\nclass ProductIdSelector < Selector\n  def initialize(match_type, product_ids)\n    @invert = match_type == :not_one\n    @product_ids = product_ids.map { |id| id.to_i }\n  end\n\n  def match?(line_item)\n    @invert ^ @product_ids.include?(line_item.variant.product.id)\n  end\nend",
 
-  CountryAndProvinceQualifier: "\nclass CountryAndProvinceQualifier < Qualifier\n  def initialize(match_type, country_map)\n    @invert = match_type == :not_one\n    @country_map = country_map\n  end\n\n  def match?(cart, selector = nil)\n    return if cart.shipping_address.nil?\n    country_code = cart.shipping_address.country_code.upcase\n    return @invert unless @country_map.key?(country_code) && cart.shipping_address.province_code\n    province_code = cart.shipping_address.province_code.upcase\n    @invert ^ @country_map[country_code].include?(province_code)\n  end\nend",
+  CountryAndProvinceQualifier: "\nclass CountryAndProvinceQualifier < Qualifier\n  def initialize(match_type, country_map)\n    @invert = match_type == :not_one\n    @country_map = country_map\n  end\n\n  def match?(cart, selector = nil)\n    return if cart.shipping_address&.country_code.nil?\n    country_code = cart.shipping_address.country_code.upcase\n    return @invert unless @country_map.key?(country_code) && cart.shipping_address.province_code\n    province_code = cart.shipping_address.province_code.upcase\n    @invert ^ @country_map[country_code].include?(province_code)\n  end\nend",
 
-  CountryCodeQualifier: "\nclass CountryCodeQualifier < Qualifier\n  def initialize(match_type, country_codes)\n    @invert = match_type == :not_one\n    @country_codes = country_codes.map(&:upcase)\n  end\n\n  def match?(cart, selector = nil)\n    shipping_address = cart.shipping_address\n    return false if shipping_address.nil?\n    @invert ^ @country_codes.include?(shipping_address.country_code.upcase)\n  end\nend",
+  CountryCodeQualifier: "\nclass CountryCodeQualifier < Qualifier\n  def initialize(match_type, country_codes)\n    @invert = match_type == :not_one\n    @country_codes = country_codes.map(&:upcase)\n  end\n\n  def match?(cart, selector = nil)\n    shipping_address = cart.shipping_address\n    return false if shipping_address&.country_code.nil?\n    @invert ^ @country_codes.include?(shipping_address.country_code.upcase)\n  end\nend",
 
   ProductTypeSelector: "\nclass ProductTypeSelector < Selector\n  def initialize(match_type, product_types)\n    @invert = match_type == :not_one\n    @product_types = product_types.map(&:downcase)\n  end\n\n  def match?(line_item)\n    @invert ^ @product_types.include?(line_item.variant.product.product_type.downcase)\n  end\nend",
 
@@ -44718,7 +44718,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Add Discounted Cart Subtotal (applied by discount codes) to the cart qualifiers. This allows you to check the value of the cart after discount codes are applied. (Only for entire cart discount codes. Discount codes that are only for specific items will cause issues with this)'
+        'Minor fix where Country & Province qualifier and the Country code qualifier could cause errors due to the address having no country code'
       )
     ),
     _react2.default.createElement(
@@ -45974,7 +45974,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.8.0",
+  currentVersion: "0.8.1",
   minimumVersion: "0.1.0"
 };
 
