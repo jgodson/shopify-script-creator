@@ -11443,33 +11443,31 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
       });
       var output = inputFmt;
       for (var index = 0; index < values.length; index++) {
-        var type = output.match(/{\w+:(\w+):[\w\s'.(),]+}/)[1];
-        if (type === "text" || type === "number") {
-          // Only grab what's in "". Removes unncessary stuff like :discount or ,
-          var _value = values[index].match(/"(.+)"/);
-          values[index] = _value ? _value[1] : _value;
-        } else {
+        var type = output.match(/{\w+:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
+        if (type === 'array') {
           values[index] = values[index].split(',').map(function (value) {
-            // Replace any [] found
-            value = value.replace(/[\[\]]/g, '');
-            // Removes "" around each value in the array
-            value = value.substring(value.length - 1, 0).substring(1);
-            return value.trim();
+            // Only grab what's in "". Removes unncessary stuff like :discount or ,
+            value = value.match(/"(.+)"/);
+            return value ? value[1].trim() : "";
           });
           values[index] = values[index].filter(function (value) {
             return value !== "";
           }).join(', ');
+        } else {
+          // Only grab what's in "". Removes unncessary stuff like :discount or ,
+          var _value = values[index].match(/"(.+)"/);
+          values[index] = _value ? _value[1] : _value;
         }
         // Skip null values
         if (values[index] !== null) {
-          output = output.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[index]);
+          output = output.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
         }
       }
       return output;
     }).join('\n');
     return lines;
   } else {
-    var inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+}/g, '').trim();
+    var inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/g, '').trim();
     var splitter = inputFormatRepl[0];
     var requiredInputs = inputFormatRepl.split(splitter).length;
     var _lines = value.split('\n').map(function (line) {
@@ -42665,7 +42663,11 @@ function VersionBox(props) {
     { className: 'version-box' },
     _react2.default.createElement(
       'a',
-      { href: 'https://github.com/jgodson/shopify-script-creator/releases' },
+      {
+        href: 'https://github.com/jgodson/shopify-script-creator/releases',
+        target: '_blank',
+        rel: 'noopener noreferrer'
+      },
       'BETA ',
       props.currentVersion
     )
@@ -42852,13 +42854,13 @@ var Modal = function (_Component) {
     var _this = _possibleConstructorReturn(this, (Modal.__proto__ || Object.getPrototypeOf(Modal)).call(this, props));
 
     _this.handleSubmit = _this.handleSubmit.bind(_this);
+    _this.generateInput = _this.generateInput.bind(_this);
 
     _this.state = {
       values: [],
-      errors: []
+      errors: [],
+      isEditing: false
     };
-
-    _this.isEditing = false;
     return _this;
   }
 
@@ -42874,9 +42876,19 @@ var Modal = function (_Component) {
         for (var index = 0; index < iterations; index++) {
           newState.values[index] = this.props.inputs[index].value;
         }
-        if (newState.values[0] !== "") {
-          this.isEditing = true;
+
+        // Set the editing state if every input value isn't blank
+        if (newState.values.every(function (val) {
+          return val !== '';
+        })) {
+          newState.isEditing = true;
         }
+
+        // Focus the select if it's the first input (nothing on the compnent to autofocus)
+        if (this.props.inputs[0].type === 'select') {
+          document.querySelector('.Modal').querySelector('select').focus();
+        }
+
         this.setState(newState);
       } else {
         document.querySelector('.Modal').querySelector('button').focus();
@@ -42890,16 +42902,18 @@ var Modal = function (_Component) {
       if (!hasInputs) {
         return this.props.onClose(true);
       }
+
       // Validate that nothing is blank
       var newState = this.state;
       var preventSubmission = false;
       for (var index = 0; index < this.state.values.length; index++) {
-        if (this.state.values[index].trim() === "") {
-          // Set to an error message instead to make this more flexible?
-          newState.errors[index] = "Must enter a value";
+        var value = this.state.values[index];
+        if (typeof value !== 'number' && value.trim() === "") {
+          newState.errors[index] = 'Must enter a value';
           preventSubmission = true;
         }
       }
+
       if (preventSubmission) {
         this.setState(newState);
         return;
@@ -42910,8 +42924,8 @@ var Modal = function (_Component) {
     key: 'handleInputChange',
     value: function handleInputChange(value, index) {
       var newState = this.state;
-      if (value.trim() === "") {
-        newState.errors[index] = "Must enter a value";
+      if (typeof value !== 'number' && value.trim() === '') {
+        newState.errors[index] = 'Must enter a value';
       } else {
         newState.errors[index] = false;
       }
@@ -42919,20 +42933,65 @@ var Modal = function (_Component) {
       this.setState(newState);
     }
   }, {
+    key: 'generateInput',
+    value: function generateInput(input, index) {
+      var _this2 = this;
+
+      var type = input.type,
+          label = input.label,
+          options = input.options,
+          name = input.name,
+          description = input.description;
+
+
+      switch (type) {
+        case 'select':
+          return _react2.default.createElement(_polaris.Select, {
+            label: label,
+            key: name,
+            options: options,
+            name: name,
+            helpText: description,
+            value: this.state.values[index],
+            onChange: function onChange(val) {
+              return _this2.handleInputChange(val, index);
+            }
+          });
+        default:
+          return _react2.default.createElement(_polaris.TextField, {
+            label: label,
+            key: name,
+            type: type,
+            min: type === 'number' ? 0 : undefined,
+            step: type === 'number' ? 0.01 : undefined,
+            name: name,
+            autoFocus: index === 0,
+            helpText: description,
+            error: this.state.errors[index],
+            value: this.state.values[index],
+            onChange: function onChange(val) {
+              return _this2.handleInputChange(type === 'number' ? Math.abs(val) : val, index);
+            }
+          });
+      }
+    }
+  }, {
     key: 'render',
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
       var hasInputs = this.props.inputs && this.props.inputs.length > 0;
       var hasActions = this.props.actions && this.props.actions.length > 0;
+      var isEditing = this.state.isEditing;
 
-      var title = hasInputs ? (this.isEditing ? 'Edit' : 'Add') + ' ' + this.props.title.toLowerCase() : this.props.title;
+
+      var title = hasInputs ? (isEditing ? 'Edit' : 'Add') + ' ' + this.props.title.toLowerCase() : this.props.title;
 
       return _react2.default.createElement(
         _react.Fragment,
         null,
         _react2.default.createElement('div', { className: 'Modal__Backdrop', onClick: function onClick() {
-            return _this2.props.onClose(false);
+            return _this3.props.onClose(false);
           } }),
         _react2.default.createElement(
           'div',
@@ -42955,16 +43014,14 @@ var Modal = function (_Component) {
                   plain: true,
                   icon: 'cancel',
                   onClick: function onClick() {
-                    return _this2.props.onClose(false);
+                    return _this3.props.onClose(false);
                   }
                 })
               )
             ),
             _react2.default.createElement(
               'form',
-              { ref: function ref(form) {
-                  return _this2.form = form;
-                }, onSubmit: this.handleSubmit },
+              { onSubmit: this.handleSubmit },
               _react2.default.createElement(
                 _polaris.Card.Section,
                 null,
@@ -42975,23 +43032,7 @@ var Modal = function (_Component) {
                   hasInputs && _react2.default.createElement(
                     _polaris.FormLayout,
                     null,
-                    this.props.inputs.map(function (input, index) {
-                      return _react2.default.createElement(_polaris.TextField, {
-                        label: input.label,
-                        key: input.name,
-                        type: input.type,
-                        min: input.type === "number" ? 0 : undefined,
-                        step: input.type === "number" ? 0.01 : undefined,
-                        name: input.name,
-                        autoFocus: index === 0,
-                        helpText: input.description,
-                        error: _this2.state.errors[index],
-                        value: _this2.state.values[index],
-                        onChange: function onChange(val) {
-                          return _this2.handleInputChange(val, index);
-                        }
-                      });
-                    })
+                    this.props.inputs.map(this.generateInput)
                   )
                 )
               ),
@@ -43000,9 +43041,7 @@ var Modal = function (_Component) {
                 null,
                 _react2.default.createElement(
                   _polaris.Stack,
-                  {
-                    distribution: 'trailing'
-                  },
+                  { distribution: 'trailing' },
                   this.props.actions.map(function (action, index) {
                     return _react2.default.createElement(
                       _polaris.Button,
@@ -43012,7 +43051,7 @@ var Modal = function (_Component) {
                         destructive: action.destructive,
                         submit: action.submit,
                         onClick: action.onClick === 'close' ? function () {
-                          return _this2.props.onClose(false);
+                          return _this3.props.onClose(false);
                         } : action.onClick
                       },
                       action.content
@@ -43562,7 +43601,7 @@ var CampaignForm = function (_Component) {
               helpText: input.description,
               value: _this3.state.inputs[input.type][input.name],
               onChange: function onChange(val) {
-                return _this3.handleInputChange(val, input.type, input.name);
+                return _this3.handleInputChange(Math.abs(val), input.type, input.name);
               }
             });
           }
@@ -43866,24 +43905,43 @@ var CampaignForm = function (_Component) {
           return value.trim();
         });
       }
-      var fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
+      var fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
       var index = 0;
       while (fullMatch) {
-        var _ref = [fullMatch[1], fullMatch[2], fullMatch[3]],
+        var _ref = [fullMatch[1], fullMatch[2], fullMatch[3], fullMatch[4]],
             name = _ref[0],
             type = _ref[1],
-            description = _ref[2];
+            description = _ref[2],
+            options = _ref[3];
+
+        if (options) {
+          options = options.split(',').map(function (option) {
+            var _option$split = option.split('|'),
+                _option$split2 = _slicedToArray(_option$split, 2),
+                value = _option$split2[0],
+                label = _option$split2[1];
+
+            return {
+              value: value,
+              label: label
+            };
+          });
+          value = values ? values[index] : options[0].value;
+        } else {
+          value = values ? values[index] : "";
+        }
 
         var newInput = {
           name: name,
           label: (0, _helpers.splitAndCapitalize)('_', name),
           type: type,
-          value: value ? values[index] : "",
+          value: value,
+          options: options,
           description: description
         };
         inputs.push(newInput);
         inputFormat = inputFormat.replace(fullMatch[0], '');
-        fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
+        fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
         index++;
       }
       return inputs;
@@ -43898,7 +43956,6 @@ var CampaignForm = function (_Component) {
 
       // Handle array and objects
       if (input.type === "array") {
-
         if (currentValue) {
           currentValue += ',' + values.join('');
         } else {
@@ -43908,7 +43965,7 @@ var CampaignForm = function (_Component) {
         // Build input value for text box
         var newValue = input.options.inputFormat;
         for (var _index = 0; _index < values.length; _index++) {
-          newValue = newValue.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[_index]);
+          newValue = newValue.replace(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[_index]);
         }
 
         // Add new content, or replace old content if editing
@@ -44718,7 +44775,46 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Minor fix where Country & Province qualifier and the Country code qualifier could cause errors due to the address having no country code'
+        _react2.default.createElement(
+          'strong',
+          null,
+          'NEW - Bundle Discount campaign'
+        ),
+        _react2.default.createElement('br', null),
+        _react2.default.createElement(
+          'span',
+          null,
+          'Use the '
+        ),
+        _react2.default.createElement(
+          'a',
+          {
+            href: 'https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform',
+            target: '_blank',
+            rel: 'noopener noreferrer'
+          },
+          'Leave feedback'
+        ),
+        _react2.default.createElement(
+          'span',
+          null,
+          ' link if you notice any issues'
+        )
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'When adding discounts to the Discount Code List campaign, you no longer have to type the discount type. There is an option selector there now'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Negative numbers are no longer permitted in number inputs'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Other minor fixes and improvements'
       )
     ),
     _react2.default.createElement(
@@ -44783,7 +44879,9 @@ var classes = {
 
   DiscountCodeList: "\nclass DiscountCodeList < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_list)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_list = discount_list\n  end\n\n  def init_discount(type, amount, message)\n    if type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n\n  def get_discount_code_type(discount_code)\n    case discount_code\n      when CartDiscount::Percentage\n        return :percent\n      when CartDiscount::FixedAmount\n        return :fixed\n      else\n        return nil\n    end\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n\n    applied_code = cart.discount_code.code.downcase\n    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }\n    return if applicable_discount.empty?\n    raise \"#{applied_code} matches multiple discounts\" if applicable_discount.length > 1\n    \n    applicable_discount = applicable_discount.first\n    case applicable_discount[:type].downcase\n      when 'p', 'percent'\n        discount_type = :percent\n      when 'f', 'fixed'\n        discount_type = :fixed\n      when 'c', 'code'\n        discount_type = get_discount_code_type(cart.discount_code)\n    end\n    return if discount_type.nil?\n\n    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)\n\n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
-  DiscountCodePattern: "\nclass DiscountCodePattern < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @percent_format = percent_format\n    @fixed_format = fixed_format\n  end\n\n  def get_discount_type(code)\n    percent_search = @percent_format.split('#').first\n    fixed_search = @fixed_format.split('#').first\n    if code.include?(percent_search)\n      return :percent\n    elsif code.include?(fixed_search)\n      return :fixed\n    end\n    return nil\n  end\n\n  def get_discount_amount(type, code)\n    start_num = nil\n    end_num = nil\n    start_search = nil\n    \n    case type\n      when :percent\n        start_num = @percent_format.index('#')\n        end_num = @percent_format.rindex('#')\n        start_search = @percent_format.split('#').first\n      when :fixed\n        start_num = @fixed_format.index('#')\n        end_num = @fixed_format.rindex('#')\n        start_search = @fixed_format.split('#').first\n    end\n    \n    search_length = start_search.length\n    start_index = code.index(start_search) + search_length\n    return if start_index.nil? || start_num.nil?\n    \n    length = (end_num - start_num || 0) + 1\n    puts code.slice(start_index, length)\n    return code.slice(start_index, length).to_i(base=10)\n  end\n\n  def initialize_discount(code)\n    type = get_discount_type(code)\n    discount_amount = get_discount_amount(type, code)\n    return if type == nil || discount_amount == nil\n    return type == :fixed ? FixedTotalDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n    \n    discount = initialize_discount(cart.discount_code.code)\n    return unless discount\n    \n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend"
+  DiscountCodePattern: "\nclass DiscountCodePattern < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @percent_format = percent_format\n    @fixed_format = fixed_format\n  end\n\n  def get_discount_type(code)\n    percent_search = @percent_format.split('#').first\n    fixed_search = @fixed_format.split('#').first\n    if code.include?(percent_search)\n      return :percent\n    elsif code.include?(fixed_search)\n      return :fixed\n    end\n    return nil\n  end\n\n  def get_discount_amount(type, code)\n    start_num = nil\n    end_num = nil\n    start_search = nil\n    \n    case type\n      when :percent\n        start_num = @percent_format.index('#')\n        end_num = @percent_format.rindex('#')\n        start_search = @percent_format.split('#').first\n      when :fixed\n        start_num = @fixed_format.index('#')\n        end_num = @fixed_format.rindex('#')\n        start_search = @fixed_format.split('#').first\n    end\n    \n    search_length = start_search.length\n    start_index = code.index(start_search) + search_length\n    return if start_index.nil? || start_num.nil?\n    \n    length = (end_num - start_num || 0) + 1\n    puts code.slice(start_index, length)\n    return code.slice(start_index, length).to_i(base=10)\n  end\n\n  def initialize_discount(code)\n    type = get_discount_type(code)\n    discount_amount = get_discount_amount(type, code)\n    return if type == nil || discount_amount == nil\n    return type == :fixed ? FixedTotalDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n    \n    discount = initialize_discount(cart.discount_code.code)\n    return unless discount\n    \n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
+
+  BundleDiscount: "\nclass BundleDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)\n    super(condition, customer_qualifier, cart_qualifier)\n    @bundle_products = bundle_products\n    @discount = discount\n    @full_bundles_only = full_bundles_only\n    @split_items = []\n    @bundle_items = []\n  end\n  \n  def check_bundles(cart)\n      bundled_items = @bundle_products.map do |bitem|\n        quantity_required = bitem[:quantity].to_i\n        qualifiers = bitem[:qualifiers]\n        type = bitem[:type].to_sym\n        case type\n          when :ptype\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) }\n          when :ptag\n            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 }\n          when :pid\n            qualifiers.map!(&:to_i)\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) }\n          when :vid\n            qualifiers.map!(&:to_i)\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) }\n        end\n        \n        total_quantity = items.reduce(0) { |total, item| total + item.quantity }\n        {\n          has_all: total_quantity >= quantity_required,\n          total_quantity: total_quantity,\n          quantity_required: quantity_required,\n          total_possible: (total_quantity / quantity_required).to_i,\n          items: items\n        }\n      end\n      \n      max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only\n      if bundled_items.all? { |item| item[:has_all] }\n        if @full_bundles_only\n          bundled_items.each do |bundle|\n            bundle_quantity = bundle[:quantity_required] * max_bundle_count\n            split_out_extra_quantity(cart, bundle[:items], bundle[:total_quantity], bundle_quantity)\n          end\n        else\n          bundled_items.each do |bundle|\n            bundle[:items].each do |item| \n              @bundle_items << item \n              cart.line_items.delete(item)\n            end\n          end\n        end\n        return true\n      end\n      false\n  end\n  \n  def split_out_extra_quantity(cart, items, total_quantity, quantity_required)\n    items_to_split = quantity_required\n    items.each do |item|\n      break if items_to_split == 0\n      if item.quantity > items_to_split\n        @bundle_items << item.split({take: items_to_split})\n        @split_items << item\n        items_to_split = 0\n      else\n        @bundle_items << item\n        split_quantity = item.quantity\n        items_to_split -= split_quantity\n      end\n      cart.line_items.delete(item)\n    end\n    cart.line_items.concat(@split_items)\n    @split_items.clear\n  end\n  \n  def run(cart)\n    raise \"Campaign requires a discount\" unless @discount\n    return unless qualifies?(cart)\n    \n    if check_bundles(cart)\n      @bundle_items.each { |item| @discount.apply(item) }\n    end\n    @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
@@ -45127,7 +45225,7 @@ var campaigns = [{
     },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    discountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discount_type: {
       type: "select",
       description: "Discount selected items by the tier amount as a percent or a total fixed amount",
@@ -45185,12 +45283,12 @@ var campaigns = [{
     },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    discountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     discounts: {
       type: "objectArray",
       description: "Set the discount codes and the discount to apply for each code",
-      inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount. One of (f)ixed, (p)ercent, or use the (c)ode} : {discount_amount:number:The amount of the discount}",
-      outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{number}"}'
+      inputFormat: "{discount_code:text:The discount code} : {discount_type:select:The type of discount:fixed|Fixed discount,percent|Percent discount,code|Use the discount code type} : {discount_amount:number:The amount of the discount}",
+      outputFormat: '{:code => "{text}", :type => "{select}", :amount => "{number}"}'
     }
   },
   dependants: ["PercentageDiscount", "FixedTotalDiscount"]
@@ -45212,7 +45310,7 @@ var campaigns = [{
     },
     customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
     cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
-    dicountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
+    discountable_items_selector: [].concat(_toConsumableArray(LINE_ITEM_SELECTORS), [LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR]),
     percent_pattern: {
       type: "text",
       description: "Percentage discount pattern (# = will always be a number PD## = PD10ABCDE for 10% discount)"
@@ -45223,6 +45321,36 @@ var campaigns = [{
     }
   },
   dependants: ["PercentageDiscount", "FixedTotalDiscount"]
+}, {
+  value: "BundleDiscount",
+  label: "Bundle Discount - NEW",
+  description: "Buy a certain combination of items to recieve a discount",
+  inputs: {
+    qualifer_behaviour: {
+      type: "select",
+      description: "Set the qualifier behaviour",
+      options: [{
+        value: "all",
+        label: "Discount if all qualify"
+      }, {
+        value: "any",
+        label: "Discount if any qualify"
+      }]
+    },
+    customer_qualifier: [].concat(_toConsumableArray(CUSTOMER_QUALIFIERS), [CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR]),
+    cart_qualifier: [].concat(_toConsumableArray(CART_QUALIFIERS), [CART_AND_SELECTOR, CART_OR_SELECTOR]),
+    discount_to_apply: [].concat(DISCOUNTS),
+    full_bundle_only: {
+      type: "boolean",
+      description: "When unchecked, all quantities for each matching item will be discounted if a full bundle is made"
+    },
+    bundle_items: {
+      type: "objectArray",
+      description: "Set the products that are part of a bundle",
+      inputFormat: "{type:select:Type of qualifier:pid|Product ID,vid|Variant ID,ptype|Product type,ptag|Product tag} : {applicable_items:array:The items that qualify for this bundle item. Separate multiples with a comma(,)} : {required_quantity:number:The amount of this item needed for a bundle}",
+      outputFormat: '{:type => "{select}", :qualifiers => [{array}], :quantity => "{number}"}'
+    }
+  }
 }];
 
 exports.default = {
@@ -45974,7 +46102,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.8.1",
+  currentVersion: "0.9.0",
   minimumVersion: "0.1.0"
 };
 
