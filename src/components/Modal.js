@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   TextField,
+  Select,
   FormLayout
 } from '@shopify/polaris';
 
@@ -15,13 +16,13 @@ export default class Modal extends Component {
     super(props)
 
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.generateInput = this.generateInput.bind(this);
 
     this.state = {
       values: [],
-      errors: []
+      errors: [],
+      isEditing: false,
     };
-
-    this.isEditing = false;
   }
 
   componentDidMount() {
@@ -34,9 +35,17 @@ export default class Modal extends Component {
       for (let index = 0; index < iterations; index++) {
         newState.values[index] = this.props.inputs[index].value;
       }
-      if (newState.values[0] !== "") {
-        this.isEditing = true;
+
+      // Set the editing state if every input value isn't blank
+      if (newState.values.every((val) => val !== '')) {
+        newState.isEditing = true;
       }
+
+      // Focus the select if it's the first input (nothing on the compnent to autofocus)
+      if (this.props.inputs[0].type === 'select') {
+        document.querySelector('.Modal').querySelector('select').focus();
+      }
+      
       this.setState(newState);
     } else {
       document.querySelector('.Modal').querySelector('button').focus();
@@ -47,16 +56,18 @@ export default class Modal extends Component {
     evt.preventDefault();
     const hasInputs = !!this.state.values.length;
     if (!hasInputs) { return this.props.onClose(true); }
+    
     // Validate that nothing is blank
     const newState = this.state;
     let preventSubmission = false;
     for (let index = 0; index < this.state.values.length; index++) {
-      if (this.state.values[index].trim() === "") {
-        // Set to an error message instead to make this more flexible?
-        newState.errors[index] = "Must enter a value";
+      const value = this.state.values[index];
+      if (typeof value !== 'number' && value.trim() === "") {
+        newState.errors[index] = 'Must enter a value';
         preventSubmission = true;
       }
     }
+
     if (preventSubmission) { 
       this.setState(newState);
       return;
@@ -66,8 +77,8 @@ export default class Modal extends Component {
 
   handleInputChange(value, index) {
     let newState = this.state;
-    if (value.trim() === "") {
-      newState.errors[index] = "Must enter a value";
+    if (typeof(value) !== 'number' && value.trim() === '') {
+      newState.errors[index] = 'Must enter a value';
     } else {
       newState.errors[index] = false;
     }
@@ -75,12 +86,48 @@ export default class Modal extends Component {
     this.setState(newState);
   }
 
+  generateInput(input, index) {
+    const { type, label, options, name, description } = input;
+
+    switch(type) {
+      case 'select':
+        return (
+          <Select
+            label={label}
+            key={name}
+            options={options}
+            name={name}
+            helpText={description}
+            value={this.state.values[index]}
+            onChange={(val) => this.handleInputChange(val, index)}
+          />
+        );
+      default:
+        return (
+          <TextField
+            label={label}
+            key={name}
+            type={type}
+            min={type === 'number' ? 0 : undefined}
+            step={type === 'number' ? 0.01 : undefined}
+            name={name}
+            autoFocus={index === 0}
+            helpText={description}
+            error={this.state.errors[index]}
+            value={this.state.values[index]}
+            onChange={(val) => this.handleInputChange(type === 'number' ? Math.abs(val) : val, index)}
+          />
+        );
+    }
+  }
+
   render() {
     const hasInputs = this.props.inputs && this.props.inputs.length > 0;
     const hasActions = this.props.actions && this.props.actions.length > 0;
+    const { isEditing } = this.state;
 
     const title = hasInputs 
-      ? `${(this.isEditing ? 'Edit' : 'Add')} ${this.props.title.toLowerCase()}`
+      ? `${(isEditing ? 'Edit' : 'Add')} ${this.props.title.toLowerCase()}`
       : this.props.title;
 
     return (
@@ -98,38 +145,20 @@ export default class Modal extends Component {
                 />
               </Stack>
             </Card.Section>
-            <form ref={(form) => this.form = form} onSubmit={this.handleSubmit}>
+            <form onSubmit={this.handleSubmit}>
               <Card.Section>
                 <div className="Modal__Content">
                   {this.props.content}
                   {hasInputs &&
                     <FormLayout>
-                      {this.props.inputs.map((input, index) => {
-                        return (
-                          <TextField
-                            label={input.label}
-                            key={input.name}
-                            type={input.type}
-                            min={input.type === "number" ? 0 : undefined}
-                            step={input.type === "number" ? 0.01 : undefined}
-                            name={input.name}
-                            autoFocus={index === 0}
-                            helpText={input.description}
-                            error={this.state.errors[index]}
-                            value={this.state.values[index]}
-                            onChange={(val) => this.handleInputChange(val, index)}
-                          />
-                        );
-                      })}
+                      {this.props.inputs.map(this.generateInput)}
                     </FormLayout>
                   }
                 </div>
               </Card.Section>
               {hasActions &&
                 <Card.Section>
-                  <Stack
-                    distribution="trailing"
-                  >
+                  <Stack distribution="trailing">
                     {this.props.actions.map((action, index) => {
                       return (
                         <Button

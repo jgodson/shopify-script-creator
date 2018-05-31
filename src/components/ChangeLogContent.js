@@ -7,7 +7,21 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3>Change Log</h3>
 
       <ul>
-      <li>Minor fix where Country & Province qualifier and the Country code qualifier could cause errors due to the address having no country code</li>
+      <li>
+        <strong>NEW - Bundle Discount campaign</strong><br />
+        <span>Use the </span>
+        <a 
+          href="https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+        Leave feedback
+        </a>
+        <span> link if you notice any issues</span>
+      </li>
+      <li>When adding discounts to the Discount Code List campaign, you no longer have to type the discount type. There is an option selector there now</li>
+      <li>Negative numbers are no longer permitted in number inputs</li>
+      <li>Other minor fixes and improvements</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

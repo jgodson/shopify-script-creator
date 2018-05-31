@@ -310,7 +310,7 @@ export default class CampaignForm extends Component {
               type="number"
               helpText={input.description}
               value={this.state.inputs[input.type][input.name]}
-              onChange={(val) => this.handleInputChange(val, input.type, input.name)}
+              onChange={(val) => this.handleInputChange(Math.abs(val), input.type, input.name)}
             />
           );
         }
@@ -535,20 +535,34 @@ export default class CampaignForm extends Component {
     if (value) {
       values = value.split(':').map((value) => value.trim());
     }
-    let fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
+    let fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
     let index = 0;
     while(fullMatch) {
-      let [name, type, description] = [fullMatch[1], fullMatch[2], fullMatch[3]];
+      let [name, type, description, options] = [fullMatch[1], fullMatch[2], fullMatch[3], fullMatch[4]];
+      if (options) {
+        options = options.split(',').map((option) => {
+          const [value, label] = option.split('|');
+          return {
+            value,
+            label
+          };
+        });
+        value = values ? values[index] : options[0].value;
+      } else {
+        value = values ? values[index] : "";
+      }
+
       const newInput = {
         name,
         label: splitAndCapitalize('_', name),
         type,
-        value: value ? values[index] : "",
+        value,
+        options,
         description
       };
       inputs.push(newInput);
       inputFormat = inputFormat.replace(fullMatch[0], '');
-      fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+)}/);
+      fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
       index++;
     }
     return inputs;
@@ -560,7 +574,6 @@ export default class CampaignForm extends Component {
 
     // Handle array and objects
     if (input.type === "array") {
-
       if (currentValue) {
         currentValue += `,${values.join('')}`;
       } else {
@@ -570,7 +583,7 @@ export default class CampaignForm extends Component {
       // Build input value for text box
       let newValue = input.options.inputFormat;
       for (let index = 0; index < values.length; index++) {
-        newValue = newValue.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[index]);
+        newValue = newValue.replace(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[index]);
       }
 
       // Add new content, or replace old content if editing

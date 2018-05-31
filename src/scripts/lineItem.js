@@ -429,6 +429,95 @@ class DiscountCodePattern < Campaign
     end
     revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
+end`,
+
+BundleDiscount: `
+class BundleDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)
+    super(condition, customer_qualifier, cart_qualifier)
+    @bundle_products = bundle_products
+    @discount = discount
+    @full_bundles_only = full_bundles_only
+    @split_items = []
+    @bundle_items = []
+  end
+  
+  def check_bundles(cart)
+      bundled_items = @bundle_products.map do |bitem|
+        quantity_required = bitem[:quantity].to_i
+        qualifiers = bitem[:qualifiers]
+        type = bitem[:type].to_sym
+        case type
+          when :ptype
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) }
+          when :ptag
+            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 }
+          when :pid
+            qualifiers.map!(&:to_i)
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) }
+          when :vid
+            qualifiers.map!(&:to_i)
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) }
+        end
+        
+        total_quantity = items.reduce(0) { |total, item| total + item.quantity }
+        {
+          has_all: total_quantity >= quantity_required,
+          total_quantity: total_quantity,
+          quantity_required: quantity_required,
+          total_possible: (total_quantity / quantity_required).to_i,
+          items: items
+        }
+      end
+      
+      max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only
+      if bundled_items.all? { |item| item[:has_all] }
+        if @full_bundles_only
+          bundled_items.each do |bundle|
+            bundle_quantity = bundle[:quantity_required] * max_bundle_count
+            split_out_extra_quantity(cart, bundle[:items], bundle[:total_quantity], bundle_quantity)
+          end
+        else
+          bundled_items.each do |bundle|
+            bundle[:items].each do |item| 
+              @bundle_items << item 
+              cart.line_items.delete(item)
+            end
+          end
+        end
+        return true
+      end
+      false
+  end
+  
+  def split_out_extra_quantity(cart, items, total_quantity, quantity_required)
+    items_to_split = quantity_required
+    items.each do |item|
+      break if items_to_split == 0
+      if item.quantity > items_to_split
+        @bundle_items << item.split({take: items_to_split})
+        @split_items << item
+        items_to_split = 0
+      else
+        @bundle_items << item
+        split_quantity = item.quantity
+        items_to_split -= split_quantity
+      end
+      cart.line_items.delete(item)
+    end
+    cart.line_items.concat(@split_items)
+    @split_items.clear
+  end
+  
+  def run(cart)
+    raise "Campaign requires a discount" unless @discount
+    return unless qualifies?(cart)
+    
+    if check_bundles(cart)
+      @bundle_items.each { |item| @discount.apply(item) }
+    end
+    @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }
+  end
 end`
 };
 
@@ -832,7 +921,7 @@ const campaigns = [
       },
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
-      dicountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discount_type: {
         type: "select",
         description: "Discount selected items by the tier amount as a percent or a total fixed amount",
@@ -903,12 +992,12 @@ const campaigns = [
       },
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
-      dicountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       discounts: {
         type: "objectArray",
         description: "Set the discount codes and the discount to apply for each code",
-        inputFormat: "{discount_code:text:The discount code} : {discount_type:text:The type of discount. One of (f)ixed, (p)ercent, or use the (c)ode} : {discount_amount:number:The amount of the discount}",
-        outputFormat: '{:code => "{text}", :type => "{text}", :amount => "{number}"}'
+        inputFormat: "{discount_code:text:The discount code} : {discount_type:select:The type of discount:fixed|Fixed discount,percent|Percent discount,code|Use the discount code type} : {discount_amount:number:The amount of the discount}",
+        outputFormat: '{:code => "{text}", :type => "{select}", :amount => "{number}"}'
       }
     },
     dependants: ["PercentageDiscount", "FixedTotalDiscount"]
@@ -934,7 +1023,7 @@ const campaigns = [
       },
       customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
       cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
-      dicountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
       percent_pattern: {
         type: "text",
         description: "Percentage discount pattern (# = will always be a number PD## = PD10ABCDE for 10% discount)"
@@ -945,7 +1034,41 @@ const campaigns = [
       }
     },
     dependants: ["PercentageDiscount", "FixedTotalDiscount"]
-  }
+  },
+  {
+    value: "BundleDiscount",
+    label: "Bundle Discount - NEW",
+    description: "Buy a certain combination of items to recieve a discount",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [
+          {
+            value: "all",
+            label: "Discount if all qualify"
+          },
+          {
+            value: "any",
+            label: "Discount if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      discount_to_apply: [...DISCOUNTS],
+      full_bundle_only: {
+        type: "boolean",
+        description: "When unchecked, all quantities for each matching item will be discounted if a full bundle is made"
+      },
+      bundle_items: {
+        type: "objectArray",
+        description: "Set the products that are part of a bundle",
+        inputFormat: "{type:select:Type of qualifier:pid|Product ID,vid|Variant ID,ptype|Product type,ptag|Product tag} : {applicable_items:array:The items that qualify for this bundle item. Separate multiples with a comma(,)} : {required_quantity:number:The amount of this item needed for a bundle}",
+        outputFormat: '{:type => "{select}", :qualifiers => [{array}], :quantity => "{number}"}'
+      }
+    }
+  },
 ];
 
 export default {

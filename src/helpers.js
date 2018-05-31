@@ -76,31 +76,29 @@
         const values = line.split('=>').map((value) => value.trim());
         let output = inputFmt;
         for (let index = 0; index < values.length; index++) {
-          const type = output.match(/{\w+:(\w+):[\w\s'.(),]+}/)[1];
-          if (type === "text" || type === "number") {
+          let type = output.match(/{\w+:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
+          if (type === 'array') {
+            values[index] = values[index].split(',').map((value) => {
+              // Only grab what's in "". Removes unncessary stuff like :discount or ,
+              value = value.match(/"(.+)"/);
+              return value ? value[1].trim() : "";
+            });
+            values[index] = values[index].filter((value) => value !== "").join(', ');
+          } else {
             // Only grab what's in "". Removes unncessary stuff like :discount or ,
             const value = values[index].match(/"(.+)"/);
             values[index] = value ? value[1] : value;
-          } else {
-            values[index] = values[index].split(',').map((value) => {
-              // Replace any [] found
-              value = value.replace(/[\[\]]/g, '');
-              // Removes "" around each value in the array
-              value = value.substring(value.length - 1, 0).substring(1);
-              return value.trim();
-            });
-            values[index] = values[index].filter((value) => value !== "").join(', ');
           }
           // Skip null values
           if (values[index] !== null) {
-            output = output.replace(/{\w+:\w+:[\w\s'.(),]+}/, values[index]);
+            output = output.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
           }
         }
         return output;
       }).join('\n');
       return lines;
     } else {
-      const inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+}/g, '').trim();
+      const inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/g, '').trim();
       const splitter = inputFormatRepl[0];
       const requiredInputs = inputFormatRepl.split(splitter).length;
       const lines = value.split('\n').map((line) => {
