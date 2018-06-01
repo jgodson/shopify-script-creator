@@ -404,7 +404,7 @@ class CartAmountQualifier < Qualifier
     total = cart.subtotal_price
     if @cart_or_item == :item
       total = cart.line_items.reduce(Money.zero) do |total, item|
-        total += selector.match?(item) ? item.original_line_price : Money.zero
+        total + (selector.match?(item) ? item.original_line_price : Money.zero)
       end
     end
     compare_amounts(total, @comparison_type, @amount)
@@ -424,7 +424,7 @@ class ReducedCartAmountQualifier < Qualifier
         when CartDiscount::Percentage
           if cart.subtotal_price >= cart.discount_code.minimum_order_amount
             cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item| 
-              total += item.variant.product.gift_card? ? Money.zero : item.line_price
+              total + (item.variant.product.gift_card? ? Money.zero : item.line_price)
             end
             gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc
             cart_subtotal_without_gc * ((Decimal.new(100) - cart.discount_code.percentage) / 100) + gift_card_amount
@@ -455,7 +455,7 @@ class CartQuantityQualifier < Qualifier
   def match?(cart, selector = nil)
     if @cart_or_item == :item
       total = cart.line_items.reduce(0) do |total, item|
-        total + selector.match?(item) ? item.quantity : 0
+        total + (selector.match?(item) ? item.quantity : 0)
       end
     else
       total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
