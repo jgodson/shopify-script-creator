@@ -21,6 +21,15 @@ export default function ChangeLogContent({newVersion} = props) {
       </li>
       <li>When adding discounts to the Discount Code List campaign, you no longer have to type the discount type. There is an option selector there now</li>
       <li>Negative numbers are no longer permitted in number inputs</li>
+      <li><span>Fixed a </span>
+        <a
+          href="https://github.com/jgodson/shopify-script-creator/issues/1" 
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          bug in the CartQuantityQualifier
+        </a>
+      </li>
       <li>Other minor fixes and improvements</li>
       </ul>
 
