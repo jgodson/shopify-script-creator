@@ -9471,11 +9471,11 @@ var classes = {
 
   LineItemPropertiesSelector: "\nclass LineItemPropertiesSelector < Selector\n  def initialize(target_properties)\n    @target_properties = target_properties\n  end\n\n  def match?(line_item)\n    line_item_props = line_item.properties\n    @target_properties.all? do |key, value|\n      next unless line_item_props.has_key?(key)\n      true if line_item_props[key].downcase == value.downcase\n    end\n  end\nend",
 
-  CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total += selector.match?(item) ? item.original_line_price : Money.zero\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
+  CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total + (selector.match?(item) ? item.original_line_price : Money.zero)\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
-  ReducedCartAmountQualifier: "\nclass ReducedCartAmountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total =\n      case cart.discount_code\n        when CartDiscount::Percentage\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item| \n              total += item.variant.product.gift_card? ? Money.zero : item.line_price\n            end\n            gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc\n            cart_subtotal_without_gc * ((Decimal.new(100) - cart.discount_code.percentage) / 100) + gift_card_amount\n          else\n            cart.subtotal_price\n          end\n        when CartDiscount::FixedAmount\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            [cart.subtotal_price - cart.discount_code.amount, Money.zero].max\n          else\n            cart.subtotal_price\n          end\n        else\n          cart.subtotal_price\n      end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
+  ReducedCartAmountQualifier: "\nclass ReducedCartAmountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total =\n      case cart.discount_code\n        when CartDiscount::Percentage\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item| \n              total + (item.variant.product.gift_card? ? Money.zero : item.line_price)\n            end\n            gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc\n            cart_subtotal_without_gc * ((Decimal.new(100) - cart.discount_code.percentage) / 100) + gift_card_amount\n          else\n            cart.subtotal_price\n          end\n        when CartDiscount::FixedAmount\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            [cart.subtotal_price - cart.discount_code.amount, Money.zero].max\n          else\n            cart.subtotal_price\n          end\n        else\n          cart.subtotal_price\n      end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
-  CartQuantityQualifier: "\nclass CartQuantityQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, quantity)\n    @cart_or_item = cart_or_item\n    @comparison_type = comparison_type\n    @quantity = quantity\n  end\n\n  def match?(cart, selector = nil)\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(0) do |total, item|\n        total + selector.match?(item) ? item.quantity : 0\n      end\n    else\n      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n    end\n    compare_amounts(total, @comparison_type, @quantity)\n  end\nend",
+  CartQuantityQualifier: "\nclass CartQuantityQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, quantity)\n    @cart_or_item = cart_or_item\n    @comparison_type = comparison_type\n    @quantity = quantity\n  end\n\n  def match?(cart, selector = nil)\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(0) do |total, item|\n        total + (selector.match?(item) ? item.quantity : 0)\n      end\n    else\n      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n    end\n    compare_amounts(total, @comparison_type, @quantity)\n  end\nend",
 
   TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart, selector = nil)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(cart_weight, @comparison_type, @amount)\n  end\nend"
 };
@@ -44814,6 +44814,24 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
+        _react2.default.createElement(
+          'span',
+          null,
+          'Fixed a '
+        ),
+        _react2.default.createElement(
+          'a',
+          {
+            href: 'https://github.com/jgodson/shopify-script-creator/issues/1',
+            target: '_blank',
+            rel: 'noopener noreferrer'
+          },
+          'bug in the CartQuantityQualifier'
+        )
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
         'Other minor fixes and improvements'
       )
     ),
@@ -46102,7 +46120,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.9.0",
+  currentVersion: "0.9.1",
   minimumVersion: "0.1.0"
 };
 
