@@ -338,13 +338,54 @@ export default class CampaignForm extends Component {
           const hasValues = !!this.state.inputs[input.type][input.name];
           const currentValues = hasValues ? this.state.inputs[input.type][input.name].split(',').map((val) => val.trim()) : '';
           return (
-            <Stack vertical key={input.name}>
-              <Stack alignment="leading">
-                <Stack.Item fill>{input.label}</Stack.Item>
-                <Stack.Item>
+            <div className="TagContainer">
+              <Stack vertical key={input.name}>
+                <Stack alignment="leading">
+                  <Stack.Item fill>{input.label}</Stack.Item>
+                  <Stack.Item>
+                    <Button
+                      plain 
+                      icon="circlePlus"
+                      onClick={() => {
+                        this.props.openModal({
+                          title: input.label,
+                          inputs: [{
+                            name: input.name,
+                            label: splitAndCapitalize('_', input.label),
+                            type: "text",
+                            value: "",
+                            description: "Add several at once by separating each with a comma"
+                          }],
+                          onClose: (values) => this.handleModalReturn(values, input),
+                          actions: MODAL_ACTIONS
+                        })
+                      }}
+                    >
+                      Add more
+                    </Button>
+                  </Stack.Item>
+                </Stack>
+                {hasValues ?
+                  <Stack spacing="extraTight">
+                    {currentValues.map((value, index) => {
+                      return (
+                        <Tag
+                          key={`Tag_${index}`}
+                          onRemove={(evt) => {
+                            evt.preventDefault();
+                            currentValues.splice(index, 1);
+                            this.handleInputChange(currentValues.join(','), input.type, input.name);
+                          }}
+                        >
+                          {value}
+                        </Tag>
+                      );
+                    })}
+                  </Stack>
+                :
                   <Button
-                    plain 
-                    icon="circlePlus"
+                    plain
+                    fullWidth
                     onClick={() => {
                       this.props.openModal({
                         title: input.label,
@@ -360,51 +401,12 @@ export default class CampaignForm extends Component {
                       })
                     }}
                   >
-                    Add more
+                    Add {input.label.toLowerCase()}
                   </Button>
-                </Stack.Item>
-              </Stack>
-              {hasValues ?
-                <Stack spacing="extraTight">
-                  {currentValues.map((value, index) => {
-                    return (
-                      <Tag
-                        key={`Tag_${index}`}
-                        onRemove={(evt) => {
-                          evt.preventDefault();
-                          currentValues.splice(index, 1);
-                          this.handleInputChange(currentValues.join(','), input.type, input.name);
-                        }}
-                      >
-                        {value}
-                      </Tag>
-                    );
-                  })}
-                </Stack>
-              :
-                <Button
-                  plain
-                  fullWidth
-                  onClick={() => {
-                    this.props.openModal({
-                      title: input.label,
-                      inputs: [{
-                        name: input.name,
-                        label: splitAndCapitalize('_', input.label),
-                        type: "text",
-                        value: "",
-                        description: "Add several at once by separating each with a comma"
-                      }],
-                      onClose: (values) => this.handleModalReturn(values, input),
-                      actions: MODAL_ACTIONS
-                    })
-                  }}
-                >
-                  Add {input.label.toLowerCase()}
-                </Button>
-              }
+                }
                 <TextStyle variation="subdued">{input.description}</TextStyle>
-            </Stack>
+              </Stack>
+            </div>
           );
         }
       },

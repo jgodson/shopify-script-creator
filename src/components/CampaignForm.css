@@ -18,3 +18,12 @@
 form {
   border-top: 1px solid #dfe3e8;
 }
+
+.TagContainer .Polaris-Stack--spacingExtraTight {
+  margin-top: -1.3em;
+}
+
+.TagContainer .Polaris-TextStyle--variationSubdued {
+  position: relative;
+  top: -8px;
+}

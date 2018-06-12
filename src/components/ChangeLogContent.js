@@ -4,33 +4,12 @@ import { Link, Stack } from '@shopify/polaris';
 export default function ChangeLogContent({newVersion} = props) {
   return (
     <div>
-      <h3>Change Log</h3>
+      <h3 id="changelog">Change Log</h3>
 
       <ul>
-      <li>
-        <strong>NEW - Bundle Discount campaign</strong><br />
-        <span>Use the </span>
-        <a 
-          href="https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-        Leave feedback
-        </a>
-        <span> link if you notice any issues</span>
-      </li>
-      <li>When adding discounts to the Discount Code List campaign, you no longer have to type the discount type. There is an option selector there now</li>
-      <li>Negative numbers are no longer permitted in number inputs</li>
-      <li><span>Fixed a </span>
-        <a
-          href="https://github.com/jgodson/shopify-script-creator/issues/1" 
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          bug in the CartQuantityQualifier
-        </a>
-      </li>
-      <li>Other minor fixes and improvements</li>
+      <li>Fixed a <a href="https://github.com/jgodson/shopify-script-creator/issues/2" target="_blank" rel="noopener noreferrer">bug</a> in the Buy X Get X campaign where it would not split out items properly when less than full multiples were bought (eg: buy 10 get 10 would give you 11 free if you purchased 11, 12 free if you purchased 12, etc). If the fixing of this bug causes any issues for you, please let me know by submitting a bug on <a href="https://github.com/jgodson/shopify-script-creator/issues" target="_blank" rel="noopener noreferrer">GitHub</a> or using the <a href="https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform" target="_blank" rel="noopener noreferrer">feedback form</a></li>
+
+      <li>Reduced spacing between title and tags to better align them with the option selection</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

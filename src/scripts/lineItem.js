@@ -162,7 +162,7 @@ class BuyXGetX < Campaign
     
     # Check if cart qualifies for discounts and limit the discount sets
     purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }
-    discountable_sets = @max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x
+    discountable_sets = (@max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x).to_i
     return if discountable_sets < 1
     discountable_quantity = (discountable_sets * @get_x).to_i
     # Apply the discounts (sort to discount lower priced items first)
