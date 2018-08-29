@@ -7,7 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-      <li>Fixed issue where new version of CSS would cause dropdowns to display incorrectly</li>
+      <li>Fixed a bug in the "Discounted Cart Subtotal (applied by scripts)" qualifier where it would cause an error in the script if it was not used in the last campaign to run.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

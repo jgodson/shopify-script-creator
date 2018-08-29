@@ -21,7 +21,14 @@ class Campaign
   
   def qualifies?(cart)
     return true if @qualifiers.empty?
-    @unmodified_line_items = cart.line_items.map(&:to_hash) if @post_amount_qualifier
+    @unmodified_line_items = cart.line_items.map do |item|
+      new_item = item.dup
+      new_item.instance_variables.each do |var|
+        val = item.instance_variable_get(var)
+        new_item.instance_variable_set(var, val.dup) if val.respond_to?(:dup)
+      end
+      new_item  
+    end if @post_amount_qualifier
     @qualifiers.send(@condition) do |qualifier|
       is_selector = false
       if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }
