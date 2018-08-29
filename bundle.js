@@ -9425,7 +9425,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var classes = {
-  Campaign: "\nclass Campaign\n  def initialize(condition, *qualifiers)\n    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym\n    @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact\n    @line_item_selector = qualifiers.last unless @line_item_selector\n    qualifiers.compact.each do |qualifier|\n      is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)\n      if is_multi_select\n        qualifier.instance_variable_get(:@conditions).each do |nested_q| \n          @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)\n          @qualifiers << qualifier\n        end\n      else\n        @post_amount_qualifier = qualifier if qualifier.is_a?(PostCartAmountQualifier)\n        @qualifiers << qualifier\n      end\n    end if @qualifiers.empty?\n  end\n  \n  def qualifies?(cart)\n    return true if @qualifiers.empty?\n    @unmodified_line_items = cart.line_items.map(&:to_hash) if @post_amount_qualifier\n    @qualifiers.send(@condition) do |qualifier|\n      is_selector = false\n      if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }\n        is_selector = true\n      end rescue nil\n      if is_selector\n        raise \"Missing line item match type\" if @li_match_type.nil?\n        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }\n      else\n        qualifier.match?(cart, @line_item_selector)\n      end\n    end\n  end\n\n  def revert_changes(cart)\n    cart.instance_variable_set(:@line_items, @unmodified_line_items)\n  end\nend",
+  Campaign: "\nclass Campaign\n  def initialize(condition, *qualifiers)\n    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym\n    @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact\n    @line_item_selector = qualifiers.last unless @line_item_selector\n    qualifiers.compact.each do |qualifier|\n      is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)\n      if is_multi_select\n        qualifier.instance_variable_get(:@conditions).each do |nested_q| \n          @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)\n          @qualifiers << qualifier\n        end\n      else\n        @post_amount_qualifier = qualifier if qualifier.is_a?(PostCartAmountQualifier)\n        @qualifiers << qualifier\n      end\n    end if @qualifiers.empty?\n  end\n  \n  def qualifies?(cart)\n    return true if @qualifiers.empty?\n    @unmodified_line_items = cart.line_items.map do |item|\n      new_item = item.dup\n      new_item.instance_variables.each do |var|\n        val = item.instance_variable_get(var)\n        new_item.instance_variable_set(var, val.dup) if val.respond_to?(:dup)\n      end\n      new_item  \n    end if @post_amount_qualifier\n    @qualifiers.send(@condition) do |qualifier|\n      is_selector = false\n      if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }\n        is_selector = true\n      end rescue nil\n      if is_selector\n        raise \"Missing line item match type\" if @li_match_type.nil?\n        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }\n      else\n        qualifier.match?(cart, @line_item_selector)\n      end\n    end\n  end\n\n  def revert_changes(cart)\n    cart.instance_variable_set(:@line_items, @unmodified_line_items)\n  end\nend",
 
   Qualifier: "\nclass Qualifier\n  def partial_match(match_type, item_info, possible_matches)\n    match_type = (match_type.to_s + '?').to_sym\n    if item_info.kind_of?(Array)\n      possible_matches.any? do |possibility|\n        item_info.any? do |search|\n          search.send(match_type, possibility)\n        end\n      end\n    else\n      possible_matches.any? do |possibility|\n        item_info.send(match_type, possibility)\n      end\n    end\n  end\n\n  def compare_amounts(compare, comparison_type, compare_to)\n    case comparison_type\n      when :greater_than\n        return compare > compare_to\n      when :greater_than_or_equal\n        return compare >= compare_to\n      when :less_than\n        return compare < compare_to\n      when :less_than_or_equal\n        return compare <= compare_to\n      when :equal_to\n        return compare == compare_to\n      else\n        raise \"Invalid comparison type\"\n    end\n  end\nend",
 
@@ -44779,7 +44779,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed issue where new version of CSS would cause dropdowns to display incorrectly'
+        'Fixed a bug in the "Discounted Cart Subtotal (applied by scripts)" qualifier where it would cause an error in the script if it was not used in the last campaign to run.'
       )
     ),
     _react2.default.createElement(
@@ -46067,7 +46067,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.9.3",
+  currentVersion: "0.9.4",
   minimumVersion: "0.1.0"
 };
 
