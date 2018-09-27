@@ -263,7 +263,7 @@ class TieredDiscount < Campaign
     @line_item_selector = line_item_selector
     @discount_type = discount_type
     @tier_type = tier_type == :default ? :customer_tag : tier_type
-    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_i }
+    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }
   end
   
   def init_discount(amount, message)
@@ -298,7 +298,7 @@ class TieredDiscount < Campaign
     end
 
     return if qualified_tiers.empty?
-    discount_amount = qualified_tiers.last[:discount].to_i
+    discount_amount = qualified_tiers.last[:discount].to_f
     discount_message = qualified_tiers.last[:message]
     
     discount = init_discount(discount_amount, discount_message)
