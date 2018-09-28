@@ -43971,6 +43971,10 @@ var CampaignForm = function (_Component) {
         // Build input value for text box
         var newValue = input.options.inputFormat;
         for (var _index = 0; _index < values.length; _index++) {
+          if (typeof values[_index] === 'string') {
+            // Replace any $ with $$ so we don't replace $<#> with matches in the regex
+            values[_index] = values[_index].replace(/\$/g, '$$$');
+          }
           newValue = newValue.replace(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[_index]);
         }
 
@@ -44781,7 +44785,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed a bug in the Tiered Discount Campaign that wouldn\'t allow a number with decimal to be used as a discount amount'
+        'Fixed a bug that can cause text entered in the modal to display incorrectly when using a $ with specific numbers immediately after it'
       )
     ),
     _react2.default.createElement(
@@ -46064,7 +46068,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.9.5",
+  currentVersion: "0.9.6",
   minimumVersion: "0.1.0"
 };
 
