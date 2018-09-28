@@ -7,7 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-      <li>Fixed a bug in the Tiered Discount Campaign that wouldn't allow a number with decimal to be used as a discount amount</li>
+      <li>Fixed a bug that can cause text entered in the modal to display incorrectly when using a $ with specific numbers immediately after it</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

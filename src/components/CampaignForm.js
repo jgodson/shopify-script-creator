@@ -1,4 +1,4 @@
-import React, { Component, Fragment } from 'react';
+import React, { Component } from 'react';
 import {
   Layout,
   Card,
@@ -585,6 +585,10 @@ export default class CampaignForm extends Component {
       // Build input value for text box
       let newValue = input.options.inputFormat;
       for (let index = 0; index < values.length; index++) {
+        if (typeof values[index] === 'string') {
+          // Replace any $ with $$ so we don't replace $<#> with matches in the regex
+          values[index] = values[index].replace(/\$/g, '$$$');
+        }
         newValue = newValue.replace(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[index]);
       }
 
