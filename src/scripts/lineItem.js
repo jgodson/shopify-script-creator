@@ -354,7 +354,7 @@ class DiscountCodeList < Campaign
     end
     return if discount_type.nil?
 
-    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)
+    discount = init_discount(discount_type, applicable_discount[:amount].to_f, applied_code)
 
     cart.line_items.each do |item|
       next unless @line_item_selector.nil? || @line_item_selector.match?(item)
