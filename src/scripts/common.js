@@ -507,60 +507,35 @@ class TotalWeightQualifier < Qualifier
 end`,
 
   FullAddressQualifier: `
-# ----- Qualifying Addresses ----- #
-# Example: {
-#   address1: ["150 Elgin St", "150 Elgin Street"],
-#   address2: "8th floor",
-#   phone: 123-456-7890,
-#   city: "Ottawa",
-#   province: "Ontario",
-#   country_code: "CA",
-#   zip: "K2P 1L4",
-#   match_type: :exact
-# }
-
-# Matches a given address to an array of addresses given
-# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)
-# If no match type is specified, :partial will be the default
-# Only the given paramaters will be compared. Arrays can be used to match different options
-class FullAddressQualifier
+  class FullAddressQualifier
   def initialize(addresses)
     @addresses = addresses
   end
   
-  def match?(cart)
-    # TODO: ADD checks to make sure every field wanted exists
+  def match?(cart, selector = nil)
     return false if cart.shipping_address.nil?
     
     @addresses.any? do |accepted_address|
-      match_type = accepted_address[:match_type] || :partial
+      match_type = accepted_address[:match_type].to_sym
 
       cart.shipping_address.to_hash.all? do |key, value|
-        match = true
         key = key.to_sym
         value.downcase!
         
-        unless accepted_address[key].nil?
-          if accepted_address[key].is_a?(Array)
-            match = accepted_address[key].any? do |potential_address|
-              potential_address.downcase!
-              case match_type
-                when :partial
-                  value.include?(potential_address)
-                when :exact
-                  potential_address == value
-              end
-            end
-          else
-            accepted_address[key].downcase!
-            case match_type
-              when :partial
-                match = value.include?(accepted_address[key])
-              when :exact
-                match = accepted_address[key] == value
-            end
+        next true unless accepted_address[key]
+        next true if accepted_address[key].length === 0
+
+        match = accepted_address[key].any? do |potential_address|
+          potential_address.downcase!
+
+          case match_type
+            when :partial
+              value.include?(potential_address)
+            when :exact
+              potential_address == value
           end
         end
+
         match
       end
     end
@@ -1017,6 +992,19 @@ const cartQualifiers = [
     }
   },
   {
+    value: "FullAddressQualifier",
+    label: "Shipping Address - Full Address Qualifier - NEW",
+    description: "Only qualifies if the shipping address matches one of the given addresses",
+    inputs: {
+      qualifing_addresses: {
+        type: "objectArray",
+        description: "Set the addresses that qualify",
+        inputFormat: "{address1?:array:Add multiple options by separating each with a comma} : {address2?:array:Add multiple options by separating each with a comma} : {phone?:array:Add multiple options by separating each with a comma} : {city?:array:Add multiple options by separating each with a comma} : {province_code?:array:Add multiple options by separating each with a comma} : {country_code?:array:Add multiple options by separating each with a comma} : {zip?:array:Add multiple options by separating each with a comma} : {match_type:select:Type of match required (e.g. '150 Elgin' partially matches '150 Elgin St'):partial|Partial,exact|Exact}",
+        outputFormat: '{:address1 => [{array}], :address2 => [{array}], :phone => [{array}], :city => [{array}], :province_code => [{array}], :country_code => [{array}], :zip => [{array}], :match_type => "{select}"}'
+      }
+    }
+  },
+  {
     value: "ReducedCartAmountQualifier",
     label: "Discounted Cart Subtotal (applied by discount code)",
     description: "Will only apply if the cart subtotal, subtracting cart discounts, meets conditions. NOTE: Works for discount codes that apply to entire cart only.",
@@ -1049,19 +1037,6 @@ const cartQualifiers = [
       }
     }
   },
-  // {
-  //   value: "ShippingAddressQualifier",
-  //   label: "Shipping Address Qualifier",
-  //   description: "Only qualifies if the shipping address matches one of the given addresses",
-  //   inputs: {
-  //     qualifing_addresses: {
-  //       type: "objectArray",
-  //       description: "Set the addresses that qualify",
-  //       inputFormat: "{address1:array:Add multiple options by separating each with a comma} : {address2:array:Add multiple options by separating each with a comma} : {phone:array:Add multiple options by separating each with a comma} : {city:array:Add multiple options by separating each with a comma} : {province:array:Add multiple options by separating each with a comma} : {country_code:array:Add multiple options by separating each with a comma} : {zip:array:Add multiple options by separating each with a comma} : {match_type:select:Type of match required (e.g. '150 Elgin' partially matches '150 Elgin St'):partial|Partial,exact|Exact}",
-  //       outputFormat: '{:address1 => [{array}], :address2 => [{array}], :phone => [{array}], :city => [{array}], :province => [{array}], :country_code => [{array}], :zip => [{array}], :match_type => "{text}"}'
-  //     }
-  //   }
-  // },
 ];
 
 const lineItemSelectors = [

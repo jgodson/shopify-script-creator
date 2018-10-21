@@ -27,8 +27,9 @@ export default class Modal extends Component {
 
   componentDidMount() {
     // When first opened, focus on the close button if there are no inputs
-    const numInputs = this.props.inputs && this.props.inputs.length;
-    if (numInputs && numInputs > 0) {
+    const inputs = this.props.inputs;
+    const numInputs = (inputs || []).length;
+    if (numInputs > 0) {
       // Initialize the values. We need the exact order when returning
       const newState = this.state;
       const iterations = numInputs;
@@ -37,9 +38,10 @@ export default class Modal extends Component {
       }
 
       // Set the editing state if every input value isn't blank
-      if (newState.values.every((val) => val !== '')) {
-        newState.isEditing = true;
-      }
+      newState.isEditing = newState.values.every((val, index) => (
+        inputs[index].type === 'select'
+        || val !== ''
+      ));
 
       // Focus the select if it's the first input (nothing on the compnent to autofocus)
       if (this.props.inputs[0].type === 'select') {
@@ -57,12 +59,14 @@ export default class Modal extends Component {
     const hasInputs = !!this.state.values.length;
     if (!hasInputs) { return this.props.onClose(true); }
     
-    // Validate that nothing is blank
+    // Validate that nothing required is blank
     const newState = this.state;
     let preventSubmission = false;
     for (let index = 0; index < this.state.values.length; index++) {
       const value = this.state.values[index];
-      if (typeof value !== 'number' && value.trim() === "") {
+      const isRequired = this.props.inputs[index].optional === false;
+      
+      if (isRequired && typeof value !== 'number' && value.trim() === "") {
         newState.errors[index] = 'Must enter a value';
         preventSubmission = true;
       }
@@ -77,7 +81,8 @@ export default class Modal extends Component {
 
   handleInputChange(value, index) {
     let newState = this.state;
-    if (typeof(value) !== 'number' && value.trim() === '') {
+    const isRequired = this.props.inputs[index].optional === false;
+    if (isRequired && typeof(value) !== 'number' && value.trim() === '') {
       newState.errors[index] = 'Must enter a value';
     } else {
       newState.errors[index] = false;

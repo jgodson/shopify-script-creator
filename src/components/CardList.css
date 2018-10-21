@@ -3,9 +3,14 @@
 }
 
 .CardList table {
-  width: 100%;
+  display: block;
+  overflow-x: auto;
   border-collapse: collapse;
   text-align: center;
+}
+
+.CardList table * {
+  width: 100%;
 }
 
 .CardList thead th {
@@ -16,8 +21,18 @@
   padding: 0.5rem;
   border-top: 1px solid #dfe3e8;
   border-bottom: 1px solid #dfe3e8;
+  min-width: 100px;
+}
+
+.CardList td:first-child, .CardList th:first-child {
+  text-align: left;
 }
 
 .CardList td:last-child {
   text-align: right;
+  min-width: 82px;
+}
+
+.CardList td:last-child > button {
+  width: 36px;
 }

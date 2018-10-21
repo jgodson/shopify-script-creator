@@ -148,7 +148,8 @@ export default class CampaignForm extends Component {
                       if (!isCampaignSelect(fieldName)) {
                         const type = getInputType(fieldName);
                         const value = input.inputs[fieldIndex];
-                        if (type === 'object') {
+                        console.log(type);
+                        if (type === 'object' || type === 'objectArray') {
                           inputCampaign = newState.inputs.campaignSelect[inputName];
                         }
                         newState.inputs[type][fieldName] = convertInput(value, type, inputCampaign, campaignInputs);
@@ -158,7 +159,7 @@ export default class CampaignForm extends Component {
                         nestedFields.forEach((nestedName, nestedIndex) => {
                           const type = getInputType(nestedName);
                           const value = input.inputs[fieldIndex].inputs[nestedIndex];
-                          if (type === 'object') {
+                          if (type === 'object' || type === 'objectArray') {
                             inputCampaign = newState.inputs.campaignSelect[fieldName];
                           }
                           newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
@@ -338,8 +339,8 @@ export default class CampaignForm extends Component {
           const hasValues = !!this.state.inputs[input.type][input.name];
           const currentValues = hasValues ? this.state.inputs[input.type][input.name].split(',').map((val) => val.trim()) : '';
           return (
-            <div className="TagContainer">
-              <Stack vertical key={input.name}>
+            <div className="TagContainer" key={input.name}>
+              <Stack vertical>
                 <Stack alignment="leading">
                   <Stack.Item fill>{input.label}</Stack.Item>
                   <Stack.Item>
@@ -537,9 +538,10 @@ export default class CampaignForm extends Component {
     if (value) {
       values = value.split(':').map((value) => value.trim());
     }
-    let fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
+    let fullMatch = inputFormat.match(/{(\w+\??):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
     let index = 0;
     while(fullMatch) {
+      let optional = false;
       let [name, type, description, options] = [fullMatch[1], fullMatch[2], fullMatch[3], fullMatch[4]];
       if (options) {
         options = options.split(',').map((option) => {
@@ -554,8 +556,16 @@ export default class CampaignForm extends Component {
         value = values ? values[index] : "";
       }
 
+      const questionIndex = name.indexOf('?');
+
+      if (questionIndex > -1) {
+        optional = true;
+        name = name.substring(0, questionIndex);
+      }
+
       const newInput = {
         name,
+        optional,
         label: splitAndCapitalize('_', name),
         type,
         value,
@@ -564,7 +574,7 @@ export default class CampaignForm extends Component {
       };
       inputs.push(newInput);
       inputFormat = inputFormat.replace(fullMatch[0], '');
-      fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
+      fullMatch = inputFormat.match(/{(\w+\??):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
       index++;
     }
     return inputs;
@@ -589,7 +599,7 @@ export default class CampaignForm extends Component {
           // Replace any $ with $$ so we don't replace $<#> with matches in the regex
           values[index] = values[index].replace(/\$/g, '$$$');
         }
-        newValue = newValue.replace(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[index]);
+        newValue = newValue.replace(/{(\w+\??):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[index]);
       }
 
       // Add new content, or replace old content if editing

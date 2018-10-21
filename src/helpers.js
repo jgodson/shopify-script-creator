@@ -76,7 +76,8 @@
         const values = line.split('=>').map((value) => value.trim());
         let output = inputFmt;
         for (let index = 0; index < values.length; index++) {
-          let type = output.match(/{\w+:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
+          let type = output.match(/{\w+\??:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
+          console.log(type);
           if (type === 'array') {
             values[index] = values[index].split(',').map((value) => {
               // Only grab what's in "". Removes unncessary stuff like :discount or ,
@@ -89,28 +90,22 @@
             const value = values[index].match(/"(.+)"/);
             values[index] = value ? value[1] : value;
           }
-          // Skip null values
+
+          // Skip empty string on first iteration (for reasons)
+          if (index === 0 && values[index] === "") { continue; }
+
           if (values[index] !== null) {
-            output = output.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
+            output = output.replace(/{\w+\??:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
           }
         }
         return output;
       }).join('\n');
       return lines;
     } else {
-      const inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/g, '').trim();
+      const inputFormatRepl = inputFmt.replace(/{\w+\??:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/g, '').trim();
       const splitter = inputFormatRepl[0];
-      const requiredInputs = inputFormatRepl.split(splitter).length;
       const lines = value.split('\n').map((line) => {
         let values = line.split(splitter).map((value) => value.trim());
-        // Don't allow a blank value
-        values = values.filter((value) => value !== "");
-
-        // Throw an error if we don't have the right number of inputs so the user can correct
-        if (values.length !== requiredInputs) {
-          throw Error("Number of inputs does not match required input format");
-        }
-
         let output = outputFmt;
         for (let index = 0; index < values.length; index++) {
           const type = output.match(/{(\w+)}/)[1];
