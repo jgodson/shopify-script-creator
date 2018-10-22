@@ -434,7 +434,7 @@ end`,
 BundleDiscount: `
 class BundleDiscount < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)
-    super(condition, customer_qualifier, cart_qualifier)
+    super(condition, customer_qualifier, cart_qualifier, nil)
     @bundle_products = bundle_products
     @discount = discount
     @full_bundles_only = full_bundles_only

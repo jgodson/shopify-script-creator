@@ -411,7 +411,7 @@ class CartAmountQualifier < Qualifier
     total = cart.subtotal_price
     if @cart_or_item == :item
       total = cart.line_items.reduce(Money.zero) do |total, item|
-        total + (selector.match?(item) ? item.original_line_price : Money.zero)
+        total + (selector&.match?(item) ? item.original_line_price : Money.zero)
       end
     end
     compare_amounts(total, @comparison_type, @amount)
@@ -462,7 +462,7 @@ class CartQuantityQualifier < Qualifier
   def match?(cart, selector = nil)
     if @cart_or_item == :item
       total = cart.line_items.reduce(0) do |total, item|
-        total + (selector.match?(item) ? item.quantity : 0)
+        total + (selector&.match?(item) ? item.quantity : 0)
       end
     else
       total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
