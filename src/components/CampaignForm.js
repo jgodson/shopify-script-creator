@@ -148,7 +148,6 @@ export default class CampaignForm extends Component {
                       if (!isCampaignSelect(fieldName)) {
                         const type = getInputType(fieldName);
                         const value = input.inputs[fieldIndex];
-                        console.log(type);
                         if (type === 'object' || type === 'objectArray') {
                           inputCampaign = newState.inputs.campaignSelect[inputName];
                         }

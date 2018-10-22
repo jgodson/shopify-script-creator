@@ -77,7 +77,6 @@
         let output = inputFmt;
         for (let index = 0; index < values.length; index++) {
           let type = output.match(/{\w+\??:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
-          console.log(type);
           if (type === 'array') {
             values[index] = values[index].split(',').map((value) => {
               // Only grab what's in "". Removes unncessary stuff like :discount or ,
