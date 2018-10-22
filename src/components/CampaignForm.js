@@ -416,7 +416,7 @@ export default class CampaignForm extends Component {
           const currentValues = hasValues ? this.state.inputs[input.type][input.name].split('\n') : '';
           return (
             <Stack vertical key={input.name}>
-              <Stack alignment="leading">
+              <Stack alignment="center">
                 <Stack.Item fill>{input.label}</Stack.Item>
                 <Stack.Item>
                   <Button
