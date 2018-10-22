@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Stack, Button, TextStyle } from '@shopify/polaris';
+import { Card, Stack, Button, TextStyle, Subheading, TextContainer } from '@shopify/polaris';
 import { splitCamelCase } from '../helpers';
 
 import styles from './CampaignsList.css';
@@ -36,22 +36,28 @@ export default class CampaignsList extends Component {
     }
     const campaignTitle = campaign.label || splitCamelCase(campaign.name)
     return (
-      <Card.Section title={campaignTitle} key={`campaign-${campaign.id || ''}`}>
-        {messages && 
-          messages.map((message, index) => {
-            if (message[1] === "") { return false; }
-            return (
-              <div key={`campaign-${campaign.id}-message-${index}`} className="campaign-info">
-                <TextStyle>{`${message[0]}: `}</TextStyle>
-                <TextStyle variation="subdued">{message[1]}</TextStyle>
-              </div>
-            );
-          })
-        }
-        <Stack distribution="trailing">
-          {campaign.id && <Button size="slim" destructive onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
-          {button}
-        </Stack>
+      <Card.Section key={`campaign-${campaign.id || ''}`}>
+        <TextContainer spacing="tight">
+          <Stack distribution="equalSpacing" alignment="center">
+            <Subheading>{campaignTitle}</Subheading>
+            {campaign.id && <Button plain onClick={() => this.props.duplicateCampaign(campaign.id)}>Duplicate</Button>}
+          </Stack>
+          {messages && 
+            messages.map((message, index) => {
+              if (message[1] === "") { return false; }
+              return (
+                <div key={`campaign-${campaign.id}-message-${index}`} className="campaign-info">
+                  <TextStyle>{`${message[0]}: `}</TextStyle>
+                  <TextStyle variation="subdued">{message[1]}</TextStyle>
+                </div>
+              );
+            })
+          }
+          <Stack distribution="trailing">
+            {campaign.id && <Button size="slim" destructive onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
+            {button}
+          </Stack>
+        </TextContainer>
       </Card.Section>
     )
   }

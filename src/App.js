@@ -57,6 +57,7 @@ export default class App extends Component {
     this.generateScript = this.generateScript.bind(this);
     this.addCampaign = this.addCampaign.bind(this);
     this.editCampaign = this.editCampaign.bind(this);
+    this.duplicateCampaign = this.duplicateCampaign.bind(this);
     this.removeCampaign = this.removeCampaign.bind(this);
     this.updateCurrentCampaign = this.updateCurrentCampaign.bind(this);
     this.getCampaigns = this.getCampaigns.bind(this);
@@ -185,6 +186,15 @@ export default class App extends Component {
     newState.editCampaignInfo = campaign;
     newState.output = '';
     this.setState(newState);
+  }
+
+  duplicateCampaign(campaignId) {
+    // Google Analytics
+    gtag('event', 'duplicateButtonClick');
+
+    const campaign = JSON.parse(JSON.stringify(this.getCampaignById(campaignId)));
+    campaign.id = null;
+    this.addCampaign(campaign);
   }
 
   removeCampaign(campaignId) {
@@ -612,6 +622,7 @@ ${INDENT[this.IL]})`;
               campaigns={this.state.campaigns}
               editCampaign={this.editCampaign}
               removeCampaign={this.removeCampaign}
+              duplicateCampaign={this.duplicateCampaign}
               showForm={this.showForm}
               isEditing={!!this.state.editCampaignInfo}
             />
