@@ -9471,15 +9471,15 @@ var classes = {
 
   LineItemPropertiesSelector: "\nclass LineItemPropertiesSelector < Selector\n  def initialize(target_properties)\n    @target_properties = target_properties\n  end\n\n  def match?(line_item)\n    line_item_props = line_item.properties\n    @target_properties.all? do |key, value|\n      next unless line_item_props.has_key?(key)\n      true if line_item_props[key].downcase == value.downcase\n    end\n  end\nend",
 
-  CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total + (selector.match?(item) ? item.original_line_price : Money.zero)\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
+  CartAmountQualifier: "\nclass CartAmountQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, amount)\n    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total = cart.subtotal_price\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(Money.zero) do |total, item|\n        total + (selector&.match?(item) ? item.original_line_price : Money.zero)\n      end\n    end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
   ReducedCartAmountQualifier: "\nclass ReducedCartAmountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type\n    @amount = Money.new(cents: amount * 100)\n  end\n\n  def match?(cart, selector = nil)\n    total =\n      case cart.discount_code\n        when CartDiscount::Percentage\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item| \n              total + (item.variant.product.gift_card? ? Money.zero : item.line_price)\n            end\n            gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc\n            cart_subtotal_without_gc * ((Decimal.new(100) - cart.discount_code.percentage) / 100) + gift_card_amount\n          else\n            cart.subtotal_price\n          end\n        when CartDiscount::FixedAmount\n          if cart.subtotal_price >= cart.discount_code.minimum_order_amount\n            [cart.subtotal_price - cart.discount_code.amount, Money.zero].max\n          else\n            cart.subtotal_price\n          end\n        else\n          cart.subtotal_price\n      end\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
-  CartQuantityQualifier: "\nclass CartQuantityQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, quantity)\n    @cart_or_item = cart_or_item\n    @comparison_type = comparison_type\n    @quantity = quantity\n  end\n\n  def match?(cart, selector = nil)\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(0) do |total, item|\n        total + (selector.match?(item) ? item.quantity : 0)\n      end\n    else\n      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n    end\n    compare_amounts(total, @comparison_type, @quantity)\n  end\nend",
+  CartQuantityQualifier: "\nclass CartQuantityQualifier < Qualifier\n  def initialize(cart_or_item, comparison_type, quantity)\n    @cart_or_item = cart_or_item\n    @comparison_type = comparison_type\n    @quantity = quantity\n  end\n\n  def match?(cart, selector = nil)\n    if @cart_or_item == :item\n      total = cart.line_items.reduce(0) do |total, item|\n        total + (selector&.match?(item) ? item.quantity : 0)\n      end\n    else\n      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n    end\n    compare_amounts(total, @comparison_type, @quantity)\n  end\nend",
 
   TotalWeightQualifier: "\nclass TotalWeightQualifier < Qualifier\n  def initialize(comparison_type, amount, units)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n    @units = units == :default ? :g : units\n  end\n  \n  def g_to_lb(grams)\n    grams * 0.00220462\n  end\n  \n  def g_to_oz(grams)\n    grams * 0.035274\n  end\n  \n  def g_to_kg(grams)\n    grams * 0.001\n  end\n\n  def match?(cart, selector = nil)\n    cart_weight = cart.total_weight\n    case @units\n      when :lb\n        cart_weight = g_to_lb(cart_weight)\n      when :kg\n        cart_weight = g_to_kg(cart_weight)\n      when :oz\n        cart_weight = g_to_oz(cart_weight)\n    end\n\n    compare_amounts(cart_weight, @comparison_type, @amount)\n  end\nend",
 
-  FullAddressQualifier: "\n# ----- Qualifying Addresses ----- #\n# Example: {\n#   address1: [\"150 Elgin St\", \"150 Elgin Street\"],\n#   address2: \"8th floor\",\n#   phone: 123-456-7890,\n#   city: \"Ottawa\",\n#   province: \"Ontario\",\n#   country_code: \"CA\",\n#   zip: \"K2P 1L4\",\n#   match_type: :exact\n# }\n\n# Matches a given address to an array of addresses given\n# Addresses should be in a hash format and will be the match type specified in the hash (:exact or :partial)\n# If no match type is specified, :partial will be the default\n# Only the given paramaters will be compared. Arrays can be used to match different options\nclass FullAddressQualifier\n  def initialize(addresses)\n    @addresses = addresses\n  end\n  \n  def match?(cart)\n    # TODO: ADD checks to make sure every field wanted exists\n    return false if cart.shipping_address.nil?\n    \n    @addresses.any? do |accepted_address|\n      match_type = accepted_address[:match_type] || :partial\n\n      cart.shipping_address.to_hash.all? do |key, value|\n        match = true\n        key = key.to_sym\n        value.downcase!\n        \n        unless accepted_address[key].nil?\n          if accepted_address[key].is_a?(Array)\n            match = accepted_address[key].any? do |potential_address|\n              potential_address.downcase!\n              case match_type\n                when :partial\n                  value.include?(potential_address)\n                when :exact\n                  potential_address == value\n              end\n            end\n          else\n            accepted_address[key].downcase!\n            case match_type\n              when :partial\n                match = value.include?(accepted_address[key])\n              when :exact\n                match = accepted_address[key] == value\n            end\n          end\n        end\n        match\n      end\n    end\n  end\nend"
+  FullAddressQualifier: "\n  class FullAddressQualifier\n  def initialize(addresses)\n    @addresses = addresses\n  end\n  \n  def match?(cart, selector = nil)\n    return false if cart.shipping_address.nil?\n    \n    @addresses.any? do |accepted_address|\n      match_type = accepted_address[:match_type].to_sym\n\n      cart.shipping_address.to_hash.all? do |key, value|\n        key = key.to_sym\n        value.downcase!\n        \n        next true unless accepted_address[key]\n        next true if accepted_address[key].length === 0\n\n        match = accepted_address[key].any? do |potential_address|\n          potential_address.downcase!\n\n          case match_type\n            when :partial\n              value.include?(potential_address)\n            when :exact\n              potential_address == value\n          end\n        end\n\n        match\n      end\n    end\n  end\nend"
 };
 
 var customerQualifiers = [{
@@ -9843,6 +9843,18 @@ var cartQualifiers = [{
     country_codes: {
       type: "array",
       description: "Enter the applicable country codes"
+    }
+  }
+}, {
+  value: "FullAddressQualifier",
+  label: "Shipping Address - Full Address Qualifier - NEW",
+  description: "Only qualifies if the shipping address matches one of the given addresses",
+  inputs: {
+    qualifing_addresses: {
+      type: "objectArray",
+      description: "Set the addresses that qualify",
+      inputFormat: "{address1?:array:Add multiple options by separating each with a comma} : {address2?:array:Add multiple options by separating each with a comma} : {phone?:array:Add multiple options by separating each with a comma} : {city?:array:Add multiple options by separating each with a comma} : {province_code?:array:Add multiple options by separating each with a comma} : {country_code?:array:Add multiple options by separating each with a comma} : {zip?:array:Add multiple options by separating each with a comma} : {match_type:select:Type of match required (e.g. '150 Elgin' partially matches '150 Elgin St'):partial|Partial,exact|Exact}",
+      outputFormat: '{:address1 => [{array}], :address2 => [{array}], :phone => [{array}], :city => [{array}], :province_code => [{array}], :country_code => [{array}], :zip => [{array}], :match_type => "{select}"}'
     }
   }
 }, {
@@ -11445,7 +11457,7 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
       });
       var output = inputFmt;
       for (var index = 0; index < values.length; index++) {
-        var type = output.match(/{\w+:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
+        var type = output.match(/{\w+\??:(\w+):[\w\s'.(),]+:?([\w\s|,]+)?}/)[1];
         if (type === 'array') {
           values[index] = values[index].split(',').map(function (value) {
             // Only grab what's in "". Removes unncessary stuff like :discount or ,
@@ -11460,32 +11472,26 @@ function formatObject(inOut, value, inputFmt, outputFmt) {
           var _value = values[index].match(/"(.+)"/);
           values[index] = _value ? _value[1] : _value;
         }
-        // Skip null values
+
+        // Skip empty string on first iteration (for reasons)
+        if (index === 0 && values[index] === "") {
+          continue;
+        }
+
         if (values[index] !== null) {
-          output = output.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
+          output = output.replace(/{\w+\??:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
         }
       }
       return output;
     }).join('\n');
     return lines;
   } else {
-    var inputFormatRepl = inputFmt.replace(/{\w+:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/g, '').trim();
+    var inputFormatRepl = inputFmt.replace(/{\w+\??:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/g, '').trim();
     var splitter = inputFormatRepl[0];
-    var requiredInputs = inputFormatRepl.split(splitter).length;
     var _lines = value.split('\n').map(function (line) {
       var values = line.split(splitter).map(function (value) {
         return value.trim();
       });
-      // Don't allow a blank value
-      values = values.filter(function (value) {
-        return value !== "";
-      });
-
-      // Throw an error if we don't have the right number of inputs so the user can correct
-      if (values.length !== requiredInputs) {
-        throw Error("Number of inputs does not match required input format");
-      }
-
       var output = outputFmt;
       for (var index = 0; index < values.length; index++) {
         var type = output.match(/{(\w+)}/)[1];
@@ -32203,6 +32209,7 @@ var App = function (_Component) {
     _this.generateScript = _this.generateScript.bind(_this);
     _this.addCampaign = _this.addCampaign.bind(_this);
     _this.editCampaign = _this.editCampaign.bind(_this);
+    _this.duplicateCampaign = _this.duplicateCampaign.bind(_this);
     _this.removeCampaign = _this.removeCampaign.bind(_this);
     _this.updateCurrentCampaign = _this.updateCurrentCampaign.bind(_this);
     _this.getCampaigns = _this.getCampaigns.bind(_this);
@@ -32365,6 +32372,16 @@ var App = function (_Component) {
       newState.editCampaignInfo = campaign;
       newState.output = '';
       this.setState(newState);
+    }
+  }, {
+    key: 'duplicateCampaign',
+    value: function duplicateCampaign(campaignId) {
+      // Google Analytics
+      gtag('event', 'duplicateButtonClick');
+
+      var campaign = JSON.parse(JSON.stringify(this.getCampaignById(campaignId)));
+      campaign.id = null;
+      this.addCampaign(campaign);
     }
   }, {
     key: 'removeCampaign',
@@ -32853,6 +32870,7 @@ var App = function (_Component) {
               campaigns: this.state.campaigns,
               editCampaign: this.editCampaign,
               removeCampaign: this.removeCampaign,
+              duplicateCampaign: this.duplicateCampaign,
               showForm: this.showForm,
               isEditing: !!this.state.editCampaignInfo
             })
@@ -42870,8 +42888,9 @@ var Modal = function (_Component) {
     key: 'componentDidMount',
     value: function componentDidMount() {
       // When first opened, focus on the close button if there are no inputs
-      var numInputs = this.props.inputs && this.props.inputs.length;
-      if (numInputs && numInputs > 0) {
+      var inputs = this.props.inputs;
+      var numInputs = (inputs || []).length;
+      if (numInputs > 0) {
         // Initialize the values. We need the exact order when returning
         var newState = this.state;
         var iterations = numInputs;
@@ -42880,11 +42899,9 @@ var Modal = function (_Component) {
         }
 
         // Set the editing state if every input value isn't blank
-        if (newState.values.every(function (val) {
-          return val !== '';
-        })) {
-          newState.isEditing = true;
-        }
+        newState.isEditing = newState.values.every(function (val, index) {
+          return inputs[index].type === 'select' || val !== '';
+        });
 
         // Focus the select if it's the first input (nothing on the compnent to autofocus)
         if (this.props.inputs[0].type === 'select') {
@@ -42905,12 +42922,14 @@ var Modal = function (_Component) {
         return this.props.onClose(true);
       }
 
-      // Validate that nothing is blank
+      // Validate that nothing required is blank
       var newState = this.state;
       var preventSubmission = false;
       for (var index = 0; index < this.state.values.length; index++) {
         var value = this.state.values[index];
-        if (typeof value !== 'number' && value.trim() === "") {
+        var isRequired = this.props.inputs[index].optional === false;
+
+        if (isRequired && typeof value !== 'number' && value.trim() === "") {
           newState.errors[index] = 'Must enter a value';
           preventSubmission = true;
         }
@@ -42926,7 +42945,8 @@ var Modal = function (_Component) {
     key: 'handleInputChange',
     value: function handleInputChange(value, index) {
       var newState = this.state;
-      if (typeof value !== 'number' && value.trim() === '') {
+      var isRequired = this.props.inputs[index].optional === false;
+      if (isRequired && typeof value !== 'number' && value.trim() === '') {
         newState.errors[index] = 'Must enter a value';
       } else {
         newState.errors[index] = false;
@@ -42965,7 +42985,6 @@ var Modal = function (_Component) {
             key: name,
             type: type,
             min: type === 'number' ? 0 : undefined,
-            step: type === 'number' ? 0.01 : undefined,
             name: name,
             autoFocus: index === 0,
             helpText: description,
@@ -43113,7 +43132,7 @@ exports = module.exports = __webpack_require__(31)(false);
 
 
 // module
-exports.push([module.i, ".Modal__Backdrop {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.7);\n  z-index: 1000;\n}\n\n.Modal {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  min-width: 320px;\n  max-width: 500px;\n  min-height: 200px;\n  width: 60%;\n  z-index: 1001;\n}", ""]);
+exports.push([module.i, ".Modal__Backdrop {\n  position: fixed;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n  background-color: rgba(0, 0, 0, 0.7);\n  z-index: 1000;\n}\n\n.Modal {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  min-width: 320px;\n  max-width: 500px;\n  min-height: 200px;\n  max-height: 100%;\n  overflow: auto;\n  width: 60%;\n  z-index: 1001;\n}\n\n@media screen and (min-height: 400px) and (min-width: 400px) {\n  .Modal {\n    max-height: 90%;\n  }\n}\n", ""]);
 
 // exports
 
@@ -43425,7 +43444,7 @@ var CampaignForm = function (_Component) {
                         if (!(0, _helpers.isCampaignSelect)(fieldName)) {
                           var type = (0, _helpers.getInputType)(fieldName);
                           var value = input.inputs[fieldIndex];
-                          if (type === 'object') {
+                          if (type === 'object' || type === 'objectArray') {
                             inputCampaign = newState.inputs.campaignSelect[inputName];
                           }
                           newState.inputs[type][fieldName] = convertInput(value, type, inputCampaign, campaignInputs);
@@ -43437,7 +43456,7 @@ var CampaignForm = function (_Component) {
                           nestedFields.forEach(function (nestedName, nestedIndex) {
                             var type = (0, _helpers.getInputType)(nestedName);
                             var value = input.inputs[fieldIndex].inputs[nestedIndex];
-                            if (type === 'object') {
+                            if (type === 'object' || type === 'objectArray') {
                               inputCampaign = newState.inputs.campaignSelect[fieldName];
                             }
                             newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
@@ -43640,10 +43659,10 @@ var CampaignForm = function (_Component) {
             }) : '';
             return _react2.default.createElement(
               'div',
-              { className: 'TagContainer' },
+              { className: 'TagContainer', key: input.name },
               _react2.default.createElement(
                 _polaris.Stack,
-                { vertical: true, key: input.name },
+                { vertical: true },
                 _react2.default.createElement(
                   _polaris.Stack,
                   { alignment: 'leading' },
@@ -43741,7 +43760,7 @@ var CampaignForm = function (_Component) {
               { vertical: true, key: input.name },
               _react2.default.createElement(
                 _polaris.Stack,
-                { alignment: 'leading' },
+                { alignment: 'center' },
                 _react2.default.createElement(
                   _polaris.Stack.Item,
                   { fill: true },
@@ -43911,9 +43930,10 @@ var CampaignForm = function (_Component) {
           return value.trim();
         });
       }
-      var fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
+      var fullMatch = inputFormat.match(/{(\w+\??):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
       var index = 0;
       while (fullMatch) {
+        var optional = false;
         var _ref = [fullMatch[1], fullMatch[2], fullMatch[3], fullMatch[4]],
             name = _ref[0],
             type = _ref[1],
@@ -43937,8 +43957,16 @@ var CampaignForm = function (_Component) {
           value = values ? values[index] : "";
         }
 
+        var questionIndex = name.indexOf('?');
+
+        if (questionIndex > -1) {
+          optional = true;
+          name = name.substring(0, questionIndex);
+        }
+
         var newInput = {
           name: name,
+          optional: optional,
           label: (0, _helpers.splitAndCapitalize)('_', name),
           type: type,
           value: value,
@@ -43947,7 +43975,7 @@ var CampaignForm = function (_Component) {
         };
         inputs.push(newInput);
         inputFormat = inputFormat.replace(fullMatch[0], '');
-        fullMatch = inputFormat.match(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
+        fullMatch = inputFormat.match(/{(\w+\??):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/);
         index++;
       }
       return inputs;
@@ -43975,7 +44003,7 @@ var CampaignForm = function (_Component) {
             // Replace any $ with $$ so we don't replace $<#> with matches in the regex
             values[_index] = values[_index].replace(/\$/g, '$$$');
           }
-          newValue = newValue.replace(/{(\w+):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[_index]);
+          newValue = newValue.replace(/{(\w+\??):(\w+):([\w\s'.(),]+):?([\w\s|,]+)?}/, values[_index]);
         }
 
         // Add new content, or replace old content if editing
@@ -44340,7 +44368,7 @@ exports = module.exports = __webpack_require__(31)(false);
 
 
 // module
-exports.push([module.i, ".CardList .Polaris-Button--iconOnly {\n  margin: 0;\n}\n\n.CardList table {\n  width: 100%;\n  border-collapse: collapse;\n  text-align: center;\n}\n\n.CardList thead th {\n  padding-bottom: 1rem;\n}\n\n.CardList tbody tr td {\n  padding: 0.5rem;\n  border-top: 1px solid #dfe3e8;\n  border-bottom: 1px solid #dfe3e8;\n}\n\n.CardList td:last-child {\n  text-align: right;\n}", ""]);
+exports.push([module.i, ".CardList .Polaris-Button--iconOnly {\n  margin: 0;\n}\n\n.CardList table {\n  display: block;\n  overflow-x: auto;\n  border-collapse: collapse;\n  text-align: center;\n}\n\n.CardList table * {\n  width: 100%;\n}\n\n.CardList thead th {\n  padding-bottom: 1rem;\n}\n\n.CardList tbody tr td {\n  padding: 0.5rem;\n  border-top: 1px solid #dfe3e8;\n  border-bottom: 1px solid #dfe3e8;\n  min-width: 100px;\n}\n\n.CardList td:first-child, .CardList th:first-child {\n  text-align: left;\n}\n\n.CardList td:last-child {\n  text-align: right;\n  min-width: 82px;\n}\n\n.CardList td:last-child > button {\n  width: 36px;\n}\n", ""]);
 
 // exports
 
@@ -44480,37 +44508,57 @@ var CampaignsList = function (_Component) {
       var campaignTitle = campaign.label || (0, _helpers.splitCamelCase)(campaign.name);
       return _react2.default.createElement(
         _polaris.Card.Section,
-        { title: campaignTitle, key: 'campaign-' + (campaign.id || '') },
-        messages && messages.map(function (message, index) {
-          if (message[1] === "") {
-            return false;
-          }
-          return _react2.default.createElement(
-            'div',
-            { key: 'campaign-' + campaign.id + '-message-' + index, className: 'campaign-info' },
-            _react2.default.createElement(
-              _polaris.TextStyle,
-              null,
-              message[0] + ': '
-            ),
-            _react2.default.createElement(
-              _polaris.TextStyle,
-              { variation: 'subdued' },
-              message[1]
-            )
-          );
-        }),
+        { key: 'campaign-' + (campaign.id || '') },
         _react2.default.createElement(
-          _polaris.Stack,
-          { distribution: 'trailing' },
-          campaign.id && _react2.default.createElement(
-            _polaris.Button,
-            { size: 'slim', destructive: true, onClick: function onClick() {
-                return _this2.props.removeCampaign(campaign.id);
-              } },
-            'Remove'
+          _polaris.TextContainer,
+          { spacing: 'tight' },
+          _react2.default.createElement(
+            _polaris.Stack,
+            { distribution: 'equalSpacing', alignment: 'center' },
+            _react2.default.createElement(
+              _polaris.Subheading,
+              null,
+              campaignTitle
+            ),
+            campaign.id && _react2.default.createElement(
+              _polaris.Button,
+              { plain: true, onClick: function onClick() {
+                  return _this2.props.duplicateCampaign(campaign.id);
+                } },
+              'Duplicate'
+            )
           ),
-          button
+          messages && messages.map(function (message, index) {
+            if (message[1] === "") {
+              return false;
+            }
+            return _react2.default.createElement(
+              'div',
+              { key: 'campaign-' + campaign.id + '-message-' + index, className: 'campaign-info' },
+              _react2.default.createElement(
+                _polaris.TextStyle,
+                null,
+                message[0] + ': '
+              ),
+              _react2.default.createElement(
+                _polaris.TextStyle,
+                { variation: 'subdued' },
+                message[1]
+              )
+            );
+          }),
+          _react2.default.createElement(
+            _polaris.Stack,
+            { distribution: 'trailing' },
+            campaign.id && _react2.default.createElement(
+              _polaris.Button,
+              { size: 'slim', destructive: true, onClick: function onClick() {
+                  return _this2.props.removeCampaign(campaign.id);
+                } },
+              'Remove'
+            ),
+            button
+          )
         )
       );
     }
@@ -44574,7 +44622,7 @@ exports = module.exports = __webpack_require__(31)(false);
 
 
 // module
-exports.push([module.i, ".campaign-info {\n  padding: 0 0 1rem 1rem;\n}", ""]);
+exports.push([module.i, ".campaign-info {\n  padding: 0 0 0rem 1rem;\n}\n", ""]);
 
 // exports
 
@@ -44785,7 +44833,42 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Fixed a bug that can cause text entered in the modal to display incorrectly when using a $ with specific numbers immediately after it'
+        'Added a new Cart Qualifier called "Shipping Address - Full Address Qualifier", which lets you target more specific addresses. There\'s quite a bit of flexibility built into this one, so take a look! (Note when using zip codes, for example, K2W1LP and K2W 1LP are both accepted as Canadian zip codes and you need to account for both (unless you use just the first portion with a partial match)'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Fixed a bug in the "Discount Code List" campaign that would not allow a decimal value.'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Fixed a bug where Bundle Discount would not work properly with the Post Cart Amount Qualifier'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Fixed a bug where a script error would occur when using the Bundle Discount in combination with a Cart Amount or Cart Quantity qualifier'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Variant SKU\'s are now an option to use for bundles in the Bundle Discount campaign'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Fixed a bug in the Fixed Rate Shipping Discount that would cause a script error'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Added a button so that you can easily duplicate a campaign in the list'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        'Some other minor bug fixes'
       )
     ),
     _react2.default.createElement(
@@ -44848,11 +44931,11 @@ var classes = {
 
   TieredDiscount: "\nclass TieredDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, tier_type, discount_tiers)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_type = discount_type\n    @tier_type = tier_type == :default ? :customer_tag : tier_type\n    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }\n  end\n  \n  def init_discount(amount, message)\n    if @discount_type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n  \n  def run(cart)\n    return unless qualifies?(cart)\n    \n    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    case @tier_type\n      when :customer_tag\n        return if cart.customer.nil?\n        customer_tags = cart.customer.tags.map(&:downcase)\n        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }\n      when :cart_subtotal\n        cart_total = cart.subtotal_price\n        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total\n        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total + item.line_price }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }\n      when :discountable_total_items\n        discountable_quantity = applicable_items.reduce(0) { |total, item| total + item.quantity }\n        qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }\n      when :cart_items\n        cart_quantity = cart.line_items.reduce(0) { |total, item| total + item.quantity }\n        qualified_tiers = @discount_tiers.select { |tier| cart_quantity >= tier[:tier].to_i }\n    end\n\n    return if qualified_tiers.empty?\n    discount_amount = qualified_tiers.last[:discount].to_f\n    discount_message = qualified_tiers.last[:message]\n    \n    discount = init_discount(discount_amount, discount_message)\n    applicable_items.each { |item| discount.apply(item) }\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
-  DiscountCodeList: "\nclass DiscountCodeList < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_list)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_list = discount_list\n  end\n\n  def init_discount(type, amount, message)\n    if type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n\n  def get_discount_code_type(discount_code)\n    case discount_code\n      when CartDiscount::Percentage\n        return :percent\n      when CartDiscount::FixedAmount\n        return :fixed\n      else\n        return nil\n    end\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n\n    applied_code = cart.discount_code.code.downcase\n    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }\n    return if applicable_discount.empty?\n    raise \"#{applied_code} matches multiple discounts\" if applicable_discount.length > 1\n    \n    applicable_discount = applicable_discount.first\n    case applicable_discount[:type].downcase\n      when 'p', 'percent'\n        discount_type = :percent\n      when 'f', 'fixed'\n        discount_type = :fixed\n      when 'c', 'code'\n        discount_type = get_discount_code_type(cart.discount_code)\n    end\n    return if discount_type.nil?\n\n    discount = init_discount(discount_type, applicable_discount[:amount].to_i, applied_code)\n\n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
+  DiscountCodeList: "\nclass DiscountCodeList < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_list)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount_list = discount_list\n  end\n\n  def init_discount(type, amount, message)\n    if type == :fixed\n      return FixedTotalDiscount.new(amount, message)\n    else\n      return PercentageDiscount.new(amount, message)\n    end\n  end\n\n  def get_discount_code_type(discount_code)\n    case discount_code\n      when CartDiscount::Percentage\n        return :percent\n      when CartDiscount::FixedAmount\n        return :fixed\n      else\n        return nil\n    end\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n\n    applied_code = cart.discount_code.code.downcase\n    applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }\n    return if applicable_discount.empty?\n    raise \"#{applied_code} matches multiple discounts\" if applicable_discount.length > 1\n    \n    applicable_discount = applicable_discount.first\n    case applicable_discount[:type].downcase\n      when 'p', 'percent'\n        discount_type = :percent\n      when 'f', 'fixed'\n        discount_type = :fixed\n      when 'c', 'code'\n        discount_type = get_discount_code_type(cart.discount_code)\n    end\n    return if discount_type.nil?\n\n    discount = init_discount(discount_type, applicable_discount[:amount].to_f, applied_code)\n\n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
   DiscountCodePattern: "\nclass DiscountCodePattern < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, percent_format, fixed_format)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @percent_format = percent_format\n    @fixed_format = fixed_format\n  end\n\n  def get_discount_type(code)\n    percent_search = @percent_format.split('#').first\n    fixed_search = @fixed_format.split('#').first\n    if code.include?(percent_search)\n      return :percent\n    elsif code.include?(fixed_search)\n      return :fixed\n    end\n    return nil\n  end\n\n  def get_discount_amount(type, code)\n    start_num = nil\n    end_num = nil\n    start_search = nil\n    \n    case type\n      when :percent\n        start_num = @percent_format.index('#')\n        end_num = @percent_format.rindex('#')\n        start_search = @percent_format.split('#').first\n      when :fixed\n        start_num = @fixed_format.index('#')\n        end_num = @fixed_format.rindex('#')\n        start_search = @fixed_format.split('#').first\n    end\n    \n    search_length = start_search.length\n    start_index = code.index(start_search) + search_length\n    return if start_index.nil? || start_num.nil?\n    \n    length = (end_num - start_num || 0) + 1\n    puts code.slice(start_index, length)\n    return code.slice(start_index, length).to_i(base=10)\n  end\n\n  def initialize_discount(code)\n    type = get_discount_type(code)\n    discount_amount = get_discount_amount(type, code)\n    return if type == nil || discount_amount == nil\n    return type == :fixed ? FixedTotalDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)\n  end\n\n  def run(cart)\n    return unless cart.discount_code\n    return unless qualifies?(cart)\n    \n    discount = initialize_discount(cart.discount_code.code)\n    return unless discount\n    \n    cart.line_items.each do |item|\n      next unless @line_item_selector.nil? || @line_item_selector.match?(item)\n      discount.apply(item)\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
-  BundleDiscount: "\nclass BundleDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)\n    super(condition, customer_qualifier, cart_qualifier)\n    @bundle_products = bundle_products\n    @discount = discount\n    @full_bundles_only = full_bundles_only\n    @split_items = []\n    @bundle_items = []\n  end\n  \n  def check_bundles(cart)\n      bundled_items = @bundle_products.map do |bitem|\n        quantity_required = bitem[:quantity].to_i\n        qualifiers = bitem[:qualifiers]\n        type = bitem[:type].to_sym\n        case type\n          when :ptype\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) }\n          when :ptag\n            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 }\n          when :pid\n            qualifiers.map!(&:to_i)\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) }\n          when :vid\n            qualifiers.map!(&:to_i)\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) }\n        end\n        \n        total_quantity = items.reduce(0) { |total, item| total + item.quantity }\n        {\n          has_all: total_quantity >= quantity_required,\n          total_quantity: total_quantity,\n          quantity_required: quantity_required,\n          total_possible: (total_quantity / quantity_required).to_i,\n          items: items\n        }\n      end\n      \n      max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only\n      if bundled_items.all? { |item| item[:has_all] }\n        if @full_bundles_only\n          bundled_items.each do |bundle|\n            bundle_quantity = bundle[:quantity_required] * max_bundle_count\n            split_out_extra_quantity(cart, bundle[:items], bundle[:total_quantity], bundle_quantity)\n          end\n        else\n          bundled_items.each do |bundle|\n            bundle[:items].each do |item| \n              @bundle_items << item \n              cart.line_items.delete(item)\n            end\n          end\n        end\n        return true\n      end\n      false\n  end\n  \n  def split_out_extra_quantity(cart, items, total_quantity, quantity_required)\n    items_to_split = quantity_required\n    items.each do |item|\n      break if items_to_split == 0\n      if item.quantity > items_to_split\n        @bundle_items << item.split({take: items_to_split})\n        @split_items << item\n        items_to_split = 0\n      else\n        @bundle_items << item\n        split_quantity = item.quantity\n        items_to_split -= split_quantity\n      end\n      cart.line_items.delete(item)\n    end\n    cart.line_items.concat(@split_items)\n    @split_items.clear\n  end\n  \n  def run(cart)\n    raise \"Campaign requires a discount\" unless @discount\n    return unless qualifies?(cart)\n    \n    if check_bundles(cart)\n      @bundle_items.each { |item| @discount.apply(item) }\n    end\n    @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }\n  end\nend"
+  BundleDiscount: "\nclass BundleDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)\n    super(condition, customer_qualifier, cart_qualifier, nil)\n    @bundle_products = bundle_products\n    @discount = discount\n    @full_bundles_only = full_bundles_only\n    @split_items = []\n    @bundle_items = []\n  end\n  \n  def check_bundles(cart)\n      bundled_items = @bundle_products.map do |bitem|\n        quantity_required = bitem[:quantity].to_i\n        qualifiers = bitem[:qualifiers]\n        type = bitem[:type].to_sym\n        case type\n          when :ptype\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) }\n          when :ptag\n            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 }\n          when :pid\n            qualifiers.map!(&:to_i)\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) }\n          when :vid\n            qualifiers.map!(&:to_i)\n            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) }\n          when :vsku\n            items = cart.line_items.select { |item| (qualifiers & item.variant.skus).length > 0 }\n        end\n        \n        total_quantity = items.reduce(0) { |total, item| total + item.quantity }\n        {\n          has_all: total_quantity >= quantity_required,\n          total_quantity: total_quantity,\n          quantity_required: quantity_required,\n          total_possible: (total_quantity / quantity_required).to_i,\n          items: items\n        }\n      end\n      \n      max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only\n      if bundled_items.all? { |item| item[:has_all] }\n        if @full_bundles_only\n          bundled_items.each do |bundle|\n            bundle_quantity = bundle[:quantity_required] * max_bundle_count\n            split_out_extra_quantity(cart, bundle[:items], bundle[:total_quantity], bundle_quantity)\n          end\n        else\n          bundled_items.each do |bundle|\n            bundle[:items].each do |item| \n              @bundle_items << item \n              cart.line_items.delete(item)\n            end\n          end\n        end\n        return true\n      end\n      false\n  end\n  \n  def split_out_extra_quantity(cart, items, total_quantity, quantity_required)\n    items_to_split = quantity_required\n    items.each do |item|\n      break if items_to_split == 0\n      if item.quantity > items_to_split\n        @bundle_items << item.split({take: items_to_split})\n        @split_items << item\n        items_to_split = 0\n      else\n        @bundle_items << item\n        split_quantity = item.quantity\n        items_to_split -= split_quantity\n      end\n      cart.line_items.delete(item)\n    end\n    cart.line_items.concat(@split_items)\n    @split_items.clear\n  end\n  \n  def run(cart)\n    raise \"Campaign requires a discount\" unless @discount\n    return unless qualifies?(cart)\n    \n    if check_bundles(cart)\n      @bundle_items.each { |item| @discount.apply(item) }\n    end\n    @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend"
 };
 
 var defaultCode = "\nCAMPAIGNS = [\n|\n].freeze\n\nCAMPAIGNS.each do |campaign|\n  campaign.run(Input.cart)\nend\n\nOutput.cart = Input.cart";
@@ -45318,7 +45401,7 @@ var campaigns = [{
     bundle_items: {
       type: "objectArray",
       description: "Set the products that are part of a bundle",
-      inputFormat: "{type:select:Type of qualifier:pid|Product ID,vid|Variant ID,ptype|Product type,ptag|Product tag} : {applicable_items:array:The items that qualify for this bundle item. Separate multiples with a comma(,)} : {required_quantity:number:The amount of this item needed for a bundle}",
+      inputFormat: "{type:select:Type of qualifier:pid|Product ID,vid|Variant ID,vsku|Variant SKU,ptype|Product type,ptag|Product tag} : {applicable_items:array:The items that qualify for this bundle item. Separate multiples with a comma(,)} : {required_quantity:number:The amount of this item needed for a bundle}",
       outputFormat: '{:type => "{select}", :qualifiers => [{array}], :quantity => "{number}"}'
     }
   }
@@ -45362,7 +45445,7 @@ var classes = {
 
   PercentageDiscount: "\nclass PercentageDiscount\n  def initialize(percent, message)\n    @percent = Decimal.new(percent) / 100\n    @message = message\n  end\n  \n  def apply(rate)\n    rate.apply_discount(rate.price * @percent, { message: @message })\n  end \nend",
 
-  FixedDiscount: "\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n  end\n  \n  def apply(rate)\n    discount_amount = rate.price - @amount < 0 ? rate.price : @amount\n    rate.apply_discount(discount_amount, { message: @message })\n  end\nend",
+  FixedDiscount: "\nclass FixedDiscount\n  def initialize(amount, message)\n    @amount = Money.new(cents: amount * 100)\n    @message = message\n  end\n  \n  def apply(rate)\n    discount_amount = rate.price - @amount < Money.zero ? rate.price : @amount\n    rate.apply_discount(discount_amount, { message: @message })\n  end\nend",
 
   ShippingDiscount: "\nclass ShippingDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, discount)\n    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)\n    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym\n    @rate_selector = rate_selector\n    @discount = discount\n  end\n  \n  def run(rates, cart)\n    raise \"Campaign requires a discount\" unless @discount\n    return unless qualifies?(cart)\n    rates.each do |rate|\n      next unless @rate_selector.nil? || @rate_selector.match?(rate)\n      @discount.apply(rate)\n    end\n  end\nend",
 
@@ -46068,7 +46151,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.9.6",
+  currentVersion: "0.10.0",
   minimumVersion: "0.1.0"
 };
 
