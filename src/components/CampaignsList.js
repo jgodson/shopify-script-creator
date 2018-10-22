@@ -25,9 +25,9 @@ export default class CampaignsList extends Component {
     let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount(?!codes)/i) > -1);
     messages = messages && messages.map((campaign) => {
       if (!campaign.inputs) { return ["", ""] }
-      const lastValueIndex = campaign.inputs.length - 1;
+      const stringIndex = campaign.inputs.findIndex((input) => typeof input === 'string' && input.indexOf('"') > -1);
       const messageType = campaign.name.search(/(reject|exclude)/i) > -1 ? 'Rejection message' : 'Discount message';
-      return [messageType, campaign.inputs[lastValueIndex].replace(/"/g, '').trim()];
+      return [messageType, campaign.inputs[stringIndex].replace(/"/g, '').trim()];
     });
     if (campaign.id) {
       button = <Button size="slim" onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;

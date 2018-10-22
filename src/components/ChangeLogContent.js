@@ -8,9 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
 
-      <li>16.0 - Added a new <b>Cart Qualifier</b> called <b>Cart Has Items</b> that allows you to check if the cart has a specific quantity or subtotal of specified items</li>
-      <li>16.1 - Added an error page when an error occurs and a banner clarifying that Shopify does not offer support for this app</li>
-      <li>16.2 - Fixed a bug when using the <b>Cart Has Items</b> cart qualifier with one of the <b>Multi-Select</b> cart qualifiers</li>
+      <li>The <b>Fixed Total Discount</b> discount now allows you to split the discount between all discountable items. This is the behaviour by default when using the <b>Fixed total discount</b> option for <b>Tiered Discount</b>, <b>Discount Code List</b> and the <b>Fixed pattern</b> for <b>Discount Code Pattern</b> campaigns. Let me know via the feedback link if you encounter any issues.</li>
 
       </ul>
 

@@ -28,17 +28,44 @@ end`,
 
   FixedTotalDiscount: `
 class FixedTotalDiscount
-  def initialize(amount, message)
+  def initialize(amount, message, behaviour = :to_zero)
     @amount = Money.new(cents: amount * 100)
     @message = message
     @discount_applied = Money.zero
+    @all_items = []
+    @is_split = behaviour == :split
   end
 
   def apply(line_item)
-    return unless @discount_applied < @amount
-    discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min
-    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
-    @discount_applied += discount_to_apply
+    if @is_split
+      @all_items << line_item
+    else
+      return unless @discount_applied < @amount
+      discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min
+      line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
+      @discount_applied += discount_to_apply
+    end
+  end
+
+  def apply_final_discount
+    return if @all_items.length == 0
+    total_items = @all_items.length
+    total_quantity = 0
+    total_cost = Money.zero
+    @all_items.each do |item|
+      total_quantity += item.quantity
+      total_cost += item.line_price
+    end
+    @all_items.each_with_index do |item, index|
+      discount_percent = item.line_price.cents / total_cost.cents
+      if total_items == index + 1
+        discount_to_apply = Money.new(cents: @amount.cents - @discount_applied.cents.floor)
+      else
+        discount_to_apply = Money.new(cents: @amount.cents * discount_percent)
+      end
+      item.change_line_price(item.line_price - discount_to_apply, {message: @message})
+      @discount_applied += discount_to_apply
+    end
   end
 end`,
 
@@ -126,7 +153,6 @@ class ConditionalDiscount < Campaign
         @items_to_discount -= item.quantity if !@items_to_discount.nil?
       end
     end
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -194,7 +220,6 @@ class BuyXGetX < Campaign
         discountable_quantity = 0
       end
     end
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -267,7 +292,6 @@ class QuantityLimit < Campaign
       end
 
     end
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -284,7 +308,7 @@ class TieredDiscount < Campaign
   def init_discount(amount, message)
     case @discount_type
       when :fixed
-        return FixedTotalDiscount.new(amount, message)
+        return FixedTotalDiscount.new(amount, message, :split)
       when :percent
         return PercentageDiscount.new(amount, message)
       when :per_item
@@ -324,16 +348,16 @@ class TieredDiscount < Campaign
         discount_message = qualified_tiers.last[:message]
         discount = init_discount(discount_amount, discount_message)
         discount.apply(item)
+        discount.apply_final_discount if discount.respond_to?(:apply_final_discount)
       end
     else
       return if qualified_tiers.empty?
       discount_amount = qualified_tiers.last[:discount].to_f
       discount_message = qualified_tiers.last[:message]
 
-      discount = init_discount(discount_amount, discount_message)
-      applicable_items.each { |item| discount.apply(item) }
+      @discount = init_discount(discount_amount, discount_message)
+      applicable_items.each { |item| @discount.apply(item) }
     end
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -348,7 +372,7 @@ class DiscountCodeList < Campaign
   def init_discount(type, amount, message)
     case type
       when :fixed
-        return FixedTotalDiscount.new(amount, message)
+        return FixedTotalDiscount.new(amount, message, :split)
       when :percent
         return PercentageDiscount.new(amount, message)
       when :per_item
@@ -389,13 +413,11 @@ class DiscountCodeList < Campaign
     end
     return if discount_type.nil?
 
-    discount = init_discount(discount_type, applicable_discount[:amount].to_f, applied_code)
-
+    @discount = init_discount(discount_type, applicable_discount[:amount].to_f, applied_code)
     cart.line_items.each do |item|
       next unless @line_item_selector.nil? || @line_item_selector.match?(item)
-      discount.apply(item)
+      @discount.apply(item)
     end
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
@@ -448,25 +470,24 @@ class DiscountCodePattern < Campaign
     type = get_discount_type(code)
     discount_amount = get_discount_amount(type, code)
     return if type == nil || discount_amount == nil
-    return type == :fixed ? FixedTotalDiscount.new(discount_amount, code) : PercentageDiscount.new(discount_amount, code)
+    return type == :fixed ? FixedTotalDiscount.new(discount_amount, code, :split) : PercentageDiscount.new(discount_amount, code)
   end
 
   def run(cart)
     return unless cart.discount_code
     return unless qualifies?(cart)
 
-    discount = initialize_discount(cart.discount_code.code)
-    return unless discount
+    @discount = initialize_discount(cart.discount_code.code)
+    return unless @discount
 
     cart.line_items.each do |item|
       next unless @line_item_selector.nil? || @line_item_selector.match?(item)
-      discount.apply(item)
+      @discount.apply(item)
     end
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
 
-BundleDiscount: `
+  BundleDiscount: `
 class BundleDiscount < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)
     super(condition, customer_qualifier, cart_qualifier, nil)
@@ -554,7 +575,6 @@ class BundleDiscount < Campaign
       @bundle_items.each { |item| @discount.apply(item) }
     end
     @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`
 };
@@ -565,7 +585,7 @@ CAMPAIGNS = [
 ].freeze
 
 CAMPAIGNS.each do |campaign|
-  campaign.run(Input.cart)
+  campaign.run_with_hooks(Input.cart)
 end
 
 Output.cart = Input.cart`;
@@ -584,8 +604,7 @@ const CART_QUALIFIERS = [
       condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -618,8 +637,7 @@ const CART_QUALIFIERS = [
       behaviour: {
         type: "select",
         description: "Set the behaviour when an unaccepted discount code is entered",
-        options: [
-          {
+        options: [{
             value: "apply_discount",
             label: "Apply discount code only"
           },
@@ -636,8 +654,7 @@ const CART_QUALIFIERS = [
       match_behaviour: {
         type: "select",
         description: "Select the behaviour for codes that match the applied code",
-        options: [
-          {
+        options: [{
             value: "reject_except",
             label: "Reject all codes, except the following"
           },
@@ -659,8 +676,7 @@ const LINE_ITEM_SELECTORS = [
   ...Common.lineItemSelectors
 ];
 
-const DISCOUNTS = [
-  {
+const DISCOUNTS = [{
     value: "none",
     label: "None",
     description: "No discount"
@@ -692,6 +708,19 @@ const DISCOUNTS = [
       message: {
         type: "text",
         description: "Message to display to customer"
+      },
+      behaviour: {
+        type: "select",
+        description: "Set the behaviour of the total discount",
+        options: [{
+            value: "to_zero",
+            label: "Discount items to $0 until maximum reached"
+          },
+          {
+            value: "split",
+            label: "Split discount between items"
+          }
+        ]
       }
     }
   },
@@ -794,8 +823,7 @@ const CART_AND_SELECTOR = {
 };
 
 
-const campaigns = [
-  {
+const campaigns = [{
     value: "ConditionalDiscount",
     label: "Conditional Discount",
     description: "Specify conditions to apply a discount",
@@ -803,8 +831,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Discount if all qualify"
           },
@@ -832,8 +859,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Discount if all qualify"
           },
@@ -881,8 +907,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Reject code if all qualify"
           },
@@ -897,8 +922,7 @@ const campaigns = [
       line_item_qualify_condition: {
         type: "select",
         description: "Set how line items are qualified",
-        options: [
-          {
+        options: [{
             value: "any",
             label: "Qualify if any item in cart matches"
           },
@@ -923,8 +947,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Limit unless all qualify"
           },
@@ -940,8 +963,7 @@ const campaigns = [
       limit_by: {
         type: "select",
         description: "Sets how items are limited",
-        options: [
-          {
+        options: [{
             value: "product",
             label: "Limit by product - Maximum amount of each matching product can be purchased"
           },
@@ -965,8 +987,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Discount if all qualify"
           },
@@ -982,8 +1003,7 @@ const campaigns = [
       discount_type: {
         type: "select",
         description: "Discount selected items by the tier amount as a percent or a total fixed amount",
-        options: [
-          {
+        options: [{
             value: "percent",
             label: "Percentage Discount"
           },
@@ -1000,8 +1020,7 @@ const campaigns = [
       tier_type: {
         type: "select",
         description: "Set what the discount tiers are based on",
-        options: [
-          {
+        options: [{
             value: "customer_tag",
             label: "Customer Tag"
           },
@@ -1044,8 +1063,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Discount if all qualify"
           },
@@ -1061,7 +1079,7 @@ const campaigns = [
       discounts: {
         type: "objectArray",
         description: "Set the discount codes and the discount to apply for each code",
-        inputFormat: "{discount_code:text:The discount code} : {discount_type:select:The type of discount:fixed|Fixed discount,percent|Percent discount,per_item|Fixed per item discount,code|Use the discount code type} : {discount_amount:number:The amount of the discount}",
+        inputFormat: "{discount_code:text:The discount code} : {discount_type:select:The type of discount:fixed|Fixed total discount,percent|Percent discount,per_item|Fixed per item discount,code|Use the discount code type} : {discount_amount:number:The amount of the discount}",
         outputFormat: '{:code => "{text}", :type => "{select}", :amount => "{number}"}'
       }
     },
@@ -1075,8 +1093,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Discount if all qualify"
           },
@@ -1108,8 +1125,7 @@ const campaigns = [
       qualifer_behaviour: {
         type: "select",
         description: "Set the qualifier behaviour",
-        options: [
-          {
+        options: [{
             value: "all",
             label: "Discount if all qualify"
           },

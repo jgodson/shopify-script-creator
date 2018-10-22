@@ -43,6 +43,17 @@ class Campaign
     end
   end
 
+  def run_with_hooks(cart)
+    before_run(cart) if respond_to?(:before_run)
+    run(cart)
+    after_run(cart)
+  end
+
+  def after_run(cart)
+    @discount.apply_final_discount if @discount.present? && @discount.respond_to?(:apply_final_discount)
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
+  end
+
   def revert_changes(cart)
     cart.instance_variable_set(:@line_items, @unmodified_line_items)
   end
@@ -576,8 +587,7 @@ end`,
 end`
 };
 
-const customerQualifiers = [
-  {
+const customerQualifiers = [{
     value: "none",
     label: "None",
     description: "No effects"
@@ -590,8 +600,7 @@ const customerQualifiers = [
       match_type: {
         type: "select",
         description: "Set how the following condition matches",
-        options: [
-          {
+        options: [{
             value: "does",
             label: "Does"
           },
@@ -604,8 +613,7 @@ const customerQualifiers = [
       match_condition: {
         type: "select",
         description: "Set how the email is matched",
-        options: [
-          {
+        options: [{
             value: "match",
             label: "Match one of"
           },
@@ -637,8 +645,7 @@ const customerQualifiers = [
       match_type: {
         type: "select",
         description: "Set how the following condition matches",
-        options: [
-          {
+        options: [{
             value: "does",
             label: "Does"
           },
@@ -651,8 +658,7 @@ const customerQualifiers = [
       match_condition: {
         type: "select",
         description: "Set how the tags are matched",
-        options: [
-          {
+        options: [{
             value: "match",
             label: "Match one of"
           },
@@ -684,8 +690,7 @@ const customerQualifiers = [
       match_condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -717,8 +722,7 @@ const customerQualifiers = [
       match_condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -750,8 +754,7 @@ const customerQualifiers = [
       qualifing_condition: {
         type: "select",
         description: "Set the condition that the customer qualifies",
-        options: [
-          {
+        options: [{
             value: "does",
             label: "Does accept"
           },
@@ -765,8 +768,7 @@ const customerQualifiers = [
   }
 ];
 
-const lineItemSelectors = [
-  {
+const lineItemSelectors = [{
     value: "none",
     label: "None",
     description: "Any item selected/No effect on qualifier"
@@ -779,8 +781,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how product ID's are matched",
-        options: [
-          {
+        options: [{
             value: "is_one",
             label: "Is one of"
           },
@@ -804,8 +805,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how product types are matched",
-        options: [
-          {
+        options: [{
             value: "is_one",
             label: "Is one of"
           },
@@ -829,8 +829,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how product vendors are matched",
-        options: [
-          {
+        options: [{
             value: "is_one",
             label: "Is one of"
           },
@@ -854,8 +853,7 @@ const lineItemSelectors = [
       match_type: {
         type: "select",
         description: "Set how the following condition matches",
-        options: [
-          {
+        options: [{
             value: "does",
             label: "Does"
           },
@@ -868,8 +866,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how the tags are matched",
-        options: [
-          {
+        options: [{
             value: "match",
             label: "Match one of"
           },
@@ -901,8 +898,7 @@ const lineItemSelectors = [
       match_type: {
         type: "select",
         description: "Set how the following condition matches",
-        options: [
-          {
+        options: [{
             value: "does",
             label: "Does"
           },
@@ -915,8 +911,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how the skus are matched",
-        options: [
-          {
+        options: [{
             value: "match",
             label: "Match one of"
           },
@@ -948,8 +943,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how variant ID's are matched",
-        options: [
-          {
+        options: [{
             value: "is_one",
             label: "Is one of"
           },
@@ -986,8 +980,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how gift cards are matched",
-        options: [
-          {
+        options: [{
             value: "is",
             label: "Is a Gift Card"
           },
@@ -1007,8 +1000,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how sale items are matched",
-        options: [
-          {
+        options: [{
             value: "is",
             label: "Is on sale"
           },
@@ -1028,8 +1020,7 @@ const lineItemSelectors = [
       match_condition: {
         type: "select",
         description: "Set how discounted items are matched",
-        options: [
-          {
+        options: [{
             value: "is",
             label: "Has been discounted"
           },
@@ -1043,8 +1034,7 @@ const lineItemSelectors = [
   }
 ]
 
-const cartQualifiers = [
-  {
+const cartQualifiers = [{
     value: "none",
     label: "None",
     description: "No effects"
@@ -1057,8 +1047,7 @@ const cartQualifiers = [
       cart_or_item_total: {
         type: "select",
         description: "Cart subtotal or item subtotal",
-        options: [
-          {
+        options: [{
             value: "cart",
             label: "Cart subtotal"
           },
@@ -1071,8 +1060,7 @@ const cartQualifiers = [
       condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -1104,8 +1092,7 @@ const cartQualifiers = [
       cart_or_item_total: {
         type: "select",
         description: "Cart quantity or item quantity",
-        options: [
-          {
+        options: [{
             value: "cart",
             label: "Cart total quantity"
           },
@@ -1126,8 +1113,7 @@ const cartQualifiers = [
       condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -1164,8 +1150,7 @@ const cartQualifiers = [
       quantity_or_subtotal: {
         type: "select",
         description: "Total quantity of items or subtotal of items",
-        options: [
-          {
+        options: [{
             value: "quantity",
             label: "Item quantity"
           },
@@ -1178,8 +1163,7 @@ const cartQualifiers = [
       match_condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -1212,8 +1196,7 @@ const cartQualifiers = [
       match_condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
@@ -1238,8 +1221,7 @@ const cartQualifiers = [
       units: {
         type: "select",
         description: "Units for weight",
-        options: [
-          {
+        options: [{
             value: "g",
             label: "Grams (g)"
           },
@@ -1267,8 +1249,7 @@ const cartQualifiers = [
       match_type: {
         type: "select",
         description: "Set how the following condition matches",
-        options: [
-          {
+        options: [{
             value: "does",
             label: "Does"
           },
@@ -1281,8 +1262,7 @@ const cartQualifiers = [
       match_condition: {
         type: 'select',
         description: "Set how the discount code is matched",
-        options: [
-          {
+        options: [{
             value: "match",
             label: "Match one of"
           },
@@ -1315,8 +1295,7 @@ const cartQualifiers = [
       match_condition: {
         type: "select",
         description: "Set how the following countries/provinces are matched",
-        options: [
-          {
+        options: [{
             value: "is_one",
             label: "Is one of"
           },
@@ -1342,8 +1321,7 @@ const cartQualifiers = [
       match_type: {
         type: "select",
         description: "Set how the country codes are matched",
-        options: [
-          {
+        options: [{
             value: "is_one",
             label: "Is one of"
           },
@@ -1380,8 +1358,7 @@ const cartQualifiers = [
       condition: {
         type: "select",
         description: "Type of comparison",
-        options: [
-          {
+        options: [{
             value: "greater_than",
             label: "Greater than"
           },
