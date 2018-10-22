@@ -519,6 +519,7 @@ class BundleDiscount < Campaign
       @bundle_items.each { |item| @discount.apply(item) }
     end
     @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }
+    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`
 };
