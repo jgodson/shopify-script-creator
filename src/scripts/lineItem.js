@@ -458,6 +458,8 @@ class BundleDiscount < Campaign
           when :vid
             qualifiers.map!(&:to_i)
             items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) }
+          when :vsku
+            items = cart.line_items.select { |item| (qualifiers & item.variant.skus).length > 0 }
         end
         
         total_quantity = items.reduce(0) { |total, item| total + item.quantity }
@@ -1064,7 +1066,7 @@ const campaigns = [
       bundle_items: {
         type: "objectArray",
         description: "Set the products that are part of a bundle",
-        inputFormat: "{type:select:Type of qualifier:pid|Product ID,vid|Variant ID,ptype|Product type,ptag|Product tag} : {applicable_items:array:The items that qualify for this bundle item. Separate multiples with a comma(,)} : {required_quantity:number:The amount of this item needed for a bundle}",
+        inputFormat: "{type:select:Type of qualifier:pid|Product ID,vid|Variant ID,vsku|Variant SKU,ptype|Product type,ptag|Product tag} : {applicable_items:array:The items that qualify for this bundle item. Separate multiples with a comma(,)} : {required_quantity:number:The amount of this item needed for a bundle}",
         outputFormat: '{:type => "{select}", :qualifiers => [{array}], :quantity => "{number}"}'
       }
     }
