@@ -44834,42 +44834,12 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Added a new Cart Qualifier called "Shipping Address - Full Address Qualifier", which lets you target more specific addresses. There\'s quite a bit of flexibility built into this one, so take a look! (Note when using zip codes, for example, K2W1LP and K2W 1LP are both accepted as Canadian zip codes and you need to account for both (unless you use just the first portion with a partial match)'
+        'Added per item discount option to the Tiered Discount and the Discount Code List Campaigns'
       ),
       _react2.default.createElement(
         'li',
         null,
-        'Fixed a bug in the "Discount Code List" campaign that would not allow a decimal value.'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Fixed a bug where Bundle Discount would not work properly with the Post Cart Amount Qualifier'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Fixed a bug where a script error would occur when using the Bundle Discount in combination with a Cart Amount or Cart Quantity qualifier'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Variant SKU\'s are now an option to use for bundles in the Bundle Discount campaign'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Fixed a bug in the Fixed Rate Shipping Discount that would cause a script error'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Added a button so that you can easily duplicate a campaign in the list'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Some other minor bug fixes'
+        'Allowed number inputs in the modal to be in 0.01 increments for more flexibility in discounts.'
       )
     ),
     _react2.default.createElement(
@@ -46155,7 +46125,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.10.0",
+  currentVersion: "0.11.0",
   minimumVersion: "0.1.0"
 };
 
