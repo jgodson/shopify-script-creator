@@ -267,10 +267,13 @@ class TieredDiscount < Campaign
   end
   
   def init_discount(amount, message)
-    if @discount_type == :fixed
-      return FixedTotalDiscount.new(amount, message)
-    else
-      return PercentageDiscount.new(amount, message)
+    case @discount_type
+      when :fixed
+        return FixedTotalDiscount.new(amount, message)
+      when :percent
+        return PercentageDiscount.new(amount, message)
+      when :per_item
+        return FixedItemDiscount.new(amount, message)
     end
   end
   
@@ -316,10 +319,13 @@ class DiscountCodeList < Campaign
   end
 
   def init_discount(type, amount, message)
-    if type == :fixed
-      return FixedTotalDiscount.new(amount, message)
-    else
-      return PercentageDiscount.new(amount, message)
+    case type
+      when :fixed
+        return FixedTotalDiscount.new(amount, message)
+      when :percent
+        return PercentageDiscount.new(amount, message)
+      when :per_item
+        return FixedItemDiscount.new(amount, message)
     end
   end
 
@@ -349,6 +355,8 @@ class DiscountCodeList < Campaign
         discount_type = :percent
       when 'f', 'fixed'
         discount_type = :fixed
+      when 'per_item'
+        discount_type = :per_item
       when 'c', 'code'
         discount_type = get_discount_code_type(cart.discount_code)
     end
@@ -936,6 +944,10 @@ const campaigns = [
           {
             value: "fixed",
             label: "Fixed Total Discount"
+          },
+          {
+            value: "per_item",
+            label: "Fixed Per Item Discount"
           }
         ]
       },
@@ -972,7 +984,7 @@ const campaigns = [
         outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
       }
     },
-    dependants: ["PercentageDiscount", "FixedTotalDiscount"]
+    dependants: ["PercentageDiscount", "FixedTotalDiscount", "FixedItemDiscount"]
   },
   {
     value: "DiscountCodeList",
@@ -999,11 +1011,11 @@ const campaigns = [
       discounts: {
         type: "objectArray",
         description: "Set the discount codes and the discount to apply for each code",
-        inputFormat: "{discount_code:text:The discount code} : {discount_type:select:The type of discount:fixed|Fixed discount,percent|Percent discount,code|Use the discount code type} : {discount_amount:number:The amount of the discount}",
+        inputFormat: "{discount_code:text:The discount code} : {discount_type:select:The type of discount:fixed|Fixed discount,percent|Percent discount,per_item|Fixed per item discount,code|Use the discount code type} : {discount_amount:number:The amount of the discount}",
         outputFormat: '{:code => "{text}", :type => "{select}", :amount => "{number}"}'
       }
     },
-    dependants: ["PercentageDiscount", "FixedTotalDiscount"]
+    dependants: ["PercentageDiscount", "FixedTotalDiscount", "FixedItemDiscount"]
   },
   {
     value: "DiscountCodePattern",

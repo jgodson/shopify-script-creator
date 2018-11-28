@@ -114,12 +114,13 @@ export default class Modal extends Component {
             key={name}
             type={type}
             min={type === 'number' ? 0 : undefined}
+            step={type === 'number' ? 0.01 : undefined}
             name={name}
             autoFocus={index === 0}
             helpText={description}
             error={this.state.errors[index]}
             value={this.state.values[index]}
-            onChange={(val) => this.handleInputChange(type === 'number' ? Math.abs(val) : val, index)}
+            onChange={(val) => this.handleInputChange(val, index)}
           />
         );
     }
