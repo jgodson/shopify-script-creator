@@ -9443,7 +9443,7 @@ var classes = {
 
   CustomerEmailQualifier: "\nclass CustomerEmailQualifier < Qualifier\n  def initialize(match_type, match_condition, emails)\n    @invert = match_type == :does_not\n    @match_condition = match_condition == :default ? :match : match_condition\n    @emails = emails.map(&:downcase)\n  end\n\n  def match?(cart, selector = nil)\n    return false if cart.customer.nil?\n    customer_email = cart.customer.email\n    case @match_condition\n      when :match\n        return @invert ^ @emails.include?(customer_email)\n      else\n        return @invert ^ partial_match(@match_condition, customer_email, @emails)\n    end\n  end\nend",
 
-  CustomerTagQualifier: "\nclass CustomerTagQualifier < Qualifier\n  def initialize(match_type, match_condition, tags)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(cart, selector = nil)\n    return false if cart.customer.nil?\n    customer_tags = cart.customer.tags.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@tags & customer_tags).length > 0)\n      else\n        return @invert ^ partial_match(@match_condition, customer_tags, @tags)\n    end\n  end\nend",
+  CustomerTagQualifier: "\nclass CustomerTagQualifier < Qualifier\n  def initialize(match_type, match_condition, tags)\n    @match_condition = match_condition == :default ? :match : match_condition\n    @invert = match_type == :does_not\n    @tags = tags.map(&:downcase)\n  end\n\n  def match?(cart, selector = nil)\n    return true if cart.customer.nil? && @invert\n    return false if cart.customer.nil?\n    customer_tags = cart.customer.tags.to_a.map(&:downcase)\n    case @match_condition\n      when :match\n        return @invert ^ ((@tags & customer_tags).length > 0)\n      else\n        return @invert ^ partial_match(@match_condition, customer_tags, @tags)\n    end\n  end\nend",
 
   CustomerOrderCountQualifier: "\nclass CustomerOrderCountQualifier < Qualifier\n  def initialize(comparison_type, amount)\n    @comparison_type = comparison_type == :default ? :greater_than : comparison_type\n    @amount = amount\n  end\n\n  def match?(cart, selector = nil)\n    return false if cart.customer.nil?\n    total = cart.customer.orders_count\n    compare_amounts(total, @comparison_type, @amount)\n  end\nend",
 
@@ -44834,12 +44834,18 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        'Added per item discount option to the Tiered Discount and the Discount Code List Campaigns'
-      ),
-      _react2.default.createElement(
-        'li',
-        null,
-        'Allowed number inputs in the modal to be in 0.01 increments for more flexibility in discounts.'
+        _react2.default.createElement(
+          'strong',
+          null,
+          'The CustomerTagQualifier now matches when there is no customer logged in, if the match type is set to "does not"'
+        ),
+        '. Let me know via the ',
+        _react2.default.createElement(
+          'i',
+          null,
+          'Leave Feedback'
+        ),
+        ' link if this causes any issues for you'
       )
     ),
     _react2.default.createElement(
@@ -46125,7 +46131,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.11.0",
+  currentVersion: "0.12.0",
   minimumVersion: "0.1.0"
 };
 
