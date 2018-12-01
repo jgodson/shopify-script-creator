@@ -197,6 +197,7 @@ class CustomerTagQualifier < Qualifier
   end
 
   def match?(cart, selector = nil)
+    return true if cart.customer.nil? && @invert
     return false if cart.customer.nil?
     customer_tags = cart.customer.tags.to_a.map(&:downcase)
     case @match_condition

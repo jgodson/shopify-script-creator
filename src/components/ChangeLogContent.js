@@ -7,9 +7,9 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-      <li>Added per item discount option to the Tiered Discount and the Discount Code List Campaigns</li>
 
-      <li>Allowed number inputs in the modal to be in 0.01 increments for more flexibility in discounts.</li>
+      <li><strong>The CustomerTagQualifier now matches when there is no customer logged in, if the match type is set to "does not"</strong>. Let me know via the <i>Leave Feedback</i> link if this causes any issues for you</li>
+
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
