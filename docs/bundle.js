@@ -43477,6 +43477,10 @@ var CampaignForm = function (_Component) {
         });
 
         function convertInput(value, type, campaignName, campaignInputs) {
+          if (value === undefined) {
+            return "";
+          }
+
           switch (type) {
             case 'array':
               // Remove []. Then split on comma, remove "" and join with comma
@@ -44077,7 +44081,7 @@ var CampaignForm = function (_Component) {
     value: function getInputValue(inputName, campaignName, campaignInputs) {
       var type = (0, _helpers.getInputType)(inputName);
       var value = this.state.inputs[type][inputName];
-      // Can modify values here (like make an array into an array)
+      // Can modify values here (like make csv's into an array)
       switch (type) {
         case 'array':
           if (!value) {
@@ -44481,7 +44485,7 @@ var CampaignsList = function (_Component) {
 
       var button = null;
       var messages = campaign.inputs && campaign.inputs.filter(function (input) {
-        return input.name && input.name.search(/discount/i) > -1;
+        return input.name && input.name.search(/discount(?!codes)/i) > -1;
       });
       messages = messages && messages.map(function (campaign) {
         if (!campaign.inputs) {
@@ -44834,18 +44838,7 @@ function ChangeLogContent() {
       _react2.default.createElement(
         'li',
         null,
-        _react2.default.createElement(
-          'strong',
-          null,
-          'The CustomerTagQualifier now matches when there is no customer logged in, if the match type is set to "does not"'
-        ),
-        '. Let me know via the ',
-        _react2.default.createElement(
-          'i',
-          null,
-          'Leave Feedback'
-        ),
-        ' link if this causes any issues for you'
+        'The "Cart has no discount codes" Cart Qualifier has been renamed to "Exclude Discount Codes" due to additional functionality. It will work the same as previously without any changes, but you can now specify whether specific codes are allowed/not allowed to combine with the additional options'
       )
     ),
     _react2.default.createElement(
@@ -44894,7 +44887,7 @@ var classes = {
 
   TaxDiscount: "\nclass TaxDiscount\n  def initialize(amount, message)\n    @amount = amount\n    @message = message\n  end\n\n  def apply(line_item)\n    calculated_tax_fraction = @amount / (100 + @amount)\n    item_tax = line_item.variant.price * calculated_tax_fraction\n    per_item_price = line_item.variant.price - item_tax\n    new_line_price = per_item_price * line_item.quantity\n    line_item.change_line_price(new_line_price, message: @message)\n  end\nend",
 
-  ExcludeDiscountCodes: "\nclass ExcludeDiscountCodes < Qualifier\n  def initialize(behaviour, message)\n    @reject = behaviour == :apply_script\n    @message = message == \"\" ? \"Discount codes cannot be used with this offer\" : message\n  end\n  \n  def match?(cart, selector = nil)\n    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})\n  end\nend",
+  ExcludeDiscountCodes: "\nclass ExcludeDiscountCodes < Qualifier\n  def initialize(behaviour, message, match_type = :reject_except, discount_codes = [])\n    @reject = behaviour == :apply_script\n    @message = message == \"\" ? \"Discount codes cannot be used with this offer\" : message\n    @match_type = match_type\n    @discount_codes = discount_codes.map(&:downcase)\n  end\n\n  def match?(cart, selector = nil)\n    return true if cart.discount_code.nil?\n    return false if !@reject\n    discount_code = cart.discount_code.code.downcase\n    should_reject = true\n    case @match_type\n      when :reject_except\n        should_reject = !@discount_codes.include?(discount_code)\n      when :accept_except\n        should_reject = @discount_codes.include?(discount_code)\n    end\n    if should_reject\n      cart.discount_code.reject({message: @message})\n    end\n    return true\n  end\nend",
 
   ConditionalDiscount: "\nclass ConditionalDiscount < Campaign\n  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, max_discounts)\n    super(condition, customer_qualifier, cart_qualifier)\n    @line_item_selector = line_item_selector\n    @discount = discount\n    @items_to_discount = max_discounts == 0 ? nil : max_discounts\n  end\n\n  def run(cart)\n    raise \"Campaign requires a discount\" unless @discount\n    return unless qualifies?(cart)\n    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }\n    applicable_items = applicable_items.sort_by { |item| item.variant.price }\n    applicable_items.each do |item|\n      break if @items_to_discount == 0\n      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)\n        discounted_items = item.split(take: @items_to_discount)\n        @discount.apply(discounted_items)\n        cart.line_items << discounted_items\n        @items_to_discount = 0\n      else\n        @discount.apply(item)\n        @items_to_discount -= item.quantity if !@items_to_discount.nil?\n      end\n    end\n    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)\n  end\nend",
 
@@ -44948,12 +44941,13 @@ var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cartQualifie
   }
 }, {
   value: "ExcludeDiscountCodes",
-  label: "Cart Has No Discount Codes",
+  label: "Exclude Discount Codes",
   description: "Do not allow discount code and script discounts to combine",
+  newLineEachInput: true,
   inputs: {
     behaviour: {
       type: "select",
-      description: "Set the behaviour when a discount code is entered",
+      description: "Set the behaviour when an unaccepted discount code is entered",
       options: [{
         value: "apply_discount",
         label: "Apply discount code only"
@@ -44965,6 +44959,21 @@ var CART_QUALIFIERS = [].concat(_toConsumableArray(_common2.default.cartQualifie
     rejection_message: {
       type: "text",
       description: "Message to display to customer when code is rejected"
+    },
+    match_behaviour: {
+      type: "select",
+      description: "Select the behaviour for codes that match the applied code",
+      options: [{
+        value: "reject_except",
+        label: "Reject all codes, except the following"
+      }, {
+        value: "accept_except",
+        label: "Accept all codes, except the following"
+      }]
+    },
+    discount_codes: {
+      type: "array",
+      description: "Enter the discount codes that will be excepted"
     }
   }
 }]);
@@ -46131,7 +46140,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.12.0",
+  currentVersion: "0.13.0",
   minimumVersion: "0.1.0"
 };
 
