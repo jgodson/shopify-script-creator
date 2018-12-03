@@ -75,13 +75,28 @@ end`,
 
   ExcludeDiscountCodes: `
 class ExcludeDiscountCodes < Qualifier
-  def initialize(behaviour, message)
+  def initialize(behaviour, message, match_type = :reject_except, discount_codes = [])
     @reject = behaviour == :apply_script
     @message = message == "" ? "Discount codes cannot be used with this offer" : message
+    @match_type = match_type
+    @discount_codes = discount_codes.map(&:downcase)
   end
-  
+
   def match?(cart, selector = nil)
-    cart.discount_code.nil? || @reject && cart.discount_code.reject({message: @message})
+    return true if cart.discount_code.nil?
+    return false if !@reject
+    discount_code = cart.discount_code.code.downcase
+    should_reject = true
+    case @match_type
+      when :reject_except
+        should_reject = !@discount_codes.include?(discount_code)
+      when :accept_except
+        should_reject = @discount_codes.include?(discount_code)
+    end
+    if should_reject
+      cart.discount_code.reject({message: @message})
+    end
+    return true
   end
 end`,
 
@@ -584,12 +599,13 @@ const CART_QUALIFIERS = [
   },
   {
     value: "ExcludeDiscountCodes",
-    label: "Cart Has No Discount Codes",
+    label: "Exclude Discount Codes",
     description: "Do not allow discount code and script discounts to combine",
+    newLineEachInput: true,
     inputs: {
       behaviour: {
         type: "select",
-        description: "Set the behaviour when a discount code is entered",
+        description: "Set the behaviour when an unaccepted discount code is entered",
         options: [
           {
             value: "apply_discount",
@@ -604,7 +620,25 @@ const CART_QUALIFIERS = [
       rejection_message: {
         type: "text",
         description: "Message to display to customer when code is rejected"
-      }
+      },
+      match_behaviour: {
+        type: "select",
+        description: "Select the behaviour for codes that match the applied code",
+        options: [
+          {
+            value: "reject_except",
+            label: "Reject all codes, except the following"
+          },
+          {
+            value: "accept_except",
+            label: "Accept all codes, except the following"
+          },
+        ]
+      },
+      discount_codes: {
+        type: "array",
+        description: "Enter the discount codes that will be excepted"
+      },
     }
   }
 ];

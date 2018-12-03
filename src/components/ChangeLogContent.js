@@ -8,7 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
 
-      <li><strong>The CustomerTagQualifier now matches when there is no customer logged in, if the match type is set to "does not"</strong>. Let me know via the <i>Leave Feedback</i> link if this causes any issues for you</li>
+      <li>The "Cart has no discount codes" Cart Qualifier has been renamed to "Exclude Discount Codes" due to additional functionality. It will work the same as previously without any changes, but you can now specify whether specific codes are allowed/not allowed to combine with the additional options</li>
 
       </ul>
 

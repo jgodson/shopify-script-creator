@@ -22,7 +22,7 @@ export default class CampaignsList extends Component {
 
   renderCardSection(campaign) {
     let button = null;
-    let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount/i) > -1);
+    let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount(?!codes)/i) > -1);
     messages = messages && messages.map((campaign) => {
       if (!campaign.inputs) { return ["", ""] }
       const lastValueIndex = campaign.inputs.length - 1;

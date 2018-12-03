@@ -178,6 +178,10 @@ export default class CampaignForm extends Component {
       });
 
       function convertInput(value, type, campaignName, campaignInputs) {
+        if (value === undefined) {
+          return "";
+        }
+
         switch (type) {
           case 'array':
             // Remove []. Then split on comma, remove "" and join with comma
@@ -664,7 +668,7 @@ export default class CampaignForm extends Component {
   getInputValue(inputName, campaignName, campaignInputs) {
     const type = getInputType(inputName);
     let value = this.state.inputs[type][inputName];
-    // Can modify values here (like make an array into an array)
+    // Can modify values here (like make csv's into an array)
     switch (type) {
       case 'array':
         if (!value) { return '[]'; }
