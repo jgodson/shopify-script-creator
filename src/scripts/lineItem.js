@@ -152,7 +152,7 @@ class BuyXGetX < Campaign
     @get_x = get_x
     @max_sets = max_sets == 0 ? nil : max_sets
   end
-  
+
   def run(cart)
     raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
@@ -160,21 +160,21 @@ class BuyXGetX < Campaign
     applicable_buy_items = nil
     eligible_get_items = nil
     discountable_sets = 0
-    
+
     # Find the items that qualify for buy_x
     if @line_item_selector.nil?
       applicable_buy_items = cart.line_items
     else
       applicable_buy_items = cart.line_items.select { |item| @line_item_selector.match?(item) }
     end
-    
+
     # Find the items that qualify for get_x
     if @get_item_selector.nil?
       eligible_get_items = cart.line_items
     else
       eligible_get_items = cart.line_items.select {|item| @get_item_selector.match?(item) }
     end
-    
+
     # Check if cart qualifies for discounts and limit the discount sets
     purchased_quantity = applicable_buy_items.reduce(0) { |total, item| total += item.quantity }
     discountable_sets = (@max_sets ? [purchased_quantity / @buy_x, @max_sets].min : purchased_quantity / @buy_x).to_i
@@ -237,7 +237,7 @@ class QuantityLimit < Campaign
           when :variant
             key = item.variant.id
         end
-        
+
         if key
           item_limits[key] = @per_item_limit if !item_limits.has_key?(key)
           needs_limiting = true if item.quantity > item_limits[key]
@@ -248,7 +248,7 @@ class QuantityLimit < Campaign
           needs_limiting = true if item.quantity > @per_item_limit
           max_amount = item.quantity - @per_item_limit
         end
-        
+
         if needs_limiting
           if needs_deleted
             to_delete << index
@@ -257,7 +257,7 @@ class QuantityLimit < Campaign
           end
         end
       end
-      
+
       if to_delete.length > 0
         del_index = -1
         cart.line_items.delete_if do |item|
@@ -265,7 +265,7 @@ class QuantityLimit < Campaign
           true if to_delete.include?(del_index)
         end
       end
-      
+
     end
     revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
@@ -280,7 +280,7 @@ class TieredDiscount < Campaign
     @tier_type = tier_type == :default ? :customer_tag : tier_type
     @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }
   end
-  
+
   def init_discount(amount, message)
     case @discount_type
       when :fixed
@@ -291,10 +291,10 @@ class TieredDiscount < Campaign
         return FixedItemDiscount.new(amount, message)
     end
   end
-  
+
   def run(cart)
     return unless qualifies?(cart)
-    
+
     applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
     case @tier_type
       when :customer_tag
@@ -318,7 +318,7 @@ class TieredDiscount < Campaign
     return if qualified_tiers.empty?
     discount_amount = qualified_tiers.last[:discount].to_f
     discount_message = qualified_tiers.last[:message]
-    
+
     discount = init_discount(discount_amount, discount_message)
     applicable_items.each { |item| discount.apply(item) }
     revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
@@ -363,7 +363,7 @@ class DiscountCodeList < Campaign
     applicable_discount = @discount_list.select { |item| item[:code].downcase == applied_code }
     return if applicable_discount.empty?
     raise "#{applied_code} matches multiple discounts" if applicable_discount.length > 1
-    
+
     applicable_discount = applicable_discount.first
     case applicable_discount[:type].downcase
       when 'p', 'percent'
@@ -411,7 +411,7 @@ class DiscountCodePattern < Campaign
     start_num = nil
     end_num = nil
     start_search = nil
-    
+
     case type
       when :percent
         start_num = @percent_format.index('#')
@@ -422,11 +422,11 @@ class DiscountCodePattern < Campaign
         end_num = @fixed_format.rindex('#')
         start_search = @fixed_format.split('#').first
     end
-    
+
     search_length = start_search.length
     start_index = code.index(start_search) + search_length
     return if start_index.nil? || start_num.nil?
-    
+
     length = (end_num - start_num || 0) + 1
     puts code.slice(start_index, length)
     return code.slice(start_index, length).to_i(base=10)
@@ -442,10 +442,10 @@ class DiscountCodePattern < Campaign
   def run(cart)
     return unless cart.discount_code
     return unless qualifies?(cart)
-    
+
     discount = initialize_discount(cart.discount_code.code)
     return unless discount
-    
+
     cart.line_items.each do |item|
       next unless @line_item_selector.nil? || @line_item_selector.match?(item)
       discount.apply(item)
@@ -464,7 +464,7 @@ class BundleDiscount < Campaign
     @split_items = []
     @bundle_items = []
   end
-  
+
   def check_bundles(cart)
       bundled_items = @bundle_products.map do |bitem|
         quantity_required = bitem[:quantity].to_i
@@ -472,19 +472,19 @@ class BundleDiscount < Campaign
         type = bitem[:type].to_sym
         case type
           when :ptype
-            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) }
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) && !item.discounted? }
           when :ptag
-            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 }
+            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 && !item.discounted? }
           when :pid
             qualifiers.map!(&:to_i)
-            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) }
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) && !item.discounted? }
           when :vid
             qualifiers.map!(&:to_i)
-            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) }
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) && !item.discounted? }
           when :vsku
-            items = cart.line_items.select { |item| (qualifiers & item.variant.skus).length > 0 }
+            items = cart.line_items.select { |item| (qualifiers & item.variant.skus).length > 0 && !item.discounted? }
         end
-        
+
         total_quantity = items.reduce(0) { |total, item| total + item.quantity }
         {
           has_all: total_quantity >= quantity_required,
@@ -494,7 +494,7 @@ class BundleDiscount < Campaign
           items: items
         }
       end
-      
+
       max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only
       if bundled_items.all? { |item| item[:has_all] }
         if @full_bundles_only
@@ -504,8 +504,8 @@ class BundleDiscount < Campaign
           end
         else
           bundled_items.each do |bundle|
-            bundle[:items].each do |item| 
-              @bundle_items << item 
+            bundle[:items].each do |item|
+              @bundle_items << item
               cart.line_items.delete(item)
             end
           end
@@ -514,7 +514,7 @@ class BundleDiscount < Campaign
       end
       false
   end
-  
+
   def split_out_extra_quantity(cart, items, total_quantity, quantity_required)
     items_to_split = quantity_required
     items.each do |item|
@@ -533,11 +533,11 @@ class BundleDiscount < Campaign
     cart.line_items.concat(@split_items)
     @split_items.clear
   end
-  
+
   def run(cart)
     raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
-    
+
     if check_bundles(cart)
       @bundle_items.each { |item| @discount.apply(item) }
     end
@@ -1086,7 +1086,7 @@ const campaigns = [
   },
   {
     value: "BundleDiscount",
-    label: "Bundle Discount - NEW",
+    label: "Bundle Discount",
     description: "Buy a certain combination of items to recieve a discount",
     inputs: {
       qualifer_behaviour: {

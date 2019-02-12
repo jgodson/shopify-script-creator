@@ -8,7 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
 
-      <li>The "Cart has no discount codes" Cart Qualifier has been renamed to "Exclude Discount Codes" due to additional functionality. It will work the same as previously without any changes, but you can now specify whether specific codes are allowed/not allowed to combine with the additional options</li>
+      <li>The Bundle Campaign no longer allows a discounted item to qualify in bundles. This was done to prevent a single item from qualifying for multiple bundle campaigns it was a part of. If this causes any issues for you, please let me know via the <i>Leave feedback</i> link.</li>
 
       </ul>
 
