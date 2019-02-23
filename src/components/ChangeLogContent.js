@@ -8,7 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
 
-      <li>The Bundle Campaign no longer allows a discounted item to qualify in bundles. This was done to prevent a single item from qualifying for multiple bundle campaigns it was a part of. If this causes any issues for you, please let me know via the <i>Leave feedback</i> link.</li>
+      <li>Added line item quantity as an tier type to the Tiered Discount Campaign</li>
 
       </ul>
 

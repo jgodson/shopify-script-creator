@@ -315,12 +315,24 @@ class TieredDiscount < Campaign
         qualified_tiers = @discount_tiers.select { |tier| cart_quantity >= tier[:tier].to_i }
     end
 
-    return if qualified_tiers.empty?
-    discount_amount = qualified_tiers.last[:discount].to_f
-    discount_message = qualified_tiers.last[:message]
+    if @tier_type == :line_quantity
+      applicable_items.each do |item|
+        qualified_tiers = @discount_tiers.select { |tier| item.quantity >= tier[:tier].to_i }
+        next if qualified_tiers.empty?
 
-    discount = init_discount(discount_amount, discount_message)
-    applicable_items.each { |item| discount.apply(item) }
+        discount_amount = qualified_tiers.last[:discount].to_f
+        discount_message = qualified_tiers.last[:message]
+        discount = init_discount(discount_amount, discount_message)
+        discount.apply(item)
+      end
+    else
+      return if qualified_tiers.empty?
+      discount_amount = qualified_tiers.last[:discount].to_f
+      discount_message = qualified_tiers.last[:message]
+
+      discount = init_discount(discount_amount, discount_message)
+      applicable_items.each { |item| discount.apply(item) }
+    end
     revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 end`,
@@ -1008,7 +1020,11 @@ const campaigns = [
           {
             value: "discountable_total_items",
             label: "Discountable Items Total Quantity"
-          }
+          },
+          {
+            value: "line_quantity",
+            label: "Line Item Quantity"
+          },
         ]
       },
       discount_tiers: {
