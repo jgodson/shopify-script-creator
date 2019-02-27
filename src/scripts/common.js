@@ -8,7 +8,7 @@ class Campaign
     qualifiers.compact.each do |qualifier|
       is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)
       if is_multi_select
-        qualifier.instance_variable_get(:@conditions).each do |nested_q| 
+        qualifier.instance_variable_get(:@conditions).each do |nested_q|
           @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)
           @qualifiers << qualifier
         end
@@ -18,7 +18,7 @@ class Campaign
       end
     end if @qualifiers.empty?
   end
-  
+
   def qualifies?(cart)
     return true if @qualifiers.empty?
     @unmodified_line_items = cart.line_items.map do |item|
@@ -27,7 +27,7 @@ class Campaign
         val = item.instance_variable_get(var)
         new_item.instance_variable_set(var, val.dup) if val.respond_to?(:dup)
       end
-      new_item  
+      new_item
     end if @post_amount_qualifier
     @qualifiers.send(@condition) do |qualifier|
       is_selector = false
@@ -431,7 +431,7 @@ class ReducedCartAmountQualifier < Qualifier
       case cart.discount_code
         when CartDiscount::Percentage
           if cart.subtotal_price >= cart.discount_code.minimum_order_amount
-            cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item| 
+            cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item|
               total + (item.variant.product.gift_card? ? Money.zero : item.line_price)
             end
             gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc
@@ -454,21 +454,28 @@ end`,
 
   CartQuantityQualifier: `
 class CartQuantityQualifier < Qualifier
-  def initialize(cart_or_item, comparison_type, quantity)
-    @cart_or_item = cart_or_item
+  def initialize(total_method, comparison_type, quantity)
+    @total_method = total_method
     @comparison_type = comparison_type
     @quantity = quantity
   end
 
   def match?(cart, selector = nil)
-    if @cart_or_item == :item
-      total = cart.line_items.reduce(0) do |total, item|
-        total + (selector&.match?(item) ? item.quantity : 0)
-      end
-    else
-      total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
+    case @total_method
+      when :item
+        total = cart.line_items.reduce(0) do |total, item|
+          total + ((selector ? selector.match?(item) : true) ? item.quantity : 0)
+        end
+      when :cart
+        total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
     end
-    compare_amounts(total, @comparison_type, @quantity)
+    if @total_method == :line_any || @total_method == :line_all
+      method = @total_method == :line_any ? :any? : :all?
+      qualified_items = cart.line_items.select { |item| selector ? selector.match?(item) : true }
+      qualified_items.send(method) { |item| compare_amounts(item.quantity, @comparison_type, @quantity) }
+    else
+      compare_amounts(total, @comparison_type, @quantity)
+    end
   end
 end`,
 
@@ -479,15 +486,15 @@ class TotalWeightQualifier < Qualifier
     @amount = amount
     @units = units == :default ? :g : units
   end
-  
+
   def g_to_lb(grams)
     grams * 0.00220462
   end
-  
+
   def g_to_oz(grams)
     grams * 0.035274
   end
-  
+
   def g_to_kg(grams)
     grams * 0.001
   end
@@ -512,17 +519,17 @@ end`,
   def initialize(addresses)
     @addresses = addresses
   end
-  
+
   def match?(cart, selector = nil)
     return false if cart.shipping_address.nil?
-    
+
     @addresses.any? do |accepted_address|
       match_type = accepted_address[:match_type].to_sym
 
       cart.shipping_address.to_hash.all? do |key, value|
         key = key.to_sym
         value.downcase!
-        
+
         next true unless accepted_address[key]
         next true if accepted_address[key].length === 0
 
@@ -788,8 +795,8 @@ const cartQualifiers = [
   },
   {
     value: "CartQuantityQualifier",
-    label: "Cart/Item quantity total",
-    description: "Will only apply if cart quantity or qualified item quantity meets conditions",
+    label: "Cart/Item/Line quantity",
+    description: "Will only apply if cart quantity, qualified item quantity, or qualified line quantity meets conditions",
     inputs: {
       cart_or_item_total: {
         type: "select",
@@ -802,6 +809,14 @@ const cartQualifiers = [
           {
             value: "item",
             label: "Qualified item total quantity"
+          },
+          {
+            value: "line_any",
+            label: "Qualified items on any line"
+          },
+          {
+            value: "line_all",
+            label: "Qualified items on all lines"
           },
         ]
       },
