@@ -15,14 +15,14 @@ import CardList from './CardList';
 
 import styles from './CampaignForm.css';
 
-import { 
+import {
   capitalize,
   splitAndCapitalize,
   splitCamelCase,
   isCampaignSelect,
   getInputType,
   getObjectFormats,
-  formatObject 
+  formatObject
 } from '../helpers';
 
 export default class CampaignForm extends Component {
@@ -130,7 +130,7 @@ export default class CampaignForm extends Component {
             break;
           case 1:
             // Pick the second set of campaigns (if there is any)
-            if (Array.isArray(input.inputs) && typeof input.inputs[0] === 'object') {
+            if (Array.isArray(input.inputs) && inputs.some((input) => input instanceof Object)) {
               input.inputs.forEach((secondInput, secondIndex) => {
                 newState.inputs.campaignSelect[`${mainCampaignName}-campaignSelect_${inputIndex}-campaignSelect_${secondIndex}`] = secondInput.name;
               });
@@ -348,7 +348,7 @@ export default class CampaignForm extends Component {
                   <Stack.Item fill>{input.label}</Stack.Item>
                   <Stack.Item>
                     <Button
-                      plain 
+                      plain
                       icon="circlePlus"
                       onClick={() => {
                         this.props.openModal({
@@ -424,7 +424,7 @@ export default class CampaignForm extends Component {
                 <Stack.Item fill>{input.label}</Stack.Item>
                 <Stack.Item>
                   <Button
-                    plain 
+                    plain
                     icon="circlePlus"
                     onClick={() => {
                       this.props.openModal({
@@ -650,7 +650,6 @@ export default class CampaignForm extends Component {
     const newInput = {
       name: this.getInputValue(campaignSelect)
     };
-
     if (Array.isArray(this.inputMap[campaignSelect])) {
       newInput.inputs = [];
       this.inputMap[campaignSelect].forEach((campaignInput) => {

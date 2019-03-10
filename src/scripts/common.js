@@ -479,6 +479,31 @@ class CartQuantityQualifier < Qualifier
   end
 end`,
 
+  CartHasItemQualifier: `
+class CartHasItemQualifier < Qualifier
+  def initialize(quantity_or_subtotal, comparison_type, amount, item_selector)
+    @quantity_or_subtotal = quantity_or_subtotal
+    @comparison_type = comparison_type
+    @amount = quantity_or_subtotal == :subtotal ? Money.new(cents: amount * 100) : amount
+    @item_selector = item_selector
+  end
+
+  def match?(cart, selector = nil)
+    raise "Must supply an item selector for the #{self.class}" if @item_selector.nil?
+    case @quantity_or_subtotal
+      when :quantity
+        total = cart.line_items.reduce(0) do |total, item|
+          total + (@item_selector&.match?(item) ? item.quantity : 0)
+        end
+      when :subtotal
+        total = cart.line_items.reduce(Money.zero) do |total, item|
+          total + (@item_selector&.match?(item) ? item.line_price : Money.zero)
+        end
+    end
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
   TotalWeightQualifier: `
 class TotalWeightQualifier < Qualifier
   def initialize(comparison_type, amount, units)
@@ -738,321 +763,6 @@ const customerQualifiers = [
       }
     }
   }
-];
-
-const cartQualifiers = [
-  {
-    value: "none",
-    label: "None",
-    description: "No effects"
-  },
-  {
-    value: "CartAmountQualifier",
-    label: "Cart/Item subtotal",
-    description: "Will only apply if cart subtotal or qualified item subtotal meets conditions",
-    inputs: {
-      cart_or_item_total: {
-        type: "select",
-        description: "Cart subtotal or item subtotal",
-        options: [
-          {
-            value: "cart",
-            label: "Cart subtotal"
-          },
-          {
-            value: "item",
-            label: "Qualified item subtotal"
-          },
-        ]
-      },
-      condition: {
-        type: "select",
-        description: "Type of comparison",
-        options: [
-          {
-            value: "greater_than",
-            label: "Greater than"
-          },
-          {
-            value: "less_than",
-            label: "Less than"
-          },
-          {
-            value: "greater_than_or_equal",
-            label: "Greater than or equal to"
-          },
-          {
-            value: "less_than_or_equal",
-            label: "Less than or equal to"
-          },
-        ]
-      },
-      amount: {
-        type: "number",
-        description: "Amount in dollars"
-      }
-    }
-  },
-  {
-    value: "CartQuantityQualifier",
-    label: "Cart/Item/Line quantity",
-    description: "Will only apply if cart quantity, qualified item quantity, or qualified line quantity meets conditions",
-    inputs: {
-      cart_or_item_total: {
-        type: "select",
-        description: "Cart quantity or item quantity",
-        options: [
-          {
-            value: "cart",
-            label: "Cart total quantity"
-          },
-          {
-            value: "item",
-            label: "Qualified item total quantity"
-          },
-          {
-            value: "line_any",
-            label: "Qualified items on any line"
-          },
-          {
-            value: "line_all",
-            label: "Qualified items on all lines"
-          },
-        ]
-      },
-      condition: {
-        type: "select",
-        description: "Type of comparison",
-        options: [
-          {
-            value: "greater_than",
-            label: "Greater than"
-          },
-          {
-            value: "less_than",
-            label: "Less than"
-          },
-          {
-            value: "greater_than_or_equal",
-            label: "Greater than or equal to"
-          },
-          {
-            value: "less_than_or_equal",
-            label: "Less than or equal to"
-          },
-          {
-            value: "equal_to",
-            label: "Equal to"
-          },
-        ]
-      },
-      amount: {
-        type: "number",
-        description: "Total quantity of items"
-      }
-    }
-  },
-  {
-    value: "TotalWeightQualifier",
-    label: "Cart Total Weight",
-    description: "Qualifies cart based on total weight of products.",
-    inputs: {
-      match_condition: {
-        type: "select",
-        description: "Type of comparison",
-        options: [
-          {
-            value: "greater_than",
-            label: "Greater than"
-          },
-          {
-            value: "less_than",
-            label: "Less than"
-          },
-          {
-            value: "greater_than_or_equal",
-            label: "Greater than or equal to"
-          },
-          {
-            value: "less_than_or_equal",
-            label: "Less than or equal to"
-          },
-        ]
-      },
-      amount: {
-        type: "number",
-        description: "Weight to compare to"
-      },
-      units: {
-        type: "select",
-        description: "Units for weight",
-        options: [
-          {
-            value: "g",
-            label: "Grams (g)"
-          },
-          {
-            value: "kg",
-            label: "Kilograms (kg)"
-          },
-          {
-            value: "oz",
-            label: "Ounces (oz)"
-          },
-          {
-            value: "lb",
-            label: "Pounds (lb)"
-          },
-        ]
-      }
-    }
-  },
-  {
-    value: "CodeQualifier",
-    label: "Cart Has Discount Code",
-    description: "Checks to see if the discount code entered matches conditions",
-    inputs: {
-      match_type: {
-        type: "select",
-        description: "Set how the following condition matches",
-        options: [
-          {
-            value: "does",
-            label: "Does"
-          },
-          {
-            value: "does_not",
-            label: "Does not"
-          }
-        ]
-      },
-      match_condition: {
-        type: 'select',
-        description: "Set how the discount code is matched",
-        options: [
-          {
-            value: "match",
-            label: "Match one of"
-          },
-          {
-            value: "include",
-            label: "Contain one of"
-          },
-          {
-            value: "start_with",
-            label: "Start with one of"
-          },
-          {
-            value: "end_with",
-            label: "End with one of"
-          }
-        ]
-      },
-      discount_codes: {
-        type: "array",
-        description: "Enter the applicable codes"
-      }
-    }
-  },
-  {
-    value: "CountryAndProvinceQualifier",
-    label: "Shipping Address - Country/Province Qualifier",
-    description: "Qualifies the cart based on specific country and province codes (Two letters)",
-    newLineEachInput: true,
-    inputs: {
-      match_condition: {
-        type: "select",
-        description: "Set how the following countries/provinces are matched",
-        options: [
-          {
-            value: "is_one",
-            label: "Is one of"
-          },
-          {
-            value: "not_one",
-            label: "Is not one of"
-          }
-        ]
-      },
-      countries_and_provinces: {
-        type: "object",
-        description: "Country codes and the provice/state codes to match",
-        inputFormat: "{country:text:The country code}: {provinces:array:The provinces included. Seperate each with a comma. (AB, SK, MB)}",
-        outputFormat: '"{text}" => [{array}]'
-      }
-    }
-  },
-  {
-    value: "CountryCodeQualifier",
-    label: "Shipping Address - Country Code Qualifier",
-    description: "Qualifies the cart based on the country code of the shipping addresss (Two letters)",
-    inputs: {
-      match_type: {
-        type: "select",
-        description: "Set how the country codes are matched",
-        options: [
-          {
-            value: "is_one",
-            label: "Is one of"
-          },
-          {
-            value: "not_one",
-            label: "Is not one of"
-          }
-        ]
-      },
-      country_codes: {
-        type: "array",
-        description: "Enter the applicable country codes"
-      }
-    }
-  },
-  {
-    value: "FullAddressQualifier",
-    label: "Shipping Address - Full Address Qualifier - NEW",
-    description: "Only qualifies if the shipping address matches one of the given addresses",
-    inputs: {
-      qualifing_addresses: {
-        type: "objectArray",
-        description: "Set the addresses that qualify",
-        inputFormat: "{address1?:array:Add multiple options by separating each with a comma} : {address2?:array:Add multiple options by separating each with a comma} : {phone?:array:Add multiple options by separating each with a comma} : {city?:array:Add multiple options by separating each with a comma} : {province_code?:array:Add multiple options by separating each with a comma} : {country_code?:array:Add multiple options by separating each with a comma} : {zip?:array:Add multiple options by separating each with a comma} : {match_type:select:Type of match required (e.g. '150 Elgin' partially matches '150 Elgin St'):partial|Partial,exact|Exact}",
-        outputFormat: '{:address1 => [{array}], :address2 => [{array}], :phone => [{array}], :city => [{array}], :province_code => [{array}], :country_code => [{array}], :zip => [{array}], :match_type => "{select}"}'
-      }
-    }
-  },
-  {
-    value: "ReducedCartAmountQualifier",
-    label: "Discounted Cart Subtotal (applied by discount code)",
-    description: "Will only apply if the cart subtotal, subtracting cart discounts, meets conditions. NOTE: Works for discount codes that apply to entire cart only.",
-    inputs: {
-      condition: {
-        type: "select",
-        description: "Type of comparison",
-        options: [
-          {
-            value: "greater_than",
-            label: "Greater than"
-          },
-          {
-            value: "less_than",
-            label: "Less than"
-          },
-          {
-            value: "greater_than_or_equal",
-            label: "Greater than or equal to"
-          },
-          {
-            value: "less_than_or_equal",
-            label: "Less than or equal to"
-          },
-        ]
-      },
-      amount: {
-        type: "number",
-        description: "Amount in dollars"
-      }
-    }
-  },
 ];
 
 const lineItemSelectors = [
@@ -1332,6 +1042,370 @@ const lineItemSelectors = [
     }
   }
 ]
+
+const cartQualifiers = [
+  {
+    value: "none",
+    label: "None",
+    description: "No effects"
+  },
+  {
+    value: "CartAmountQualifier",
+    label: "Cart/Item subtotal",
+    description: "Will only apply if cart subtotal or qualified item subtotal meets conditions",
+    inputs: {
+      cart_or_item_total: {
+        type: "select",
+        description: "Cart subtotal or item subtotal",
+        options: [
+          {
+            value: "cart",
+            label: "Cart subtotal"
+          },
+          {
+            value: "item",
+            label: "Qualified item subtotal"
+          },
+        ]
+      },
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Amount in dollars"
+      }
+    }
+  },
+  {
+    value: "CartQuantityQualifier",
+    label: "Cart/Item/Line quantity",
+    description: "Will only apply if cart quantity, qualified item quantity, or qualified line quantity meets conditions",
+    inputs: {
+      cart_or_item_total: {
+        type: "select",
+        description: "Cart quantity or item quantity",
+        options: [
+          {
+            value: "cart",
+            label: "Cart total quantity"
+          },
+          {
+            value: "item",
+            label: "Qualified item total quantity"
+          },
+          {
+            value: "line_any",
+            label: "Qualified items on any line"
+          },
+          {
+            value: "line_all",
+            label: "Qualified items on all lines"
+          },
+        ]
+      },
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+          {
+            value: "equal_to",
+            label: "Equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Total quantity of items"
+      }
+    }
+  },
+  {
+    value: "CartHasItemQualifier",
+    label: "Cart Has Items",
+    description: "Qualifies if the items in the cart match the given conditions",
+    newLineEachInput: true,
+    inputs: {
+      quantity_or_subtotal: {
+        type: "select",
+        description: "Total quantity of items or subtotal of items",
+        options: [
+          {
+            value: "quantity",
+            label: "Item quantity"
+          },
+          {
+            value: "subtotal",
+            label: "Item subtotal"
+          },
+        ]
+      },
+      match_condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Quantity or subtotal of items"
+      },
+      item_selector: lineItemSelectors,
+    }
+  },
+  {
+    value: "TotalWeightQualifier",
+    label: "Cart Total Weight",
+    description: "Qualifies cart based on total weight of products.",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Weight to compare to"
+      },
+      units: {
+        type: "select",
+        description: "Units for weight",
+        options: [
+          {
+            value: "g",
+            label: "Grams (g)"
+          },
+          {
+            value: "kg",
+            label: "Kilograms (kg)"
+          },
+          {
+            value: "oz",
+            label: "Ounces (oz)"
+          },
+          {
+            value: "lb",
+            label: "Pounds (lb)"
+          },
+        ]
+      }
+    }
+  },
+  {
+    value: "CodeQualifier",
+    label: "Cart Has Discount Code",
+    description: "Checks to see if the discount code entered matches conditions",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the following condition matches",
+        options: [
+          {
+            value: "does",
+            label: "Does"
+          },
+          {
+            value: "does_not",
+            label: "Does not"
+          }
+        ]
+      },
+      match_condition: {
+        type: 'select',
+        description: "Set how the discount code is matched",
+        options: [
+          {
+            value: "match",
+            label: "Match one of"
+          },
+          {
+            value: "include",
+            label: "Contain one of"
+          },
+          {
+            value: "start_with",
+            label: "Start with one of"
+          },
+          {
+            value: "end_with",
+            label: "End with one of"
+          }
+        ]
+      },
+      discount_codes: {
+        type: "array",
+        description: "Enter the applicable codes"
+      }
+    }
+  },
+  {
+    value: "CountryAndProvinceQualifier",
+    label: "Shipping Address - Country/Province Qualifier",
+    description: "Qualifies the cart based on specific country and province codes (Two letters)",
+    newLineEachInput: true,
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how the following countries/provinces are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      countries_and_provinces: {
+        type: "object",
+        description: "Country codes and the provice/state codes to match",
+        inputFormat: "{country:text:The country code}: {provinces:array:The provinces included. Seperate each with a comma. (AB, SK, MB)}",
+        outputFormat: '"{text}" => [{array}]'
+      }
+    }
+  },
+  {
+    value: "CountryCodeQualifier",
+    label: "Shipping Address - Country Code Qualifier",
+    description: "Qualifies the cart based on the country code of the shipping addresss (Two letters)",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the country codes are matched",
+        options: [
+          {
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      country_codes: {
+        type: "array",
+        description: "Enter the applicable country codes"
+      }
+    }
+  },
+  {
+    value: "FullAddressQualifier",
+    label: "Shipping Address - Full Address Qualifier - NEW",
+    description: "Only qualifies if the shipping address matches one of the given addresses",
+    inputs: {
+      qualifing_addresses: {
+        type: "objectArray",
+        description: "Set the addresses that qualify",
+        inputFormat: "{address1?:array:Add multiple options by separating each with a comma} : {address2?:array:Add multiple options by separating each with a comma} : {phone?:array:Add multiple options by separating each with a comma} : {city?:array:Add multiple options by separating each with a comma} : {province_code?:array:Add multiple options by separating each with a comma} : {country_code?:array:Add multiple options by separating each with a comma} : {zip?:array:Add multiple options by separating each with a comma} : {match_type:select:Type of match required (e.g. '150 Elgin' partially matches '150 Elgin St'):partial|Partial,exact|Exact}",
+        outputFormat: '{:address1 => [{array}], :address2 => [{array}], :phone => [{array}], :city => [{array}], :province_code => [{array}], :country_code => [{array}], :zip => [{array}], :match_type => "{select}"}'
+      }
+    }
+  },
+  {
+    value: "ReducedCartAmountQualifier",
+    label: "Discounted Cart Subtotal (applied by discount code)",
+    description: "Will only apply if the cart subtotal, subtracting cart discounts, meets conditions. NOTE: Works for discount codes that apply to entire cart only.",
+    inputs: {
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [
+          {
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Amount in dollars"
+      }
+    }
+  },
+];
 
 export default {
   classes,
