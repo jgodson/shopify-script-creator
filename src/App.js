@@ -47,9 +47,6 @@ export default class App extends Component {
     this.version = Versions.currentVersion;
     this.minimumVersion = Versions.minimumVersion;
 
-    // Set the app version for bugsnag
-    bugsnagClient.app.version = this.version;
-
     this.state = JSON.parse(JSON.stringify(this.defaultState));
 
     this.typeChange = this.typeChange.bind(this);
@@ -281,7 +278,7 @@ export default class App extends Component {
     const allClasses = {};
     // Reset the indent level
     this.IL = 0;
-    
+
     switch(this.state.scriptType) {
       case 'line_item':
         Object.assign(allClasses, Common.classes, LineItemScript.classes);
@@ -401,8 +398,8 @@ ${INDENT[this.IL]})`;
       link.click();
       setTimeout(() => {
         document.body.removeChild(link);
-        window.URL.revokeObjectURL(url);  
-      }, 10); 
+        window.URL.revokeObjectURL(url);
+      }, 10);
     }
   }
 
@@ -424,7 +421,7 @@ ${INDENT[this.IL]})`;
       fileInput.addEventListener('change', (evt) => {
         // Google Analytics
         gtag('event', 'importAttempt');
-        
+
         this.readFile(evt.target, (results) => {
           if (this.loadImportedData(results)) {
             this.prepareAndExportTo('localStorage');
@@ -548,7 +545,7 @@ ${INDENT[this.IL]})`;
       content: 'Leave feedback',
       external: true,
       plain: true,
-      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform' 
+      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform'
     }
 
     const secondaryActions = [
@@ -586,10 +583,10 @@ ${INDENT[this.IL]})`;
         );
       }
     };
-    
+
     return (
       <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
-        {this.state.modal.isOpen && 
+        {this.state.modal.isOpen &&
           <Modal
             title={this.state.modal.title}
             content={this.state.modal.content}
@@ -603,7 +600,7 @@ ${INDENT[this.IL]})`;
         <Layout>
           <Layout.Section>
             <ScriptSelector changeType={this.typeChange} currentType={this.state.scriptType} />
-            {this.state.showForm && 
+            {this.state.showForm &&
               <CampaignForm
                 currentCampaign={this.state.currentCampaign}
                 availableCampaigns={this.state.availableCampaigns}

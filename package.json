@@ -1,7 +1,7 @@
 {
   "name": "shopify-script-creator",
   "private": true,
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {
@@ -12,7 +12,10 @@
     "deploy": "git add ./docs && git commit -m 'Update build' && git push && git subtree split --prefix docs -b gh-pages && git push deploy gh-pages:master && git branch -D gh-pages"
   },
   "dependencies": {
+    "@bugsnag/js": "^6.0.0",
+    "@bugsnag/plugin-react": "^6.0.0",
     "@shopify/polaris": "^1.9.1",
+    "file-loader": "^3.0.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
