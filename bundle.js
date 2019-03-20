@@ -11945,7 +11945,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.default = {
-  currentVersion: "0.16.1",
+  currentVersion: "0.16.2",
   minimumVersion: "0.1.0"
 };
 
@@ -45598,7 +45598,6 @@ var App = function (_Component) {
         var used = classesUsed.filter(function (name) {
           return !name.match(/^(Selector|Qualifier|Campaign)$/);
         }).join(', ');
-        gtag('event', 'scriptGenerated', { 'event_label': used });
 
         var code = '';
         classesUsed.forEach(function (className) {
@@ -45624,7 +45623,8 @@ var App = function (_Component) {
         1: '  ',
         2: '    ',
         3: '      ',
-        4: '        '
+        4: '        ',
+        5: '          '
       };
 
       addUsedClass(campaign.name, allClasses);
@@ -46679,7 +46679,7 @@ var CampaignForm = function (_Component) {
   }, {
     key: 'componentDidUpdate',
     value: function componentDidUpdate() {
-      if (this.props.existingInfo && this.updateCount < 3) {
+      if (this.props.existingInfo && this.updateCount < 4) {
         this.populateBasedOnExistingInfo(this.props.existingInfo);
       }
     }
@@ -46746,6 +46746,24 @@ var CampaignForm = function (_Component) {
                 });
               }
               break;
+            case 2:
+              // Pick the third set of campaigns (if there is any)
+              if (Array.isArray(input.inputs) && inputs.some(function (input) {
+                return input instanceof Object;
+              })) {
+                input.inputs.forEach(function (secondInput, secondIndex) {
+                  if (Array.isArray(secondInput.inputs) && secondInput.inputs.some(function (input) {
+                    return input instanceof Object;
+                  })) {
+                    secondInput.inputs.forEach(function (thirdInput, thirdIndex) {
+                      if ((typeof thirdInput === 'undefined' ? 'undefined' : _typeof(thirdInput)) === "object") {
+                        newState.inputs.campaignSelect[mainCampaignName + '-campaignSelect_' + inputIndex + '-campaignSelect_' + secondIndex + '-campaignSelect_' + thirdIndex] = thirdInput.name;
+                      }
+                    });
+                  }
+                });
+              }
+              break;
             default:
               // Set the values
               inputMap[mainCampaignName].forEach(function (inputName, index) {
@@ -46768,12 +46786,27 @@ var CampaignForm = function (_Component) {
                             return;
                           }
                           nestedFields.forEach(function (nestedName, nestedIndex) {
-                            var type = (0, _helpers.getInputType)(nestedName);
-                            var value = input.inputs[fieldIndex].inputs[nestedIndex];
-                            if (type === 'object' || type === 'objectArray') {
-                              inputCampaign = newState.inputs.campaignSelect[fieldName];
+                            if (!(0, _helpers.isCampaignSelect)(nestedName)) {
+                              var _type = (0, _helpers.getInputType)(nestedName);
+                              var _value = input.inputs[fieldIndex].inputs[nestedIndex];
+                              if (_type === 'object' || _type === 'objectArray') {
+                                inputCampaign = newState.inputs.campaignSelect[fieldName];
+                              }
+                              newState.inputs[_type][nestedName] = convertInput(_value, _type, inputCampaign, campaignInputs);
+                            } else {
+                              var finalFields = inputMap[nestedName];
+                              if (!finalFields || finalFields === 'none') {
+                                return;
+                              }
+                              finalFields.forEach(function (finalName, finalIndex) {
+                                var type = (0, _helpers.getInputType)(finalName);
+                                var value = input.inputs[fieldIndex].inputs[nestedIndex].inputs[finalIndex];
+                                if (type === 'object' || type === 'objectArray') {
+                                  inputCampaign = newState.inputs.campaignSelect[nestedName];
+                                }
+                                newState.inputs[type][finalName] = convertInput(value, type, inputCampaign, campaignInputs);
+                              });
                             }
-                            newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
                           });
                         }
                       });
@@ -48172,6 +48205,23 @@ function ChangeLogContent() {
         'li',
         null,
         '16.1 - Added an error page when an error occurs and a banner clarifying that Shopify does not offer support for this app'
+      ),
+      _react2.default.createElement(
+        'li',
+        null,
+        '16.2 - Fixed a bug when using the ',
+        _react2.default.createElement(
+          'b',
+          null,
+          'Cart Has Items'
+        ),
+        ' cart qualifier with one of the ',
+        _react2.default.createElement(
+          'b',
+          null,
+          'Multi-Select'
+        ),
+        ' cart qualifiers'
       )
     ),
     _react2.default.createElement(
