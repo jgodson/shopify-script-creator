@@ -22,7 +22,7 @@ export default class InfoBanner extends React.Component {
     }
 
     return (
-      <div style={{margin: '0 80px'}} >
+      <div style={{marginRight: '80px'}} >
       <Banner
         status="info"
 
