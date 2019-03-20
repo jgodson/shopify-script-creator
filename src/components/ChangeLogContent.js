@@ -10,6 +10,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <li>16.0 - Added a new <b>Cart Qualifier</b> called <b>Cart Has Items</b> that allows you to check if the cart has a specific quantity or subtotal of specified items</li>
       <li>16.1 - Added an error page when an error occurs and a banner clarifying that Shopify does not offer support for this app</li>
+      <li>16.2 - Fixed a bug when using the <b>Cart Has Items</b> cart qualifier with one of the <b>Multi-Select</b> cart qualifiers</li>
 
       </ul>
 

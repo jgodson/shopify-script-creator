@@ -77,7 +77,7 @@ export default class CampaignForm extends Component {
   }
 
   componentDidUpdate() {
-    if (this.props.existingInfo && this.updateCount < 3) {
+    if (this.props.existingInfo && this.updateCount < 4) {
       this.populateBasedOnExistingInfo(this.props.existingInfo);
     }
   }
@@ -136,6 +136,20 @@ export default class CampaignForm extends Component {
               });
             }
             break;
+          case 2:
+            // Pick the third set of campaigns (if there is any)
+            if (Array.isArray(input.inputs) && inputs.some((input) => input instanceof Object)) {
+              input.inputs.forEach((secondInput, secondIndex) => {
+                if (Array.isArray(secondInput.inputs) && secondInput.inputs.some((input) => input instanceof Object)) {
+                  secondInput.inputs.forEach((thirdInput, thirdIndex) => {
+                    if (typeof thirdInput === "object") {
+                      newState.inputs.campaignSelect[`${mainCampaignName}-campaignSelect_${inputIndex}-campaignSelect_${secondIndex}-campaignSelect_${thirdIndex}`] = thirdInput.name;
+                    }
+                  });
+                }
+              });
+            }
+            break;
           default:
             // Set the values
             inputMap[mainCampaignName].forEach((inputName, index) => {
@@ -156,12 +170,25 @@ export default class CampaignForm extends Component {
                         const nestedFields = inputMap[fieldName];
                         if (!nestedFields || nestedFields === 'none') { return; }
                         nestedFields.forEach((nestedName, nestedIndex) => {
-                          const type = getInputType(nestedName);
-                          const value = input.inputs[fieldIndex].inputs[nestedIndex];
-                          if (type === 'object' || type === 'objectArray') {
-                            inputCampaign = newState.inputs.campaignSelect[fieldName];
+                          if (!isCampaignSelect(nestedName)) {
+                            const type = getInputType(nestedName);
+                            const value = input.inputs[fieldIndex].inputs[nestedIndex];
+                            if (type === 'object' || type === 'objectArray') {
+                              inputCampaign = newState.inputs.campaignSelect[fieldName];
+                            }
+                            newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
+                          } else {
+                            const finalFields = inputMap[nestedName];
+                            if (!finalFields || finalFields === 'none') { return; }
+                            finalFields.forEach((finalName, finalIndex) => {
+                              const type = getInputType(finalName);
+                              const value = input.inputs[fieldIndex].inputs[nestedIndex].inputs[finalIndex];
+                              if (type === 'object' || type === 'objectArray') {
+                                inputCampaign = newState.inputs.campaignSelect[nestedName];
+                              }
+                              newState.inputs[type][finalName] = convertInput(value, type, inputCampaign, campaignInputs);
+                            });
                           }
-                          newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
                         });
                       }
                     });
@@ -500,7 +527,7 @@ export default class CampaignForm extends Component {
           let additionalInputs = null;
           if (value && value !== 'none') {
             const campaign = input.options.filter((option) => option.value === value)[0];
-              description = <TextStyle variation="subdued"><strong>What it does: </strong>{campaign.description}</TextStyle>;
+            description = <TextStyle variation="subdued"><strong>What it does: </strong>{campaign.description}</TextStyle>;
             if (campaign.inputs) {
               additionalInputs = this.generateAdditionalInputs(campaign, input.name);
             }

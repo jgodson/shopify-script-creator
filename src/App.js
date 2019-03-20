@@ -317,7 +317,6 @@ export default class App extends Component {
     function generateClassCode(allClasses, classesUsed) {
       // Google Analytics
       const used = classesUsed.filter((name) => !name.match(/^(Selector|Qualifier|Campaign)$/)).join(', ');
-      gtag('event', 'scriptGenerated', {'event_label': used});
 
       let code = '';
       classesUsed.forEach((className) => {
@@ -338,7 +337,8 @@ export default class App extends Component {
       1: '  ',
       2: '    ',
       3: '      ',
-      4: '        '
+      4: '        ',
+      5: '          ',
     };
 
     addUsedClass(campaign.name, allClasses);
