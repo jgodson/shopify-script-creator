@@ -12006,7 +12006,7 @@ var InfoBanner = function (_React$Component) {
 
       return _react2.default.createElement(
         'div',
-        { style: { margin: '0 80px' } },
+        { style: { marginRight: '80px' } },
         _react2.default.createElement(
           _polaris.Banner,
           {
