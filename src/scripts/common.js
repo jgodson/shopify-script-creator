@@ -50,7 +50,7 @@ class Campaign
   end
 
   def after_run(cart)
-    @discount.apply_final_discount if @discount.present? && @discount.respond_to?(:apply_final_discount)
+    @discount.apply_final_discount if @discount && @discount.respond_to?(:apply_final_discount)
     revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
   end
 
