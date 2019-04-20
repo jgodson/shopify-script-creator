@@ -2,11 +2,41 @@ import Common from './common';
 
 const classes = {
   AllGatewaysSelector: `
-  class AllGatewaysSelector
-    def match?(gateway)
-      return true
+class AllGatewaysSelector
+  def match?(gateway)
+    return true
+  end
+end`,
+
+  ChangeGatewayName: `
+class ChangeGatewayName < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector, new_name)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @gateway_selector = gateway_selector
+    @new_name = new_name
+  end
+
+  def run(gateways, cart)
+    return unless qualifies?(cart) && @gateway_selector
+    gateways.each do|gateway|
+      gateway.change_name(@new_name) if @gateway_selector.match?(gateway)
     end
-  end`,
+  end
+end`,
+
+  ConditonallyRemoveGateway: `
+class ConditionallyRemoveGateway < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @gateway_selector = gateway_selector
+  end
+
+  def run(gateways, cart)
+    gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } if qualifies?(cart)
+  end
+end`,
 
   GatewayNameSelector: `
 class GatewayNameSelector < Selector
@@ -24,19 +54,6 @@ class GatewayNameSelector < Selector
       else
         return @invert ^ partial_match(@match_condition, name, @names)
     end
-  end
-end`,
-
-  ConditionallyRemoveGateway: `
-class ConditionallyRemoveGateway < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
-    @gateway_selector = gateway_selector
-  end
-
-  def run(gateways, cart)
-    gateways.delete_if { |gateway| @gateway_selector.match?(gateway) } if qualifies?(cart)
   end
 end`,
 
@@ -66,23 +83,6 @@ class ReorderPaymentGateways < Campaign
     gateways.sort_by! { |gateway| new_order.index(gateway.name) }
   end
 end`,
-
-  ChangeGatewayName: `
-class ChangeGatewayName < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, gateway_selector, new_name)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
-    @gateway_selector = gateway_selector
-    @new_name = new_name
-  end
-
-  def run(gateways, cart)
-    return unless qualifies?(cart) && @gateway_selector
-    gateways.each do|gateway| 
-      gateway.change_name(@new_name) if @gateway_selector.match?(gateway)
-    end
-  end
-end`
 };
 
 const defaultCode = `

@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "prebuild": "rimraf ./docs",
+    "prebuild": "rimraf ./docs && node ruby-to-js",
     "build": "webpack",
     "predeploy": "yarn run build",
     "deploy": "git add ./docs && git commit -m 'Update build' && git push && git subtree split --prefix docs -b gh-pages && git push deploy gh-pages:master && git branch -D gh-pages"
