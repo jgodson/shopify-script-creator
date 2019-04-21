@@ -1,4 +1,21 @@
 const classes = {
+  AndSelector: `
+class AndSelector
+  def initialize(*conditions)
+    @conditions = conditions.compact
+  end
+
+  def match?(item, selector = nil)
+    @conditions.all? do |condition|
+      if selector
+        condition.match?(item, selector)
+      else
+        condition.match?(item)
+      end
+    end
+  end
+end`,
+
   Campaign: `
 class Campaign
   def initialize(condition, *qualifiers)
@@ -59,204 +76,74 @@ class Campaign
   end
 end`,
 
-  Qualifier: `
-class Qualifier
-  def partial_match(match_type, item_info, possible_matches)
-    match_type = (match_type.to_s + '?').to_sym
-    if item_info.kind_of?(Array)
-      possible_matches.any? do |possibility|
-        item_info.any? do |search|
-          search.send(match_type, possibility)
-        end
-      end
-    else
-      possible_matches.any? do |possibility|
-        item_info.send(match_type, possibility)
-      end
-    end
-  end
-
-  def compare_amounts(compare, comparison_type, compare_to)
-    case comparison_type
-      when :greater_than
-        return compare > compare_to
-      when :greater_than_or_equal
-        return compare >= compare_to
-      when :less_than
-        return compare < compare_to
-      when :less_than_or_equal
-        return compare <= compare_to
-      when :equal_to
-        return compare == compare_to
-      else
-        raise "Invalid comparison type"
-    end
-  end
-end`,
-
-  Selector: `
-class Selector
-  def partial_match(match_type, item_info, possible_matches)
-    match_type = (match_type.to_s + '?').to_sym
-    if item_info.kind_of?(Array)
-      possible_matches.any? do |possibility|
-        item_info.any? do |search|
-          search.send(match_type, possibility)
-        end
-      end
-    else
-      possible_matches.any? do |possibility|
-        item_info.send(match_type, possibility)
-      end
-    end
-  end
-end`,
-
-  AndSelector: `
-class AndSelector
-  def initialize(*conditions)
-    @conditions = conditions.compact
-  end
-
-  def match?(item, selector = nil)
-    @conditions.all? do |condition|
-      if selector
-        condition.match?(item, selector)
-      else
-        condition.match?(item)
-      end
-    end
-  end
-end`,
-
-  OrSelector: `
-class OrSelector
-  def initialize(*conditions)
-    @conditions = conditions.compact
-  end
-
-  def match?(item, selector = nil)
-    @conditions.any? do |condition|
-      if selector
-        condition.match?(item, selector)
-      else
-        condition.match?(item)
-      end
-    end
-  end
-end`,
-
-  GiftCardSelector: `
-class GiftCardSelector < Selector
-  def initialize(match_type)
-    @invert = match_type == :not
-  end
-
-  def match?(line_item)
-    @invert ^ line_item.variant.product.gift_card?
-  end
-end`,
-
-  SaleItemSelector: `
-class SaleItemSelector < Selector
-  def initialize(match_type)
-    @invert = match_type == :is
-  end
-
-  def match?(line_item)
-    @invert ^ (line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price)
-  end
-end`,
-
-  ReducedItemSelector: `
-class ReducedItemSelector < Selector
-  def initialize(match_type)
-    @invert = match_type == :not
-  end
-
-  def match?(line_item)
-    @invert ^ line_item.discounted?
-  end
-end`,
-
-  CustomerEmailQualifier: `
-class CustomerEmailQualifier < Qualifier
-  def initialize(match_type, match_condition, emails)
-    @invert = match_type == :does_not
-    @match_condition = match_condition == :default ? :match : match_condition
-    @emails = emails.map(&:downcase)
-  end
-
-  def match?(cart, selector = nil)
-    return false if cart.customer.nil?
-    customer_email = cart.customer.email
-    case @match_condition
-      when :match
-        return @invert ^ @emails.include?(customer_email)
-      else
-        return @invert ^ partial_match(@match_condition, customer_email, @emails)
-    end
-  end
-end`,
-
-  CustomerTagQualifier: `
-class CustomerTagQualifier < Qualifier
-  def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :default ? :match : match_condition
-    @invert = match_type == :does_not
-    @tags = tags.map(&:downcase)
-  end
-
-  def match?(cart, selector = nil)
-    return true if cart.customer.nil? && @invert
-    return false if cart.customer.nil?
-    customer_tags = cart.customer.tags.to_a.map(&:downcase)
-    case @match_condition
-      when :match
-        return @invert ^ ((@tags & customer_tags).length > 0)
-      else
-        return @invert ^ partial_match(@match_condition, customer_tags, @tags)
-    end
-  end
-end`,
-
-  CustomerOrderCountQualifier: `
-class CustomerOrderCountQualifier < Qualifier
-  def initialize(comparison_type, amount)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
-    @amount = amount
-  end
-
-  def match?(cart, selector = nil)
-    return false if cart.customer.nil?
-    total = cart.customer.orders_count
-    compare_amounts(total, @comparison_type, @amount)
-  end
-end`,
-
-  CustomerTotalSpentQualifier: `
-class CustomerTotalSpentQualifier < Qualifier
-  def initialize(comparison_type, amount)
+  CartAmountQualifier: `
+class CartAmountQualifier < Qualifier
+  def initialize(cart_or_item, comparison_type, amount)
+    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item
     @comparison_type = comparison_type == :default ? :greater_than : comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 
   def match?(cart, selector = nil)
-    return false if cart.customer.nil?
-    total = cart.customer.total_spent
+    total = cart.subtotal_price
+    if @cart_or_item == :item
+      total = cart.line_items.reduce(Money.zero) do |total, item|
+        total + (selector&.match?(item) ? item.original_line_price : Money.zero)
+      end
+    end
     compare_amounts(total, @comparison_type, @amount)
   end
 end`,
 
-  CustomerAcceptsMarketingQualifier: `
-class CustomerAcceptsMarketingQualifier < Qualifier
-  def initialize(match_type)
-    @invert = match_type == :does_not
+  CartHasItemQualifier: `
+class CartHasItemQualifier < Qualifier
+  def initialize(quantity_or_subtotal, comparison_type, amount, item_selector)
+    @quantity_or_subtotal = quantity_or_subtotal
+    @comparison_type = comparison_type
+    @amount = quantity_or_subtotal == :subtotal ? Money.new(cents: amount * 100) : amount
+    @item_selector = item_selector
   end
 
   def match?(cart, selector = nil)
-    return false if cart.customer.nil?
-    return @invert ^ cart.customer.accepts_marketing?
+    raise "Must supply an item selector for the #{self.class}" if @item_selector.nil?
+    case @quantity_or_subtotal
+      when :quantity
+        total = cart.line_items.reduce(0) do |total, item|
+          total + (@item_selector&.match?(item) ? item.quantity : 0)
+        end
+      when :subtotal
+        total = cart.line_items.reduce(Money.zero) do |total, item|
+          total + (@item_selector&.match?(item) ? item.line_price : Money.zero)
+        end
+    end
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
+  CartQuantityQualifier: `
+class CartQuantityQualifier < Qualifier
+  def initialize(total_method, comparison_type, quantity)
+    @total_method = total_method
+    @comparison_type = comparison_type
+    @quantity = quantity
+  end
+
+  def match?(cart, selector = nil)
+    case @total_method
+      when :item
+        total = cart.line_items.reduce(0) do |total, item|
+          total + ((selector ? selector.match?(item) : true) ? item.quantity : 0)
+        end
+      when :cart
+        total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
+    end
+    if @total_method == :line_any || @total_method == :line_all
+      method = @total_method == :line_any ? :any? : :all?
+      qualified_items = cart.line_items.select { |item| selector ? selector.match?(item) : true }
+      qualified_items.send(method) { |item| compare_amounts(item.quantity, @comparison_type, @quantity) }
+    else
+      compare_amounts(total, @comparison_type, @quantity)
+    end
   end
 end`,
 
@@ -277,18 +164,6 @@ class CodeQualifier < Qualifier
       else
         return @invert ^ partial_match(@match_condition, code, @codes)
     end
-  end
-end`,
-
-  ProductIdSelector: `
-class ProductIdSelector < Selector
-  def initialize(match_type, product_ids)
-    @invert = match_type == :not_one
-    @product_ids = product_ids.map { |id| id.to_i }
-  end
-
-  def match?(line_item)
-    @invert ^ @product_ids.include?(line_item.variant.product.id)
   end
 end`,
 
@@ -322,6 +197,197 @@ class CountryCodeQualifier < Qualifier
   end
 end`,
 
+  CustomerAcceptsMarketingQualifier: `
+class CustomerAcceptsMarketingQualifier < Qualifier
+  def initialize(match_type)
+    @invert = match_type == :does_not
+  end
+
+  def match?(cart, selector = nil)
+    return false if cart.customer.nil?
+    return @invert ^ cart.customer.accepts_marketing?
+  end
+end`,
+
+  CustomerEmailQualifier: `
+class CustomerEmailQualifier < Qualifier
+  def initialize(match_type, match_condition, emails)
+    @invert = match_type == :does_not
+    @match_condition = match_condition == :default ? :match : match_condition
+    @emails = emails.map(&:downcase)
+  end
+
+  def match?(cart, selector = nil)
+    return false if cart.customer.nil?
+    customer_email = cart.customer.email
+    case @match_condition
+      when :match
+        return @invert ^ @emails.include?(customer_email)
+      else
+        return @invert ^ partial_match(@match_condition, customer_email, @emails)
+    end
+  end
+end`,
+
+  CustomerOrderCountQualifier: `
+class CustomerOrderCountQualifier < Qualifier
+  def initialize(comparison_type, amount)
+    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @amount = amount
+  end
+
+  def match?(cart, selector = nil)
+    return false if cart.customer.nil?
+    total = cart.customer.orders_count
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
+  CustomerTagQualifier: `
+class CustomerTagQualifier < Qualifier
+  def initialize(match_type, match_condition, tags)
+    @match_condition = match_condition == :default ? :match : match_condition
+    @invert = match_type == :does_not
+    @tags = tags.map(&:downcase)
+  end
+
+  def match?(cart, selector = nil)
+    return true if cart.customer.nil? && @invert
+    return false if cart.customer.nil?
+    customer_tags = cart.customer.tags.to_a.map(&:downcase)
+    case @match_condition
+      when :match
+        return @invert ^ ((@tags & customer_tags).length > 0)
+      else
+        return @invert ^ partial_match(@match_condition, customer_tags, @tags)
+    end
+  end
+end`,
+
+  CustomerTotalSpentQualifier: `
+class CustomerTotalSpentQualifier < Qualifier
+  def initialize(comparison_type, amount)
+    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @amount = Money.new(cents: amount * 100)
+  end
+
+  def match?(cart, selector = nil)
+    return false if cart.customer.nil?
+    total = cart.customer.total_spent
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
+  FullAddressQualifier: `
+class FullAddressQualifier
+  def initialize(addresses)
+    @addresses = addresses
+  end
+
+  def match?(cart, selector = nil)
+    return false if cart.shipping_address.nil?
+
+    @addresses.any? do |accepted_address|
+      match_type = accepted_address[:match_type].to_sym
+
+      cart.shipping_address.to_hash.all? do |key, value|
+        key = key.to_sym
+        value.downcase!
+
+        next true unless accepted_address[key]
+        next true if accepted_address[key].length === 0
+
+        match = accepted_address[key].any? do |potential_address|
+          potential_address.downcase!
+
+          case match_type
+            when :partial
+              value.include?(potential_address)
+            when :exact
+              potential_address == value
+          end
+        end
+
+        match
+      end
+    end
+  end
+end`,
+
+  GiftCardSelector: `
+class GiftCardSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :not
+  end
+
+  def match?(line_item)
+    @invert ^ line_item.variant.product.gift_card?
+  end
+end`,
+
+  LineItemPropertiesSelector: `
+class LineItemPropertiesSelector < Selector
+  def initialize(target_properties)
+    @target_properties = target_properties
+  end
+
+  def match?(line_item)
+    line_item_props = line_item.properties
+    @target_properties.all? do |key, value|
+      next unless line_item_props.has_key?(key)
+      true if line_item_props[key].downcase == value.downcase
+    end
+  end
+end`,
+
+  OrSelector: `
+class OrSelector
+  def initialize(*conditions)
+    @conditions = conditions.compact
+  end
+
+  def match?(item, selector = nil)
+    @conditions.any? do |condition|
+      if selector
+        condition.match?(item, selector)
+      else
+        condition.match?(item)
+      end
+    end
+  end
+end`,
+
+  ProductIdSelector: `
+class ProductIdSelector < Selector
+  def initialize(match_type, product_ids)
+    @invert = match_type == :not_one
+    @product_ids = product_ids.map { |id| id.to_i }
+  end
+
+  def match?(line_item)
+    @invert ^ @product_ids.include?(line_item.variant.product.id)
+  end
+end`,
+
+  ProductTagSelector: `
+class ProductTagSelector < Selector
+  def initialize(match_type, match_condition, tags)
+    @match_condition = match_condition == :default ? :match : match_condition
+    @invert = match_type == :does_not
+    @tags = tags.map(&:downcase)
+  end
+
+  def match?(line_item)
+    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
+    case @match_condition
+      when :match
+        return @invert ^ ((@tags & product_tags).length > 0)
+      else
+        return @invert ^ partial_match(@match_condition, product_tags, @tags)
+    end
+  end
+end`,
+
   ProductTypeSelector: `
 class ProductTypeSelector < Selector
   def initialize(match_type, product_types)
@@ -346,87 +412,38 @@ class ProductVendorSelector < Selector
   end
 end`,
 
-  VariantSkuSelector: `
-class VariantSkuSelector < Selector
-  def initialize(match_type, match_condition, skus)
-    @invert = match_type == :does_not
-    @match_condition = match_condition == :default ? :match : match_condition
-    @skus = skus.map(&:downcase)
-  end
-
-  def match?(line_item)
-    variant_skus = line_item.variant.skus.to_a.map(&:downcase)
-    case @match_condition
-      when :match
-        return @invert ^ ((@skus & variant_skus).length > 0)
-      else
-        return @invert ^ partial_match(@match_condition, variant_skus, @skus)
-    end
-  end
-end`,
-
-  VariantIdSelector: `
-class VariantIdSelector < Selector
-  def initialize(match_type, variant_ids)
-    @invert = match_type == :not_one
-    @variant_ids = variant_ids.map { |id| id.to_i }
-  end
-
-  def match?(line_item)
-    @invert ^ @variant_ids.include?(line_item.variant.id)
-  end
-end`,
-
-  ProductTagSelector: `
-class ProductTagSelector < Selector
-  def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :default ? :match : match_condition
-    @invert = match_type == :does_not
-    @tags = tags.map(&:downcase)
-  end
-
-  def match?(line_item)
-    product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
-    case @match_condition
-      when :match
-        return @invert ^ ((@tags & product_tags).length > 0)
-      else
-        return @invert ^ partial_match(@match_condition, product_tags, @tags)
-    end
-  end
-end`,
-
-  LineItemPropertiesSelector: `
-class LineItemPropertiesSelector < Selector
-  def initialize(target_properties)
-    @target_properties = target_properties
-  end
-
-  def match?(line_item)
-    line_item_props = line_item.properties
-    @target_properties.all? do |key, value|
-      next unless line_item_props.has_key?(key)
-      true if line_item_props[key].downcase == value.downcase
-    end
-  end
-end`,
-
-  CartAmountQualifier: `
-class CartAmountQualifier < Qualifier
-  def initialize(cart_or_item, comparison_type, amount)
-    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
-    @amount = Money.new(cents: amount * 100)
-  end
-
-  def match?(cart, selector = nil)
-    total = cart.subtotal_price
-    if @cart_or_item == :item
-      total = cart.line_items.reduce(Money.zero) do |total, item|
-        total + (selector&.match?(item) ? item.original_line_price : Money.zero)
+  Qualifier: `
+class Qualifier
+  def partial_match(match_type, item_info, possible_matches)
+    match_type = (match_type.to_s + '?').to_sym
+    if item_info.kind_of?(Array)
+      possible_matches.any? do |possibility|
+        item_info.any? do |search|
+          search.send(match_type, possibility)
+        end
+      end
+    else
+      possible_matches.any? do |possibility|
+        item_info.send(match_type, possibility)
       end
     end
-    compare_amounts(total, @comparison_type, @amount)
+  end
+
+  def compare_amounts(compare, comparison_type, compare_to)
+    case comparison_type
+      when :greater_than
+        return compare > compare_to
+      when :greater_than_or_equal
+        return compare >= compare_to
+      when :less_than
+        return compare < compare_to
+      when :less_than_or_equal
+        return compare <= compare_to
+      when :equal_to
+        return compare == compare_to
+      else
+        raise "Invalid comparison type"
+    end
   end
 end`,
 
@@ -463,55 +480,43 @@ class ReducedCartAmountQualifier < Qualifier
   end
 end`,
 
-  CartQuantityQualifier: `
-class CartQuantityQualifier < Qualifier
-  def initialize(total_method, comparison_type, quantity)
-    @total_method = total_method
-    @comparison_type = comparison_type
-    @quantity = quantity
+  ReducedItemSelector: `
+class ReducedItemSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :not
   end
 
-  def match?(cart, selector = nil)
-    case @total_method
-      when :item
-        total = cart.line_items.reduce(0) do |total, item|
-          total + ((selector ? selector.match?(item) : true) ? item.quantity : 0)
-        end
-      when :cart
-        total = cart.line_items.reduce(0) { |total, item| total + item.quantity }
-    end
-    if @total_method == :line_any || @total_method == :line_all
-      method = @total_method == :line_any ? :any? : :all?
-      qualified_items = cart.line_items.select { |item| selector ? selector.match?(item) : true }
-      qualified_items.send(method) { |item| compare_amounts(item.quantity, @comparison_type, @quantity) }
-    else
-      compare_amounts(total, @comparison_type, @quantity)
-    end
+  def match?(line_item)
+    @invert ^ line_item.discounted?
   end
 end`,
 
-  CartHasItemQualifier: `
-class CartHasItemQualifier < Qualifier
-  def initialize(quantity_or_subtotal, comparison_type, amount, item_selector)
-    @quantity_or_subtotal = quantity_or_subtotal
-    @comparison_type = comparison_type
-    @amount = quantity_or_subtotal == :subtotal ? Money.new(cents: amount * 100) : amount
-    @item_selector = item_selector
+  SaleItemSelector: `
+class SaleItemSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :is
   end
 
-  def match?(cart, selector = nil)
-    raise "Must supply an item selector for the #{self.class}" if @item_selector.nil?
-    case @quantity_or_subtotal
-      when :quantity
-        total = cart.line_items.reduce(0) do |total, item|
-          total + (@item_selector&.match?(item) ? item.quantity : 0)
+  def match?(line_item)
+    @invert ^ (line_item.variant.compare_at_price.nil? || line_item.variant.compare_at_price <= line_item.variant.price)
+  end
+end`,
+
+  Selector: `
+class Selector
+  def partial_match(match_type, item_info, possible_matches)
+    match_type = (match_type.to_s + '?').to_sym
+    if item_info.kind_of?(Array)
+      possible_matches.any? do |possibility|
+        item_info.any? do |search|
+          search.send(match_type, possibility)
         end
-      when :subtotal
-        total = cart.line_items.reduce(Money.zero) do |total, item|
-          total + (@item_selector&.match?(item) ? item.line_price : Money.zero)
-        end
+      end
+    else
+      possible_matches.any? do |possibility|
+        item_info.send(match_type, possibility)
+      end
     end
-    compare_amounts(total, @comparison_type, @amount)
   end
 end`,
 
@@ -550,41 +555,36 @@ class TotalWeightQualifier < Qualifier
   end
 end`,
 
-  FullAddressQualifier: `
-  class FullAddressQualifier
-  def initialize(addresses)
-    @addresses = addresses
+  VariantIdSelector: `
+class VariantIdSelector < Selector
+  def initialize(match_type, variant_ids)
+    @invert = match_type == :not_one
+    @variant_ids = variant_ids.map { |id| id.to_i }
   end
 
-  def match?(cart, selector = nil)
-    return false if cart.shipping_address.nil?
+  def match?(line_item)
+    @invert ^ @variant_ids.include?(line_item.variant.id)
+  end
+end`,
 
-    @addresses.any? do |accepted_address|
-      match_type = accepted_address[:match_type].to_sym
+  VariantSkuSelector: `
+class VariantSkuSelector < Selector
+  def initialize(match_type, match_condition, skus)
+    @invert = match_type == :does_not
+    @match_condition = match_condition == :default ? :match : match_condition
+    @skus = skus.map(&:downcase)
+  end
 
-      cart.shipping_address.to_hash.all? do |key, value|
-        key = key.to_sym
-        value.downcase!
-
-        next true unless accepted_address[key]
-        next true if accepted_address[key].length === 0
-
-        match = accepted_address[key].any? do |potential_address|
-          potential_address.downcase!
-
-          case match_type
-            when :partial
-              value.include?(potential_address)
-            when :exact
-              potential_address == value
-          end
-        end
-
-        match
-      end
+  def match?(line_item)
+    variant_skus = line_item.variant.skus.to_a.map(&:downcase)
+    case @match_condition
+      when :match
+        return @invert ^ ((@skus & variant_skus).length > 0)
+      else
+        return @invert ^ partial_match(@match_condition, variant_skus, @skus)
     end
   end
-end`
+end`,
 };
 
 const customerQualifiers = [{
