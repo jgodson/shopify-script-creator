@@ -1,15 +1,5 @@
 require "./ruby_scripts/payment/change_gateway_name"
 
-class NameMatcher
-  def initialize(name)
-    @name = name
-  end
-
-  def match?(gateway)
-    @name == gateway.name
-  end
-end
-
 RSpec.describe ChangeGatewayName, "#run" do
   let(:gateway1) { create(:gateway) }
   let(:gateway2) { create(:gateway, :gateway2) }
@@ -17,7 +7,17 @@ RSpec.describe ChangeGatewayName, "#run" do
   let(:cart) { create(:cart) }
 
   describe "with two gateways available" do
-    before { ChangeGatewayName.new(:all, nil, nil, :any, nil, NameMatcher.new("Gateway1"), "Test").run(gateways, cart) }
+    before {
+      ChangeGatewayName.new(
+        :all,
+        nil,
+        nil,
+        :any,
+        nil,
+        TestHelper::GatewayNameMatcher.new("Gateway1"),
+        "Test"
+      ).run(gateways, cart)
+    }
 
     it "changes the name of the first gateway" do
       expect(gateway1.name).to eq("Test")
@@ -35,7 +35,7 @@ RSpec.describe ChangeGatewayName, "#run" do
       nil,
       :any,
       nil,
-      NameMatcher.new("Gateway1"),
+      TestHelper::GatewayNameMatcher.new("Gateway1"),
       "Test"
       ).run(gateways, cart)
     }
