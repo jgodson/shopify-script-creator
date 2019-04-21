@@ -1,2 +1,4 @@
 --require spec_helper
+--require test_helper
 --require ./spec/models/money
+--require ./ruby_scripts/common/campaign

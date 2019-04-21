@@ -1,6 +1,6 @@
 require "./ruby_scripts/payment/all_gateways_selector"
 
-RSpec.describe AllGatewaysSelector, "#match" do
+RSpec.describe AllGatewaysSelector, "#match?" do
   let(:gateway1) { create(:gateway) }
   let(:gateway2) { create(:gateway, :gateway2) }
   let(:gateway3) { create(:gateway, :gateway3) }

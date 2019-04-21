@@ -6,7 +6,7 @@ class Cart
     @customer = customer
     @shipping_address = shipping_address
     @discount_code = discount_code
-    @original_price = line_items.reduce(Money.zero) { |sum, item| sum + item.original_line_price }
+    @original_price = line_items.reduce(Money.zero) { |sum, item| sum + item.original_line_price } if line_items
   end
 
   def subtotal_price
