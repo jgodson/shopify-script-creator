@@ -6,8 +6,9 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "prebuild": "rimraf ./docs && node ruby-to-js",
+    "prebuild": "rimraf ./docs && yarn run build:scripts",
     "build": "webpack",
+    "build:scripts": "node ruby-to-js",
     "predeploy": "yarn run build",
     "deploy": "git add ./docs && git commit -m 'Update build' && git push && git subtree split --prefix docs -b gh-pages && git push deploy gh-pages:master && git branch -D gh-pages",
     "test:ruby": "bundle exec rspec"

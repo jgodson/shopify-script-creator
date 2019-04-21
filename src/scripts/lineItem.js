@@ -1,169 +1,94 @@
 import Common from './common';
 
 const classes = {
-  PostCartAmountQualifier: `
-class PostCartAmountQualifier < Qualifier
-  def initialize(comparison_type, amount)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
-    @amount = Money.new(cents: amount * 100)
-  end
-
-  def match?(cart, selector = nil)
-    total = cart.subtotal_price
-    compare_amounts(total, @comparison_type, @amount)
-  end
-end`,
-
-  PercentageDiscount: `
-class PercentageDiscount
-  def initialize(percent, message)
-    @discount = (100 - percent) / 100.0
-    @message = message
-  end
-
-  def apply(line_item)
-    line_item.change_line_price(line_item.line_price * @discount, message: @message)
-  end
-end`,
-
-  FixedTotalDiscount: `
-class FixedTotalDiscount
-  def initialize(amount, message, behaviour = :to_zero)
-    @amount = Money.new(cents: amount * 100)
-    @message = message
-    @discount_applied = Money.zero
-    @all_items = []
-    @is_split = behaviour == :split
-  end
-
-  def apply(line_item)
-    if @is_split
-      @all_items << line_item
-    else
-      return unless @discount_applied < @amount
-      discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min
-      line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
-      @discount_applied += discount_to_apply
-    end
-  end
-
-  def apply_final_discount
-    return if @all_items.length == 0
-    total_items = @all_items.length
-    total_quantity = 0
-    total_cost = Money.zero
-    @all_items.each do |item|
-      total_quantity += item.quantity
-      total_cost += item.line_price
-    end
-    @all_items.each_with_index do |item, index|
-      discount_percent = item.line_price.cents / total_cost.cents
-      if total_items == index + 1
-        discount_to_apply = Money.new(cents: @amount.cents - @discount_applied.cents.floor)
-      else
-        discount_to_apply = Money.new(cents: @amount.cents * discount_percent)
-      end
-      item.change_line_price(item.line_price - discount_to_apply, {message: @message})
-      @discount_applied += discount_to_apply
-    end
-  end
-end`,
-
-  FixedItemDiscount: `
-class FixedItemDiscount
-  def initialize(amount, message)
-    @amount = Money.new(cents: amount * 100)
-    @message = message
-  end
-
-  def apply(line_item)
-    per_item_price = line_item.variant.price
-    per_item_discount = [(@amount - per_item_price), @amount].max
-    discount_to_apply = [(per_item_discount * line_item.quantity), line_item.line_price].min
-    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
-  end
-end`,
-
-  TaxDiscount: `
-class TaxDiscount
-  def initialize(amount, message)
-    @amount = amount
-    @message = message
-  end
-
-  def apply(line_item)
-    calculated_tax_fraction = @amount / (100 + @amount)
-    item_tax = line_item.variant.price * calculated_tax_fraction
-    per_item_price = line_item.variant.price - item_tax
-    new_line_price = per_item_price * line_item.quantity
-    line_item.change_line_price(new_line_price, message: @message)
-  end
-end`,
-
-  ExcludeDiscountCodes: `
-class ExcludeDiscountCodes < Qualifier
-  def initialize(behaviour, message, match_type = :reject_except, discount_codes = [])
-    @reject = behaviour == :apply_script
-    @message = message == "" ? "Discount codes cannot be used with this offer" : message
-    @match_type = match_type
-    @discount_codes = discount_codes.map(&:downcase)
-  end
-
-  def match?(cart, selector = nil)
-    return true if cart.discount_code.nil?
-    return false if !@reject
-    discount_code = cart.discount_code.code.downcase
-    should_reject = true
-    case @match_type
-      when :reject_except
-        should_reject = !@discount_codes.include?(discount_code)
-      when :accept_except
-        should_reject = @discount_codes.include?(discount_code)
-    end
-    if should_reject
-      cart.discount_code.reject({message: @message})
-    end
-    return true
-  end
-end`,
-
-  ConditionalDiscount: `
-class ConditionalDiscount < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, max_discounts)
-    super(condition, customer_qualifier, cart_qualifier)
-    @line_item_selector = line_item_selector
+  BundleDiscount: `
+class BundleDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)
+    super(condition, customer_qualifier, cart_qualifier, nil)
+    @bundle_products = bundle_products
     @discount = discount
-    @items_to_discount = max_discounts == 0 ? nil : max_discounts
+    @full_bundles_only = full_bundles_only
+    @split_items = []
+    @bundle_items = []
+  end
+
+  def check_bundles(cart)
+      bundled_items = @bundle_products.map do |bitem|
+        quantity_required = bitem[:quantity].to_i
+        qualifiers = bitem[:qualifiers]
+        type = bitem[:type].to_sym
+        case type
+          when :ptype
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) && !item.discounted? }
+          when :ptag
+            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 && !item.discounted? }
+          when :pid
+            qualifiers.map!(&:to_i)
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) && !item.discounted? }
+          when :vid
+            qualifiers.map!(&:to_i)
+            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) && !item.discounted? }
+          when :vsku
+            items = cart.line_items.select { |item| (qualifiers & item.variant.skus).length > 0 && !item.discounted? }
+        end
+
+        total_quantity = items.reduce(0) { |total, item| total + item.quantity }
+        {
+          has_all: total_quantity >= quantity_required,
+          total_quantity: total_quantity,
+          quantity_required: quantity_required,
+          total_possible: (total_quantity / quantity_required).to_i,
+          items: items
+        }
+      end
+
+      max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only
+      if bundled_items.all? { |item| item[:has_all] }
+        if @full_bundles_only
+          bundled_items.each do |bundle|
+            bundle_quantity = bundle[:quantity_required] * max_bundle_count
+            split_out_extra_quantity(cart, bundle[:items], bundle[:total_quantity], bundle_quantity)
+          end
+        else
+          bundled_items.each do |bundle|
+            bundle[:items].each do |item|
+              @bundle_items << item
+              cart.line_items.delete(item)
+            end
+          end
+        end
+        return true
+      end
+      false
+  end
+
+  def split_out_extra_quantity(cart, items, total_quantity, quantity_required)
+    items_to_split = quantity_required
+    items.each do |item|
+      break if items_to_split == 0
+      if item.quantity > items_to_split
+        @bundle_items << item.split({take: items_to_split})
+        @split_items << item
+        items_to_split = 0
+      else
+        @bundle_items << item
+        split_quantity = item.quantity
+        items_to_split -= split_quantity
+      end
+      cart.line_items.delete(item)
+    end
+    cart.line_items.concat(@split_items)
+    @split_items.clear
   end
 
   def run(cart)
     raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
-    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
-    applicable_items = applicable_items.sort_by { |item| item.variant.price }
-    applicable_items.each do |item|
-      break if @items_to_discount == 0
-      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)
-        discounted_items = item.split(take: @items_to_discount)
-        @discount.apply(discounted_items)
-        cart.line_items << discounted_items
-        @items_to_discount = 0
-      else
-        @discount.apply(item)
-        @items_to_discount -= item.quantity if !@items_to_discount.nil?
-      end
+
+    if check_bundles(cart)
+      @bundle_items.each { |item| @discount.apply(item) }
     end
-  end
-end`,
-
-  RejectAllDiscountCodes: `
-class RejectAllDiscountCodes < Campaign
-  def initialize(message)
-    @message = message == "" ? "Discount codes are disabled" : message
-  end
-
-  def run(cart)
-    cart.discount_code.reject({message: @message}) unless cart.discount_code.nil?
+    @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }
   end
 end`,
 
@@ -223,7 +148,36 @@ class BuyXGetX < Campaign
   end
 end`,
 
-  ConditionalDiscountCodeRejection: `
+  ConditionalDiscount: `
+class ConditionalDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, max_discounts)
+    super(condition, customer_qualifier, cart_qualifier)
+    @line_item_selector = line_item_selector
+    @discount = discount
+    @items_to_discount = max_discounts == 0 ? nil : max_discounts
+  end
+
+  def run(cart)
+    raise "Campaign requires a discount" unless @discount
+    return unless qualifies?(cart)
+    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
+    applicable_items = applicable_items.sort_by { |item| item.variant.price }
+    applicable_items.each do |item|
+      break if @items_to_discount == 0
+      if (!@items_to_discount.nil? && item.quantity > @items_to_discount)
+        discounted_items = item.split(take: @items_to_discount)
+        @discount.apply(discounted_items)
+        cart.line_items << discounted_items
+        @items_to_discount = 0
+      else
+        @discount.apply(item)
+        @items_to_discount -= item.quantity if !@items_to_discount.nil?
+      end
+    end
+  end
+end`,
+
+  ConditonalDiscountCodeRejection: `
 class ConditionalDiscountCodeRejection < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
@@ -234,130 +188,6 @@ class ConditionalDiscountCodeRejection < Campaign
   def run(cart)
     return unless cart.discount_code
     cart.discount_code.reject({message: @message}) if qualifies?(cart)
-  end
-end`,
-
-  QuantityLimit: `
-class QuantityLimit < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)
-    super(condition, customer_qualifier, cart_qualifier)
-    @limit_by = limit_by == :default ? :product : limit_by
-    @line_item_selector = line_item_selector
-    @per_item_limit = limit
-  end
-
-  def run(cart)
-    return unless qualifies?(cart)
-    item_limits = {}
-    to_delete = []
-    if @per_item_limit == 0
-      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
-    else
-      cart.line_items.each_with_index do |item, index|
-        next unless @line_item_selector.nil? || @line_item_selector.match?(item)
-        key = nil
-        case @limit_by
-          when :product
-            key = item.variant.product.id
-          when :variant
-            key = item.variant.id
-        end
-
-        if key
-          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)
-          needs_limiting = true if item.quantity > item_limits[key]
-          needs_deleted = true if item_limits[key] <= 0
-          max_amount = item.quantity - item_limits[key]
-          item_limits[key] -= needs_limiting ? max_amount : item.quantity
-        else
-          needs_limiting = true if item.quantity > @per_item_limit
-          max_amount = item.quantity - @per_item_limit
-        end
-
-        if needs_limiting
-          if needs_deleted
-            to_delete << index
-          else
-            item.split(take: max_amount)
-          end
-        end
-      end
-
-      if to_delete.length > 0
-        del_index = -1
-        cart.line_items.delete_if do |item|
-          del_index += 1
-          true if to_delete.include?(del_index)
-        end
-      end
-
-    end
-  end
-end`,
-
-  TieredDiscount: `
-class TieredDiscount < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, tier_type, discount_tiers)
-    super(condition, customer_qualifier, cart_qualifier)
-    @line_item_selector = line_item_selector
-    @discount_type = discount_type
-    @tier_type = tier_type == :default ? :customer_tag : tier_type
-    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }
-  end
-
-  def init_discount(amount, message)
-    case @discount_type
-      when :fixed
-        return FixedTotalDiscount.new(amount, message, :split)
-      when :percent
-        return PercentageDiscount.new(amount, message)
-      when :per_item
-        return FixedItemDiscount.new(amount, message)
-    end
-  end
-
-  def run(cart)
-    return unless qualifies?(cart)
-
-    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
-    case @tier_type
-      when :customer_tag
-        return if cart.customer.nil?
-        customer_tags = cart.customer.tags.map(&:downcase)
-        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }
-      when :cart_subtotal
-        cart_total = cart.subtotal_price
-        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
-      when :discountable_total
-        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total + item.line_price }
-        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }
-      when :discountable_total_items
-        discountable_quantity = applicable_items.reduce(0) { |total, item| total + item.quantity }
-        qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }
-      when :cart_items
-        cart_quantity = cart.line_items.reduce(0) { |total, item| total + item.quantity }
-        qualified_tiers = @discount_tiers.select { |tier| cart_quantity >= tier[:tier].to_i }
-    end
-
-    if @tier_type == :line_quantity
-      applicable_items.each do |item|
-        qualified_tiers = @discount_tiers.select { |tier| item.quantity >= tier[:tier].to_i }
-        next if qualified_tiers.empty?
-
-        discount_amount = qualified_tiers.last[:discount].to_f
-        discount_message = qualified_tiers.last[:message]
-        discount = init_discount(discount_amount, discount_message)
-        discount.apply(item)
-        discount.apply_final_discount if discount.respond_to?(:apply_final_discount)
-      end
-    else
-      return if qualified_tiers.empty?
-      discount_amount = qualified_tiers.last[:discount].to_f
-      discount_message = qualified_tiers.last[:message]
-
-      @discount = init_discount(discount_amount, discount_message)
-      applicable_items.each { |item| @discount.apply(item) }
-    end
   end
 end`,
 
@@ -487,96 +317,266 @@ class DiscountCodePattern < Campaign
   end
 end`,
 
-  BundleDiscount: `
-class BundleDiscount < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, discount, full_bundles_only, bundle_products)
-    super(condition, customer_qualifier, cart_qualifier, nil)
-    @bundle_products = bundle_products
-    @discount = discount
-    @full_bundles_only = full_bundles_only
-    @split_items = []
-    @bundle_items = []
+  ExcludeDiscountCodes: `
+class ExcludeDiscountCodes < Qualifier
+  def initialize(behaviour, message, match_type = :reject_except, discount_codes = [])
+    @reject = behaviour == :apply_script
+    @message = message == "" ? "Discount codes cannot be used with this offer" : message
+    @match_type = match_type
+    @discount_codes = discount_codes.map(&:downcase)
   end
 
-  def check_bundles(cart)
-      bundled_items = @bundle_products.map do |bitem|
-        quantity_required = bitem[:quantity].to_i
-        qualifiers = bitem[:qualifiers]
-        type = bitem[:type].to_sym
-        case type
-          when :ptype
-            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.product_type) && !item.discounted? }
-          when :ptag
-            items = cart.line_items.select { |item| (qualifiers & item.variant.product.tags).length > 0 && !item.discounted? }
-          when :pid
-            qualifiers.map!(&:to_i)
-            items = cart.line_items.select { |item| qualifiers.include?(item.variant.product.id) && !item.discounted? }
-          when :vid
-            qualifiers.map!(&:to_i)
-            items = cart.line_items.select { |item| qualifiers.include?(item.variant.id) && !item.discounted? }
-          when :vsku
-            items = cart.line_items.select { |item| (qualifiers & item.variant.skus).length > 0 && !item.discounted? }
-        end
-
-        total_quantity = items.reduce(0) { |total, item| total + item.quantity }
-        {
-          has_all: total_quantity >= quantity_required,
-          total_quantity: total_quantity,
-          quantity_required: quantity_required,
-          total_possible: (total_quantity / quantity_required).to_i,
-          items: items
-        }
-      end
-
-      max_bundle_count = bundled_items.map{ |bundle| bundle[:total_possible] }.min if @full_bundles_only
-      if bundled_items.all? { |item| item[:has_all] }
-        if @full_bundles_only
-          bundled_items.each do |bundle|
-            bundle_quantity = bundle[:quantity_required] * max_bundle_count
-            split_out_extra_quantity(cart, bundle[:items], bundle[:total_quantity], bundle_quantity)
-          end
-        else
-          bundled_items.each do |bundle|
-            bundle[:items].each do |item|
-              @bundle_items << item
-              cart.line_items.delete(item)
-            end
-          end
-        end
-        return true
-      end
-      false
-  end
-
-  def split_out_extra_quantity(cart, items, total_quantity, quantity_required)
-    items_to_split = quantity_required
-    items.each do |item|
-      break if items_to_split == 0
-      if item.quantity > items_to_split
-        @bundle_items << item.split({take: items_to_split})
-        @split_items << item
-        items_to_split = 0
-      else
-        @bundle_items << item
-        split_quantity = item.quantity
-        items_to_split -= split_quantity
-      end
-      cart.line_items.delete(item)
+  def match?(cart, selector = nil)
+    return true if cart.discount_code.nil?
+    return false if !@reject
+    discount_code = cart.discount_code.code.downcase
+    should_reject = true
+    case @match_type
+      when :reject_except
+        should_reject = !@discount_codes.include?(discount_code)
+      when :accept_except
+        should_reject = @discount_codes.include?(discount_code)
     end
-    cart.line_items.concat(@split_items)
-    @split_items.clear
+    if should_reject
+      cart.discount_code.reject({message: @message})
+    end
+    return true
+  end
+end`,
+
+  FixedItemDiscount: `
+class FixedItemDiscount
+  def initialize(amount, message)
+    @amount = Money.new(cents: amount * 100)
+    @message = message
+  end
+
+  def apply(line_item)
+    per_item_price = line_item.variant.price
+    per_item_discount = [(@amount - per_item_price), @amount].max
+    discount_to_apply = [(per_item_discount * line_item.quantity), line_item.line_price].min
+    line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
+  end
+end`,
+
+  FixedTotalDiscount: `
+class FixedTotalDiscount
+  def initialize(amount, message, behaviour = :to_zero)
+    @amount = Money.new(cents: amount * 100)
+    @message = message
+    @discount_applied = Money.zero
+    @all_items = []
+    @is_split = behaviour == :split
+  end
+
+  def apply(line_item)
+    if @is_split
+      @all_items << line_item
+    else
+      return unless @discount_applied < @amount
+      discount_to_apply = [(@amount - @discount_applied), line_item.line_price].min
+      line_item.change_line_price(line_item.line_price - discount_to_apply, {message: @message})
+      @discount_applied += discount_to_apply
+    end
+  end
+
+  def apply_final_discount
+    return if @all_items.length == 0
+    total_items = @all_items.length
+    total_quantity = 0
+    total_cost = Money.zero
+    @all_items.each do |item|
+      total_quantity += item.quantity
+      total_cost += item.line_price
+    end
+    @all_items.each_with_index do |item, index|
+      discount_percent = item.line_price.cents / total_cost.cents
+      if total_items == index + 1
+        discount_to_apply = Money.new(cents: @amount.cents - @discount_applied.cents.floor)
+      else
+        discount_to_apply = Money.new(cents: @amount.cents * discount_percent)
+      end
+      item.change_line_price(item.line_price - discount_to_apply, {message: @message})
+      @discount_applied += discount_to_apply
+    end
+  end
+end`,
+
+  PercentageDiscount: `
+class PercentageDiscount
+  def initialize(percent, message)
+    @discount = (100 - percent) / 100.0
+    @message = message
+  end
+
+  def apply(line_item)
+    line_item.change_line_price(line_item.line_price * @discount, message: @message)
+  end
+end`,
+
+  PostCartAmontQualifier: `
+class PostCartAmountQualifier < Qualifier
+  def initialize(comparison_type, amount)
+    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @amount = Money.new(cents: amount * 100)
+  end
+
+  def match?(cart, selector = nil)
+    total = cart.subtotal_price
+    compare_amounts(total, @comparison_type, @amount)
+  end
+end`,
+
+  QuantityLimit: `
+class QuantityLimit < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)
+    super(condition, customer_qualifier, cart_qualifier)
+    @limit_by = limit_by == :default ? :product : limit_by
+    @line_item_selector = line_item_selector
+    @per_item_limit = limit
   end
 
   def run(cart)
-    raise "Campaign requires a discount" unless @discount
+    return unless qualifies?(cart)
+    item_limits = {}
+    to_delete = []
+    if @per_item_limit == 0
+      cart.line_items.delete_if { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
+    else
+      cart.line_items.each_with_index do |item, index|
+        next unless @line_item_selector.nil? || @line_item_selector.match?(item)
+        key = nil
+        case @limit_by
+          when :product
+            key = item.variant.product.id
+          when :variant
+            key = item.variant.id
+        end
+
+        if key
+          item_limits[key] = @per_item_limit if !item_limits.has_key?(key)
+          needs_limiting = true if item.quantity > item_limits[key]
+          needs_deleted = true if item_limits[key] <= 0
+          max_amount = item.quantity - item_limits[key]
+          item_limits[key] -= needs_limiting ? max_amount : item.quantity
+        else
+          needs_limiting = true if item.quantity > @per_item_limit
+          max_amount = item.quantity - @per_item_limit
+        end
+
+        if needs_limiting
+          if needs_deleted
+            to_delete << index
+          else
+            item.split(take: max_amount)
+          end
+        end
+      end
+
+      if to_delete.length > 0
+        del_index = -1
+        cart.line_items.delete_if do |item|
+          del_index += 1
+          true if to_delete.include?(del_index)
+        end
+      end
+
+    end
+  end
+end`,
+
+  RejectAllDiscountCodes: `
+class RejectAllDiscountCodes < Campaign
+  def initialize(message)
+    @message = message == "" ? "Discount codes are disabled" : message
+  end
+
+  def run(cart)
+    cart.discount_code.reject({message: @message}) unless cart.discount_code.nil?
+  end
+end`,
+
+  TaxDiscount: `
+class TaxDiscount
+  def initialize(amount, message)
+    @amount = amount
+    @message = message
+  end
+
+  def apply(line_item)
+    calculated_tax_fraction = @amount / (100 + @amount)
+    item_tax = line_item.variant.price * calculated_tax_fraction
+    per_item_price = line_item.variant.price - item_tax
+    new_line_price = per_item_price * line_item.quantity
+    line_item.change_line_price(new_line_price, message: @message)
+  end
+end`,
+
+  TieredDiscount: `
+class TieredDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, tier_type, discount_tiers)
+    super(condition, customer_qualifier, cart_qualifier)
+    @line_item_selector = line_item_selector
+    @discount_type = discount_type
+    @tier_type = tier_type == :default ? :customer_tag : tier_type
+    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }
+  end
+
+  def init_discount(amount, message)
+    case @discount_type
+      when :fixed
+        return FixedTotalDiscount.new(amount, message, :split)
+      when :percent
+        return PercentageDiscount.new(amount, message)
+      when :per_item
+        return FixedItemDiscount.new(amount, message)
+    end
+  end
+
+  def run(cart)
     return unless qualifies?(cart)
 
-    if check_bundles(cart)
-      @bundle_items.each { |item| @discount.apply(item) }
+    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
+    case @tier_type
+      when :customer_tag
+        return if cart.customer.nil?
+        customer_tags = cart.customer.tags.map(&:downcase)
+        qualified_tiers = @discount_tiers.select { |tier| customer_tags.include?(tier[:tier].downcase) }
+      when :cart_subtotal
+        cart_total = cart.subtotal_price
+        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
+      when :discountable_total
+        discountable_total = applicable_items.reduce(Money.zero) { |total, item| total + item.line_price }
+        qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }
+      when :discountable_total_items
+        discountable_quantity = applicable_items.reduce(0) { |total, item| total + item.quantity }
+        qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }
+      when :cart_items
+        cart_quantity = cart.line_items.reduce(0) { |total, item| total + item.quantity }
+        qualified_tiers = @discount_tiers.select { |tier| cart_quantity >= tier[:tier].to_i }
     end
-    @bundle_items.reverse.each { |item| cart.line_items.prepend(item) }
+
+    if @tier_type == :line_quantity
+      applicable_items.each do |item|
+        qualified_tiers = @discount_tiers.select { |tier| item.quantity >= tier[:tier].to_i }
+        next if qualified_tiers.empty?
+
+        discount_amount = qualified_tiers.last[:discount].to_f
+        discount_message = qualified_tiers.last[:message]
+        discount = init_discount(discount_amount, discount_message)
+        discount.apply(item)
+        discount.apply_final_discount if discount.respond_to?(:apply_final_discount)
+      end
+    else
+      return if qualified_tiers.empty?
+      discount_amount = qualified_tiers.last[:discount].to_f
+      discount_message = qualified_tiers.last[:message]
+
+      @discount = init_discount(discount_amount, discount_message)
+      applicable_items.each { |item| @discount.apply(item) }
+    end
   end
-end`
+end`,
 };
 
 const defaultCode = `
