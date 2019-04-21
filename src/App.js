@@ -369,7 +369,14 @@ ${INDENT[this.IL]})`;
 
     function addUsedClass(className, allClasses) {
       // Grab what inherits from the class (if anything)
-      let inheritsFrom = allClasses[className].split('\n')[1];
+      let inheritsFrom;
+
+      if (allClasses[className]) {
+        inheritsFrom = allClasses[className].split('\n')[1];
+      } else {
+        throw Error(`Missing class ${className}`);
+      }
+
       if (inheritsFrom.indexOf('<') > -1) {
         inheritsFrom = inheritsFrom.split('<')[1].trim();
         if (classesUsed.indexOf(inheritsFrom) === -1) {

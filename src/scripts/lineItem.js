@@ -177,7 +177,7 @@ class ConditionalDiscount < Campaign
   end
 end`,
 
-  ConditonalDiscountCodeRejection: `
+  ConditionalDiscountCodeRejection: `
 class ConditionalDiscountCodeRejection < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, message)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
@@ -414,7 +414,7 @@ class PercentageDiscount
   end
 end`,
 
-  PostCartAmontQualifier: `
+  PostCartAmountQualifier: `
 class PostCartAmountQualifier < Qualifier
   def initialize(comparison_type, amount)
     @comparison_type = comparison_type == :default ? :greater_than : comparison_type
