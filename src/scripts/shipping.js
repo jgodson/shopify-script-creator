@@ -8,22 +8,58 @@ class AllRatesSelector
   end
 end`,
 
-  RateNameSelector: `
-class RateNameSelector < Selector
-  def initialize(match_type, match_condition, names)
-    @match_condition = match_condition == :default ? :match : match_condition
-    @invert = match_type == :does_not
-    @names = names.map(&:downcase)
+  ChangeRateName: `
+class ChangeRateName < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, new_name)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @rate_selector = rate_selector
+    @new_name = new_name
   end
 
-  def match?(shipping_rate)
-    name = shipping_rate.name.downcase
-    case @match_condition
-      when :match
-        return @invert ^ @names.include?(name)
-      else
-        return @invert ^ partial_match(@match_condition, name, @names)
+  def run(rates, cart)
+    return unless qualifies?(cart) && @rate_selector
+    rates.each do|rate|
+      rate.change_name(@new_name, {message: ""}) if @rate_selector.match?(rate)
     end
+  end
+end`,
+
+  ConditionallyHideRates: `
+class ConditionallyHideRates < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @rate_selector = rate_selector
+  end
+
+  def run(rates, cart)
+    rates.delete_if { |rate| @rate_selector.match?(rate) } if qualifies?(cart)
+  end
+end`,
+
+  FixedDiscount: `
+class FixedDiscount
+  def initialize(amount, message)
+    @amount = Money.new(cents: amount * 100)
+    @message = message
+  end
+
+  def apply(rate)
+    discount_amount = rate.price - @amount < Money.zero ? rate.price : @amount
+    rate.apply_discount(discount_amount, { message: @message })
+  end
+end`,
+
+  PercentageDiscount: `
+class PercentageDiscount
+  def initialize(percent, message)
+    @percent = Decimal.new(percent) / 100
+    @message = message
+  end
+
+  def apply(rate)
+    rate.apply_discount(rate.price * @percent, { message: @message })
   end
 end`,
 
@@ -46,6 +82,25 @@ class RateCodeSelector < Selector
   end
 end`,
 
+  RateNameSelector: `
+class RateNameSelector < Selector
+  def initialize(match_type, match_condition, names)
+    @match_condition = match_condition == :default ? :match : match_condition
+    @invert = match_type == :does_not
+    @names = names.map(&:downcase)
+  end
+
+  def match?(shipping_rate)
+    name = shipping_rate.name.downcase
+    case @match_condition
+      when :match
+        return @invert ^ @names.include?(name)
+      else
+        return @invert ^ partial_match(@match_condition, name, @names)
+    end
+  end
+end`,
+
   RateSourceSelector: `
 class RateSourceSelector < Selector
   def initialize(match_type, sources)
@@ -64,86 +119,12 @@ class ReducedRateSelector < Selector
   def initialize(match_type)
     @invert = match_type == :not
   end
-  
+
   def match?(rate)
     return @invert if rate.instance_variable_get(:@adjustments).empty?
     return @invert ^ rate.instance_variable_get(:@adjustments).any? do |adjustment|
       next unless adjustment&.property == :price
       adjustment.old_value.cents > adjustment.new_value.cents
-    end
-  end
-end`,
-
-  PercentageDiscount: `
-class PercentageDiscount
-  def initialize(percent, message)
-    @percent = Decimal.new(percent) / 100
-    @message = message
-  end
-  
-  def apply(rate)
-    rate.apply_discount(rate.price * @percent, { message: @message })
-  end 
-end`,
-
-  FixedDiscount: `
-class FixedDiscount
-  def initialize(amount, message)
-    @amount = Money.new(cents: amount * 100)
-    @message = message
-  end
-  
-  def apply(rate)
-    discount_amount = rate.price - @amount < Money.zero ? rate.price : @amount
-    rate.apply_discount(discount_amount, { message: @message })
-  end
-end`,
-
-  ShippingDiscount: `
-class ShippingDiscount < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, discount)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
-    @rate_selector = rate_selector
-    @discount = discount
-  end
-  
-  def run(rates, cart)
-    raise "Campaign requires a discount" unless @discount
-    return unless qualifies?(cart)
-    rates.each do |rate|
-      next unless @rate_selector.nil? || @rate_selector.match?(rate)
-      @discount.apply(rate)
-    end
-  end
-end`,
-
-  ConditionallyHideRates: `
-class ConditionallyHideRates < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
-    @rate_selector = rate_selector
-  end
-
-  def run(rates, cart)
-    rates.delete_if { |rate| @rate_selector.match?(rate) } if qualifies?(cart)
-  end
-end`,
-
-  ChangeRateName: `
-class ChangeRateName < Campaign
-  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, new_name)
-    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
-    @rate_selector = rate_selector
-    @new_name = new_name
-  end
-
-  def run(rates, cart)
-    return unless qualifies?(cart) && @rate_selector
-    rates.each do|rate| 
-      rate.change_name(@new_name, {message: ""}) if @rate_selector.match?(rate)
     end
   end
 end`,
@@ -173,7 +154,26 @@ class ReorderShippingRates < Campaign
     end
     rates.sort_by! { |rate| new_rate_order.index(rate.name) }
   end
-end`
+end`,
+
+  ShippingDiscount: `
+class ShippingDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, rate_selector, discount)
+    super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
+    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @rate_selector = rate_selector
+    @discount = discount
+  end
+
+  def run(rates, cart)
+    raise "Campaign requires a discount" unless @discount
+    return unless qualifies?(cart)
+    rates.each do |rate|
+      next unless @rate_selector.nil? || @rate_selector.match?(rate)
+      @discount.apply(rate)
+    end
+  end
+end`,
 };
 
 const defaultCode = `
