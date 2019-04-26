@@ -78,20 +78,30 @@ end`,
 
   CartAmountQualifier: `
 class CartAmountQualifier < Qualifier
-  def initialize(cart_or_item, comparison_type, amount)
-    @cart_or_item = cart_or_item == :default ? :cart : cart_or_item
+  def initialize(behaviour, comparison_type, amount)
+    @behaviour = behaviour == :default ? :cart : behaviour
     @comparison_type = comparison_type == :default ? :greater_than : comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 
   def match?(cart, selector = nil)
     total = cart.subtotal_price
-    if @cart_or_item == :item
+    if @behaviour == :item || @behaviour == :diff_item
       total = cart.line_items.reduce(Money.zero) do |total, item|
-        total + (selector&.match?(item) ? item.original_line_price : Money.zero)
+        total + (selector&.match?(item) ? item.line_price : Money.zero)
       end
     end
-    compare_amounts(total, @comparison_type, @amount)
+    case @behaviour
+      when :cart, :item
+        compare_amounts(total, @comparison_type, @amount)
+      when :diff_cart
+        compare_amounts(cart.subtotal_price_was - @amount, @comparison_type, total)
+      when :diff_item
+        original_line_total = cart.line_items.reduce(Money.zero) do |total, item|
+          total + (selector&.match?(item) ? item.original_line_price : Money.zero)
+        end
+        compare_amounts(original_line_total - @amount, @comparison_type, total)
+    end
   end
 end`,
 
@@ -1042,18 +1052,26 @@ const cartQualifiers = [{
   {
     value: "CartAmountQualifier",
     label: "Cart/Item subtotal",
-    description: "Will only apply if cart subtotal or qualified item subtotal meets conditions",
+    description: "Will only apply if the cart or item subtotals meet the conditions",
     inputs: {
-      cart_or_item_total: {
+      behaviour: {
         type: "select",
-        description: "Cart subtotal or item subtotal",
+        description: "Comparison behaviour",
         options: [{
             value: "cart",
-            label: "Cart subtotal"
+            label: "Cart current subtotal"
           },
           {
             value: "item",
-            label: "Qualified item subtotal"
+            label: "Qualified item current subtotal"
+          },
+          {
+            value: "diff_cart",
+            label: "Difference from original cart subtotal (before script discounts)"
+          },
+          {
+            value: "diff_item",
+            label: "Difference from original qualified item subtotal (before script discounts)"
           },
         ]
       },
@@ -1081,7 +1099,7 @@ const cartQualifiers = [{
       amount: {
         type: "number",
         description: "Amount in dollars"
-      }
+      },
     }
   },
   {

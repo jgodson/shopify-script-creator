@@ -9,8 +9,8 @@ FactoryBot.define do
     shipping_address { nil }
     discount_code { nil }
 
-    trait :with_line_item do
-      line_items { create(:line_item) }
+    transient do
+      original_price { nil }
     end
 
     trait :with_shipping_address do
@@ -21,6 +21,9 @@ FactoryBot.define do
       discount_code { create(:discount_code) }
     end
 
+
     initialize_with { new(line_items, customer, shipping_address, discount_code) }
+
+    after(:create) { |cart, evaluator| cart.original_price = evaluator.original_price if evaluator.original_price }
   end
 end

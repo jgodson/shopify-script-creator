@@ -8,7 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
 
-      <li>The <b>Fixed Total Discount</b> discount now allows you to split the discount between all discountable items. This is the behaviour by default when using the <b>Fixed total discount</b> option for <b>Tiered Discount</b>, <b>Discount Code List</b> and the <b>Fixed pattern</b> for <b>Discount Code Pattern</b> campaigns. Let me know via the feedback link if you encounter any issues.</li>
+      <li>18.0 - The <b>Cart/Item subtotal</b> qualifier now has options to check the difference between the original cart or item subtotal and the current subtotal. This allows you to conditionally apply a discount based on if the discounts applied by scripts are greater than/less than, etc, a specific amount. Also fixed a bug in this qualifier where the <b>Qualified item subtotal</b> was added together using the original line price instead of the current line price</li>
 
       </ul>
 

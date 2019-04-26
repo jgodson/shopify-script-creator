@@ -1,5 +1,6 @@
 class Cart
   attr_accessor :customer, :shipping_address, :discount_code, :line_items, :presentment_currency
+  attr_writer :original_price
 
   def initialize(line_items, customer, shipping_address, discount_code)
     @line_items = line_items

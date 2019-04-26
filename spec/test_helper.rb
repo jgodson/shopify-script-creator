@@ -14,4 +14,14 @@ module TestHelper
       @name == gateway.name
     end
   end
+
+  class VariantIdMatcher
+    def initialize(id)
+      @id = id
+    end
+
+    def match?(line_item)
+      @id == line_item.variant.id
+    end
+  end
 end

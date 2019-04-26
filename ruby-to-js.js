@@ -20,9 +20,13 @@ const Colors = {
   Green: '\x1b[32m%s\x1b[0m',
 };
 
+const commandArgs = process.argv.slice(2);
 const rubyDir = join(__dirname, 'ruby_scripts');
 const jsDir = join(__dirname, 'src/scripts');
 const searchRegex = /const classes = {[^;]+;/;
+const args = {
+  verbose: commandArgs.some((arg) => arg === '-v' || arg === '--verbose')
+};
 
 // Do the thing
 rubyToJS();
@@ -35,7 +39,9 @@ function rubyToJS() {
   rootDirContents.forEach((fileOrDirectory) => {
     const path = `${rubyDir}/${fileOrDirectory}`;
     if (checkIfDirectory(path)) {
-      console.log(Colors.Blue, `Compiling files from ${fileOrDirectory}`);
+      if (args.verbose) {
+        console.log(Colors.Blue, `Compiling files from ${fileOrDirectory}`);
+      }
 
       const injectableCode = compileScripts(path);
 
@@ -71,21 +77,27 @@ function overwriteClassesInFile({
 
   writeFileSync(jsFilePath, newContents);
 
-  console.log(Colors.Green, `  Successfully wrote to ${dirName}.js`);
+  if (args.verbose) {
+    console.log(Colors.Green, `  Successfully wrote to ${dirName}.js`);
+  }
 }
 
 function compileScripts(path) {
   const directoryContents = readdirSync(path);
 
   if (directoryContents.length === 0) {
-    console.log(Colors.Yellow, '  Skipped empty directory');
+    if (args.verbose) {
+      console.log(Colors.Yellow, '  Skipped empty directory');
+    }
     return null;
   }
 
   const jsCode = [];
 
   directoryContents.forEach((fileName) => {
-    console.log(Colors.Cyan, `  Adding ${fileName}`);
+    if (args.verbose) {
+      console.log(Colors.Cyan, `  Adding ${fileName}`);
+    }
 
     const rubyCode = readFileSync(`${path}/${fileName}`, 'utf8').trim();
 

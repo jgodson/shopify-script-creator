@@ -4,15 +4,15 @@ FactoryBot.define do
   skip_create
 
   factory :line_item do
-    variant { create(:variant) }
+    variant { nil }
     quantity { 1 }
     grams { 0 }
     properties { {} }
 
-    trait :with_line_item do
-      line_items { create(:line_item) }
-    end
+    initialize_with { new(variant, quantity) }
 
-    initialize_with { new(varaint, quantity) }
+    after(:create) do |line_item, evaluator|
+      line_item.original_line_price = evaluator.original_line_price if evaluator.original_line_price
+    end
   end
 end

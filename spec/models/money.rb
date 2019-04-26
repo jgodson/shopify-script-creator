@@ -8,10 +8,42 @@ class Money
   end
 
   def initialize(cents:)
-    @cents = cents.to_f
+    @cents = cents.to_i
   end
 
   def to_s
-    sprintf "$%.2f" % (cents / 100).round(2)
+    sprintf "#<Money:$%.2f>" % (cents / 100).round(2)
+  end
+
+  def *(number)
+    Money.new(cents: @cents * number)
+  end
+
+  def +(money)
+    Money.new(cents: @cents + money.cents)
+  end
+
+  def -(money)
+    Money.new(cents: @cents - money.cents)
+  end
+
+  def <(money)
+    @cents < money.cents
+  end
+
+  def <=(money)
+    @cents <= money.cents
+  end
+
+  def >(money)
+    @cents > money.cents
+  end
+
+  def >=(money)
+    @cents >= money.cents
+  end
+
+  def ==(money)
+    @cents == money.cents
   end
 end
