@@ -58,6 +58,12 @@ jobs:
               --format progress \
               $TEST_FILES
 
+      # check ruby/js files match
+      - run:
+          name: check ruby->js files
+          command: |
+            yarn build:scripts --check
+
       # collect reports
       - store_test_results:
           path: /tmp/test-results

@@ -25,14 +25,20 @@ const rubyDir = join(__dirname, 'ruby_scripts');
 const jsDir = join(__dirname, 'src/scripts');
 const searchRegex = /const classes = {[^;]+;/;
 const args = {
-  verbose: commandArgs.some((arg) => arg === '-v' || arg === '--verbose')
+  verbose: commandArgs.some((arg) => arg === '-v' || arg === '--verbose'),
+  check: commandArgs.some((arg) => arg === '-c' || arg === '--check'),
 };
 
 // Do the thing
 rubyToJS();
 
 function rubyToJS() {
-  console.log('Compiling .rb files and adding to .js files...');
+  const results = [];
+  if (args.check === false) {
+    console.log('Compiling .rb files and adding to .js files...');
+  } else {
+    console.log('Checking to ensure all .rb files were added to .js files...');
+  }
 
   const rootDirContents = readdirSync(rubyDir);
 
@@ -46,13 +52,33 @@ function rubyToJS() {
       const injectableCode = compileScripts(path);
 
       if (injectableCode) {
-        overwriteClassesInFile({
+        const result = overwriteClassesInFile({
           dirName: fileOrDirectory,
           code: injectableCode
         });
+
+        results.push(result);
       }
     }
   });
+
+  const changeCount = results.filter((result) => result === true).length;
+
+  if (args.check === true) {
+    if (changeCount > 0) {
+      console.log(Colors.Red, 'Changes were detected in .rb files that are not present in .js files');
+      process.exit(1);
+    } else {
+      console.log(Colors.Green, 'No changes detected');
+      process.exit(0);
+    }
+  } else {
+    if (changeCount > 0) {
+      console.log(Colors.Green, `Changes were applied to ${changeCount} file(s)`);
+    } else {
+      console.log(Colors.Green, 'No changes were made');
+    }
+  }
 }
 
 function checkIfDirectory(path) {
@@ -75,10 +101,22 @@ function overwriteClassesInFile({
   const fileContents = readFileSync(jsFilePath, 'utf8');
   const newContents = fileContents.replace(searchRegex, addVariableDefinition(code));
 
-  writeFileSync(jsFilePath, newContents);
+  if (fileContents !== newContents) {
+    if (args.check === false) {
+      writeFileSync(jsFilePath, newContents);
 
-  if (args.verbose) {
-    console.log(Colors.Green, `  Successfully wrote to ${dirName}.js`);
+      if (args.verbose) {
+        console.log(Colors.Green, `  Successfully wrote to ${dirName}.js`);
+      }
+    }
+
+    return true;
+  } else {
+    if (args.verbose) {
+      console.log(Colors.Green, `  No changes needed to ${dirName}.js`);
+    }
+
+    return false;
   }
 }
 
