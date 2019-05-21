@@ -62,7 +62,7 @@ jobs:
       - run:
           name: check ruby->js files
           command: |
-            yarn build:scripts --check
+            yarn check:scripts
 
       # collect reports
       - store_test_results:
