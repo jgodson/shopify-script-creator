@@ -11,7 +11,7 @@
     "build:scripts": "node ruby-to-js",
     "check:scripts": "node ruby-to-js --check",
     "predeploy": "yarn run build",
-    "deploy": "git add ./docs && git commit -m 'Update build' && git push && git subtree split --prefix docs -b gh-pages && git push deploy gh-pages:master && git branch -D gh-pages",
+    "deploy": "git add ./docs && git commit -m 'Update build' && git push",
     "test:ruby": "bundle exec rspec"
   },
   "dependencies": {
