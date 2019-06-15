@@ -228,7 +228,7 @@ class CustomerEmailQualifier < Qualifier
   end
 
   def match?(cart, selector = nil)
-    return false if cart.customer.nil?
+    return false if cart.customer&.email.nil?
     customer_email = cart.customer.email
     case @match_condition
       when :match
