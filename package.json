@@ -1,7 +1,7 @@
 {
   "name": "shopify-script-creator",
   "private": true,
-  "version": "0.18.0",
+  "version": "0.19.0",
   "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {
@@ -10,8 +10,8 @@
     "build": "webpack",
     "build:scripts": "node ruby-to-js",
     "check:scripts": "node ruby-to-js --check",
-    "predeploy": "yarn run build",
-    "deploy": "git add ./docs && git commit -m 'Update build' && git push",
+    "predeploy": "node ruby-to-js --check && yarn run build",
+    "deploy": "git add ./docs && git commit -m 'Release new version' && git push",
     "test:ruby": "bundle exec rspec"
   },
   "dependencies": {

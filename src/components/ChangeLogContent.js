@@ -8,8 +8,8 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
 
-      <li>18.0 - The <b>Cart/Item subtotal</b> qualifier now has options to check the difference between the original cart or item subtotal and the current subtotal. This allows you to conditionally apply a discount based on if the discounts applied by scripts are greater than/less than, etc, a specific amount. Also fixed a bug in this qualifier where the <b>Qualified item subtotal</b> was added together using the original line price instead of the current line price</li>
-
+      <li>19.0 - Fixed a bug in the <b>Customer Email Qualifier</b> that caused issues when the customer did not have an email associated with their account</li>
+      <li>19.0 - Added an <b>Item Price Qualifier</b> to the list of <b>Line Item Qualifiers</b>. This allows you to check that the prices of invididual items in the cart are more than or less than a specific amount</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
