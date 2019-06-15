@@ -3,3 +3,4 @@
 --require ./spec/models/money
 --require ./ruby_scripts/common/campaign
 --require ./ruby_scripts/common/qualifier
+--require ./ruby_scripts/common/selector

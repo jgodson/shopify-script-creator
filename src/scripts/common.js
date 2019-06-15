@@ -335,6 +335,23 @@ class GiftCardSelector < Selector
   end
 end`,
 
+  LineItemPriceSelector: `
+class LineItemPriceSelector < Selector
+  def initialize(comparison_type, amount)
+    @comparison_type = comparison_type
+    @amount = Money.new(cents: amount * 100)
+  end
+
+  def match?(line_item)
+    case @comparison_type
+      when :greater_than_equal
+        line_item.variant.price >= @amount
+      when :less_than_equal
+        line_item.variant.price <= @amount
+    end
+  end
+end`,
+
   LineItemPropertiesSelector: `
 class LineItemPropertiesSelector < Selector
   def initialize(target_properties)
@@ -979,6 +996,30 @@ const lineItemSelectors = [{
         description: "Properties must match all entered key/value pairs",
         inputFormat: "{key:text:The property's key} : {value:text:The value of the property}",
         outputFormat: '"{text}" => "{text}"'
+      }
+    }
+  },
+  {
+    value: "LineItemPriceSelector",
+    label: "Item Price",
+    description: "Selects line items if the variant price meets the condition",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how the amount is matched",
+        options: [{
+            value: "greater_than_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_equal",
+            label: "Less than or equal to"
+          }
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Amount in dollars"
       }
     }
   },
