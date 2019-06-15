@@ -6,7 +6,7 @@
   "main": "index.js",
   "scripts": {
     "start": "webpack-dev-server",
-    "prebuild": "rimraf ./docs && yarn run build:scripts",
+    "prebuild": "rimraf ./docs",
     "build": "webpack",
     "build:scripts": "node ruby-to-js",
     "check:scripts": "node ruby-to-js --check",
