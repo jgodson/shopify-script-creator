@@ -99,7 +99,7 @@ function overwriteClassesInFile({
 }) {
   const jsFilePath = `${jsDir}/${dirName}.js`;
   const fileContents = readFileSync(jsFilePath, 'utf8');
-  const newContents = fileContents.replace(searchRegex, addVariableDefinition(code));
+  const newContents = normalizeNewLines(fileContents.replace(searchRegex, addVariableDefinition(code)));
 
   if (fileContents !== newContents) {
     if (args.check === false) {
@@ -161,4 +161,8 @@ function snakeCaseToPascalCase(word) {
 
 function addVariableDefinition(code) {
   return `const classes = {\n${code}\n};`;
+}
+
+function normalizeNewLines(code) {
+  return code.replace(/\r/g, '');
 }
