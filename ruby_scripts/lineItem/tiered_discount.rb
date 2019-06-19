@@ -3,7 +3,7 @@ class TieredDiscount < Campaign
     super(condition, customer_qualifier, cart_qualifier)
     @line_item_selector = line_item_selector
     @discount_type = discount_type
-    @tier_type = tier_type == :default ? :customer_tag : tier_type
+    @tier_type = tier_type
     @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }
   end
 

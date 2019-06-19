@@ -1,6 +1,6 @@
 class GatewayNameSelector < Selector
   def initialize(match_type, match_condition, names)
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @invert = match_type == :does_not
     @names = names.map(&:downcase)
   end

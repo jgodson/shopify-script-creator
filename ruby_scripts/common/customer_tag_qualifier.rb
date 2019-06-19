@@ -1,6 +1,6 @@
 class CustomerTagQualifier < Qualifier
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end

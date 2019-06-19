@@ -1,7 +1,7 @@
 class ReorderPaymentGateways < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, li_match_type, line_item_qualifier, order_from, desired_order)
     super(condition, customer_qualifier, cart_qualifier, line_item_qualifier)
-    @li_match_type = li_match_type == :default ? :any? : (li_match_type.to_s + '?').to_sym
+    @li_match_type = (li_match_type.to_s + '?').to_sym
     @reverse = order_from == :last_to_first
     @desired_order = desired_order.map(&:downcase)
   end

@@ -1,7 +1,7 @@
 class VariantSkuSelector < Selector
   def initialize(match_type, match_condition, skus)
     @invert = match_type == :does_not
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @skus = skus.map(&:downcase)
   end
 

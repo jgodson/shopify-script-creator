@@ -1,6 +1,6 @@
 class CustomerTotalSpentQualifier < Qualifier
   def initialize(comparison_type, amount)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @comparison_type = comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 

@@ -1,6 +1,6 @@
 class RateCodeSelector < Selector
   def initialize(match_type, match_condition, codes)
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @invert = match_type == :does_not
     @codes = codes.map(&:downcase)
   end

@@ -1,8 +1,8 @@
 class TotalWeightQualifier < Qualifier
   def initialize(comparison_type, amount, units)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @comparison_type = comparison_type
     @amount = amount
-    @units = units == :default ? :g : units
+    @units = units
   end
 
   def g_to_lb(grams)

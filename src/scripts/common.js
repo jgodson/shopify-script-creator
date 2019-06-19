@@ -19,7 +19,7 @@ end`,
   Campaign: `
 class Campaign
   def initialize(condition, *qualifiers)
-    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym
+    @condition = (condition.to_s + '?').to_sym
     @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact
     @line_item_selector = qualifiers.last unless @line_item_selector
     qualifiers.compact.each do |qualifier|
@@ -79,8 +79,8 @@ end`,
   CartAmountQualifier: `
 class CartAmountQualifier < Qualifier
   def initialize(behaviour, comparison_type, amount)
-    @behaviour = behaviour == :default ? :cart : behaviour
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @behaviour = behaviour
+    @comparison_type = comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 
@@ -160,7 +160,7 @@ end`,
   CodeQualifier: `
 class CodeQualifier < Qualifier
   def initialize(match_type, match_condition, codes)
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @invert = match_type == :does_not
     @codes = codes.map(&:downcase)
   end
@@ -223,7 +223,7 @@ end`,
 class CustomerEmailQualifier < Qualifier
   def initialize(match_type, match_condition, emails)
     @invert = match_type == :does_not
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @emails = emails.map(&:downcase)
   end
 
@@ -242,7 +242,7 @@ end`,
   CustomerOrderCountQualifier: `
 class CustomerOrderCountQualifier < Qualifier
   def initialize(comparison_type, amount)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @comparison_type = comparison_type
     @amount = amount
   end
 
@@ -256,7 +256,7 @@ end`,
   CustomerTagQualifier: `
 class CustomerTagQualifier < Qualifier
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end
@@ -277,7 +277,7 @@ end`,
   CustomerTotalSpentQualifier: `
 class CustomerTotalSpentQualifier < Qualifier
   def initialize(comparison_type, amount)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @comparison_type = comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 
@@ -399,7 +399,7 @@ end`,
   ProductTagSelector: `
 class ProductTagSelector < Selector
   def initialize(match_type, match_condition, tags)
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @invert = match_type == :does_not
     @tags = tags.map(&:downcase)
   end
@@ -550,9 +550,9 @@ end`,
   TotalWeightQualifier: `
 class TotalWeightQualifier < Qualifier
   def initialize(comparison_type, amount, units)
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @comparison_type = comparison_type
     @amount = amount
-    @units = units == :default ? :g : units
+    @units = units
   end
 
   def g_to_lb(grams)
@@ -598,7 +598,7 @@ end`,
 class VariantSkuSelector < Selector
   def initialize(match_type, match_condition, skus)
     @invert = match_type == :does_not
-    @match_condition = match_condition == :default ? :match : match_condition
+    @match_condition = match_condition
     @skus = skus.map(&:downcase)
   end
 

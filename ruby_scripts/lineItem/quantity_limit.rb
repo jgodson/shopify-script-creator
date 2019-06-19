@@ -1,7 +1,7 @@
 class QuantityLimit < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)
     super(condition, customer_qualifier, cart_qualifier)
-    @limit_by = limit_by == :default ? :product : limit_by
+    @limit_by = limit_by
     @line_item_selector = line_item_selector
     @per_item_limit = limit
   end

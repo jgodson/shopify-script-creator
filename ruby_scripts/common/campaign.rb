@@ -1,6 +1,6 @@
 class Campaign
   def initialize(condition, *qualifiers)
-    @condition = condition == :default ? :all? : (condition.to_s + '?').to_sym
+    @condition = (condition.to_s + '?').to_sym
     @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact
     @line_item_selector = qualifiers.last unless @line_item_selector
     qualifiers.compact.each do |qualifier|

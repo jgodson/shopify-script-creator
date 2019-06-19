@@ -1,7 +1,7 @@
 class CartAmountQualifier < Qualifier
   def initialize(behaviour, comparison_type, amount)
-    @behaviour = behaviour == :default ? :cart : behaviour
-    @comparison_type = comparison_type == :default ? :greater_than : comparison_type
+    @behaviour = behaviour
+    @comparison_type = comparison_type
     @amount = Money.new(cents: amount * 100)
   end
 
