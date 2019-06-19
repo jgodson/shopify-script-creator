@@ -262,14 +262,6 @@ export default class App extends Component {
     newState.showForm = false;
     newState.output = this.generateCampaignsOutput();
     this.setState(newState);
-
-    // Usage Tracking
-    const data = JSON.stringify(this.prepareAndExportTo('raw'));
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", 'https://script.google.com/macros/s/AKfycbz9jBq3xUeeCtSbpVdP9yTuq0GTU4egckvoNaYqYWy4dcR_uiI/exec', true);
-    //Send the proper header information along with the request
-    xhr.setRequestHeader("Content-type", "text/plain");
-    xhr.send(data);
   }
 
   generateCampaignsOutput() {
