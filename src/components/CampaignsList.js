@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Card, Stack, Button, TextStyle, Subheading, TextContainer } from '@shopify/polaris';
+import { Card, Stack, Button, TextStyle, Subheading, TextContainer, Badge } from '@shopify/polaris';
 import { splitCamelCase } from '../helpers';
 
 import styles from './CampaignsList.css';
@@ -10,6 +10,7 @@ export default class CampaignsList extends Component {
 
     this.renderCardSection = this.renderCardSection.bind(this);
     this.createNew = this.createNew.bind(this);
+    this.toggleActive = this.toggleActive.bind(this);
   }
 
   createNew() {
@@ -18,6 +19,10 @@ export default class CampaignsList extends Component {
       return;
     }
     this.props.showForm(true)
+  }
+
+  toggleActive(id) {
+    return () => this.props.toggleActive(id);
   }
 
   renderCardSection(campaign) {
@@ -35,6 +40,13 @@ export default class CampaignsList extends Component {
       button = <Button size="slim" primary onClick={this.createNew}>Create new</Button>;
     }
     const campaignTitle = campaign.label || splitCamelCase(campaign.name)
+    const badgeMarkup = campaign.id && (
+      <button className="active-toggle" onClick={this.toggleActive(campaign.id)}>
+        {campaign.active === false ?
+          <Badge>Inactive</Badge> : <Badge status="success">Active</Badge>
+        }
+      </button>
+    );
     return (
       <Card.Section key={`campaign-${campaign.id || ''}`}>
         <TextContainer spacing="tight">
@@ -42,7 +54,8 @@ export default class CampaignsList extends Component {
             <Subheading>{campaignTitle}</Subheading>
             {campaign.id && <Button plain onClick={() => this.props.duplicateCampaign(campaign.id)}>Duplicate</Button>}
           </Stack>
-          {messages && 
+          {badgeMarkup}
+          {messages &&
             messages.map((message, index) => {
               if (message[1] === "") { return false; }
               return (

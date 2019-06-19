@@ -42,7 +42,8 @@ export default class CampaignForm extends Component {
     }
 
     this.state = {
-      inputs: JSON.parse(JSON.stringify(this.blankInputState))
+      inputs: JSON.parse(JSON.stringify(this.blankInputState)),
+      isActive: true,
     }
 
     this.mainCampaignName = 'mainCampaign';
@@ -60,6 +61,7 @@ export default class CampaignForm extends Component {
     this.renderForm = this.renderForm.bind(this);
     this.generateModalInputs = this.generateModalInputs.bind(this);
     this.handleModalReturn = this.handleModalReturn.bind(this);
+    this.toggleActive = this.toggleActive.bind(this);
   }
 
   componentDidMount() {
@@ -69,10 +71,14 @@ export default class CampaignForm extends Component {
   }
 
   componentWillReceiveProps(newProps) {
-    if (this.props.existingInfo && this.props.existingInfo.id !== newProps.existingInfo.id) {
-      // Reset update count so we can populate the new information
-      this.updateCount = 0;
-      this.populateBasedOnExistingInfo(newProps.existingInfo);
+    if (this.props.existingInfo) {
+      if (this.props.existingInfo.id !== newProps.existingInfo.id) {
+        // Reset update count so we can populate the new information
+        this.updateCount = 0;
+        this.populateBasedOnExistingInfo(newProps.existingInfo);
+      } else if (newProps.existingInfo.active !== this.state.isActive) {
+        this.setState({isActive: newProps.existingInfo.active});
+      }
     }
   }
 
@@ -102,9 +108,14 @@ export default class CampaignForm extends Component {
     this.setState(newState);
   }
 
+  toggleActive() {
+    this.setState({isActive: !this.state.isActive});
+  }
+
   populateBasedOnExistingInfo(existingInfo) {
     if (!existingInfo) { return; }
     const newState = this.state;
+    newState.isActive = existingInfo.active === false ? false : true;
     const mainInputs = existingInfo.inputs;
     const updateCount = this.updateCount;
     const inputMap = this.inputMap;
@@ -656,6 +667,7 @@ export default class CampaignForm extends Component {
     evt.preventDefault();
     const newCampaign = {
       name: this.props.currentCampaign.value,
+      active: this.state.isActive,
       label: this.state.inputs.campaignLabel,
       id: this.props.existingInfo ? this.props.existingInfo.id : null,
       dependants: this.props.currentCampaign.dependants,
@@ -769,6 +781,8 @@ export default class CampaignForm extends Component {
   }
 
   render() {
+    const {isActive} = this.state;
+
     // Reset input map and defaults for selects
     this.inputMap = {};
     this.defaults = {};
@@ -797,11 +811,14 @@ export default class CampaignForm extends Component {
       }
     };
 
+    const action = {content: isActive ? 'Deactivate' : 'Activate', onAction: this.toggleActive};
+
     return (
       <Card
         title="Campaign details"
         primaryFooterAction={footerActions.primary}
         secondaryFooterAction={footerActions.secondary}
+        actions={[action]}
       >
         {this.state.modalOpen && <Modal />}
         <Card.Section title="Select a campaign">

@@ -1,3 +1,9 @@
 .campaign-info {
   padding: 0 0 0rem 1rem;
 }
+
+.active-toggle {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}

@@ -70,6 +70,7 @@ export default class App extends Component {
     this.saveDataToStorage = this.saveDataToStorage.bind(this);
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
+    this.toggleCampaignActive = this.toggleCampaignActive.bind(this);
   }
 
   componentWillMount() {
@@ -194,6 +195,20 @@ export default class App extends Component {
     this.addCampaign(campaign);
   }
 
+  toggleCampaignActive(campaignId) {
+    const newState = this.state;
+    const index = findIndexOf(newState.campaigns, (campaign) => campaign.id === campaignId);
+    newState.campaigns[index].active = !this.state.campaigns[index].active;
+
+    // If currently editing that campaign, lets change the state in the form as well
+    if (this.state.editCampaignInfo && newState.editCampaignInfo.id === campaignId) {
+      newState.editCampaignInfo.active = newState.campaigns[index].active;
+    }
+
+    newState.output = '';
+    this.setState(newState);
+  }
+
   removeCampaign(campaignId) {
     // Google Analytics
     gtag('event', 'removeButtonClick');
@@ -289,12 +304,14 @@ export default class App extends Component {
     }
 
     // Generate the campaign initialization code (also finds out what classes are used)
-    let campaigns = this.state.campaigns.map((campaign) => {
-      this.IL++;
-      const code = this.generateCode(campaign, classesUsed, allClasses);
-      this.IL--;
-      return code;
-    }).join(',\n');
+    let campaigns = this.state.campaigns
+      .filter((campaign) => campaign.active === true || campaign.active === undefined)
+      .map((campaign) => {
+        this.IL++;
+        const code = this.generateCode(campaign, classesUsed, allClasses);
+        this.IL--;
+        return code;
+      }).join(',\n');
     // remove the last `,` from the campaigns string (raises syntax error)
     campaigns = campaigns.substring(campaigns.length -1, 0);
 
@@ -605,6 +622,7 @@ ${INDENT[this.IL]})`;
                 availableCampaigns={this.state.availableCampaigns}
                 updateCurrentCampaign={this.updateCurrentCampaign}
                 addCampaign={this.addCampaign}
+                toggleActive={this.toggleCampaignActive}
                 showForm={this.showForm}
                 existingInfo={this.state.editCampaignInfo}
                 openModal={this.openModal}
@@ -617,6 +635,7 @@ ${INDENT[this.IL]})`;
             <CampaignsList
               campaigns={this.state.campaigns}
               editCampaign={this.editCampaign}
+              toggleActive={this.toggleCampaignActive}
               removeCampaign={this.removeCampaign}
               duplicateCampaign={this.duplicateCampaign}
               showForm={this.showForm}
