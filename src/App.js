@@ -622,7 +622,6 @@ ${INDENT[this.IL]})`;
                 availableCampaigns={this.state.availableCampaigns}
                 updateCurrentCampaign={this.updateCurrentCampaign}
                 addCampaign={this.addCampaign}
-                toggleActive={this.toggleCampaignActive}
                 showForm={this.showForm}
                 existingInfo={this.state.editCampaignInfo}
                 openModal={this.openModal}
