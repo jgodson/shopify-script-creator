@@ -7,9 +7,8 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-
-      <li>19.0 - Fixed a bug in the <b>Customer Email Qualifier</b> that caused issues when the customer did not have an email associated with their account</li>
-      <li>19.0 - Added an <b>Item Price Qualifier</b> to the list of <b>Line Item Qualifiers</b>. This allows you to check that the prices of invididual items in the cart are more than or less than a specific amount</li>
+        <li>20.0 - Removed some fallbacks that were in place for default arguments that are no longer used. If you have issues with an existing saved script, try re-selecting your current options in all selects and then generate the script again.</li>
+        <li>20.0 - Added the ability to Activate and Deactivate campagins. Deactivated campaigns will not be included in generated code.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
