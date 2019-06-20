@@ -726,10 +726,7 @@ export default class CampaignForm extends Component {
           const output = formatObject('output', value, inputFormat, outputFormat);
           return `{${output}}`;
         } catch (error) {
-          // Alert user if there was a parsing error (as best we can) and prevent going any further
-          alert (`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
-          console.warn(error);
-          throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+          throw error;
         }
       case 'objectArray':
         if (!value) { return "[]"; }
@@ -738,10 +735,7 @@ export default class CampaignForm extends Component {
           const output = formatObject('output', value, inputFormat, outputFormat);
           return `[${output}]`;
         } catch (error) {
-          // Alert user if there was a parsing error (as best we can) and prevent going any further
-          alert (`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
-          console.warn(error);
-          throw Error(`Error parsing object input for ${splitCamelCase(campaignName)}. Make sure your input matches the required format`);
+          throw error;
         }
       case 'campaignSelect':
         return value || 'none';
