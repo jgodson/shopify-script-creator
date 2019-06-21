@@ -8,6 +8,8 @@ import CampaignsList from './components/CampaignsList';
 import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
 import ChangeLogContent from './components/ChangeLogContent';
+import { minifyRuby } from './minifyRuby';
+import { MAX_SCRIPT_LENGTH } from './constants';
 
 import LineItemScript from './scripts/lineItem';
 import ShippingScript from './scripts/shipping';
@@ -29,6 +31,8 @@ export default class App extends Component {
       campaigns: [{name: "Create new campaign", skip: true}],
       currentId: 0,
       output: '',
+      currentCount: 0,
+      maxCount: MAX_SCRIPT_LENGTH,
       editCampaignInfo: null,
       modal: {
         isOpen: false,
@@ -71,6 +75,7 @@ export default class App extends Component {
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.toggleCampaignActive = this.toggleCampaignActive.bind(this);
+    this.setMinification = this.setMinification.bind(this);
   }
 
   componentWillMount() {
@@ -207,6 +212,9 @@ export default class App extends Component {
 
     newState.output = '';
     this.setState(newState);
+
+    // Persist data in local storage
+    this.prepareAndExportTo('localStorage');
   }
 
   removeCampaign(campaignId) {
@@ -227,6 +235,7 @@ export default class App extends Component {
     const newState = this.state;
     const index = findIndexOf(this.state.campaigns, (campaign) => campaign.id === campaignId);
     newState.campaigns.splice(index, 1);
+    newState.output = '';
     this.setState(newState);
     // Persist data in local storage
     this.prepareAndExportTo('localStorage');
@@ -260,12 +269,14 @@ export default class App extends Component {
     newState.currentCampaign = null;
     newState.editCampaignInfo = null;
     newState.showForm = false;
+    newState.output = '';
     this.setState(newState);
+
     // Persist data in local storage
     this.prepareAndExportTo('localStorage');
   }
 
-  generateScript() {
+  generateScript(minificationLevel = 0) {
     // Google Analytics
     gtag('event', 'generateButtonClick');
 
@@ -274,8 +285,18 @@ export default class App extends Component {
       return;
     }
     const newState = this.state;
+
+    let output = this.generateCampaignsOutput();
+    if (minificationLevel > 0) {
+      const {result} = minifyRuby(output, {level: minificationLevel});
+      output = result;
+    } else {
+      newState.savedCount = 0;
+    }
+
     newState.showForm = false;
-    newState.output = this.generateCampaignsOutput();
+    newState.output = output;
+    newState.currentCount = output.length;
     this.setState(newState);
   }
 
@@ -545,6 +566,10 @@ ${INDENT[this.IL]})`;
     }
   }
 
+  setMinification(level) {
+    this.generateScript(level);
+  }
+
   render() {
     const generate = {
       content: 'Generate script',
@@ -627,7 +652,14 @@ ${INDENT[this.IL]})`;
                 openModal={this.openModal}
               />
             }
-            {this.state.output && <ScriptOutput output={this.state.output} />}
+            {this.state.output && (
+              <ScriptOutput
+                output={this.state.output}
+                setMinification={this.setMinification}
+                currentCount={this.state.currentCount}
+                maxCount={this.state.maxCount}
+              />
+            )}
             {(!this.state.showForm && !this.state.output) && instructions()}
           </Layout.Section>
           <Layout.Section secondary>

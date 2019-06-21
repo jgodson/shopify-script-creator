@@ -1,0 +1,5 @@
+const MAX_SCRIPT_LENGTH = 16384;
+
+export {
+  MAX_SCRIPT_LENGTH,
+};

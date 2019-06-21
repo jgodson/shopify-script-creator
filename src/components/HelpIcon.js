@@ -7,11 +7,5 @@ export default function HelpIcon({url, external}) {
     rel: external ? 'noopener noreferrer' : undefined,
   };
 
-  const styles = {
-    display: 'inline-block',
-    verticalAlign: 'bottom',
-    padding: '0 0.3em',
-  };
-
-  return <a style={styles} href={url} {...props}><Icon color="blue" source="help" /></a>
+  return <a href={url} {...props}><Icon color="blue" source="help" /></a>
 }

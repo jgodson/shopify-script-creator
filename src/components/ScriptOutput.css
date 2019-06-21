@@ -6,3 +6,12 @@
   white-space: pre;
   word-wrap: normal;
 }
+
+.count {
+  color: #919eab;
+  font-style: italic;
+}
+
+.overlimit {
+  color: red;
+}
