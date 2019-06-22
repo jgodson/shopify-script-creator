@@ -11,6 +11,7 @@ import {
   Button,
   Tag
 } from '@shopify/polaris';
+import {CirclePlusMajorMonotone} from '@shopify/polaris-icons';
 import CardList from './CardList';
 
 import styles from './CampaignForm.css';
@@ -387,7 +388,7 @@ export default class CampaignForm extends Component {
                   <Stack.Item>
                     <Button
                       plain
-                      icon="circlePlus"
+                      icon={CirclePlusMajorMonotone}
                       onClick={() => {
                         this.props.openModal({
                           title: input.label,
@@ -463,7 +464,7 @@ export default class CampaignForm extends Component {
                 <Stack.Item>
                   <Button
                     plain
-                    icon="circlePlus"
+                    icon={CirclePlusMajorMonotone}
                     onClick={() => {
                       this.props.openModal({
                         title: input.label,
@@ -543,11 +544,16 @@ export default class CampaignForm extends Component {
               additionalInputs = this.generateAdditionalInputs(campaign, input.name);
             }
           }
+
+          // Remove React warning about newLineEachInput not being a valid DOM property
+          const options = JSON.parse(JSON.stringify(input.options));
+          Object.keys(options).forEach((key) => delete options[key].newLineEachInput);
+
           return (
             <Card.Section key={input.name} title={input.label}>
               <div className="select-wrapper">
                 <Select
-                  options={input.options}
+                  options={options}
                   name={input.name}
                   value={value}
                   onChange={(val) => this.handleInputChange(val, input.type, input.name)}
@@ -785,20 +791,20 @@ export default class CampaignForm extends Component {
       <Select
         name={this.mainCampaignName}
         options={this.props.availableCampaigns}
-        value={this.props.currentCampaign && this.props.currentCampaign.value}
+        value={this.props.currentCampaign ? this.props.currentCampaign.value : ''}
         placeholder="Select campaign"
         onChange={(val) => this.handleCampaignSelect(val)}
       />
     );
 
     const footerActions = {
-      secondary: {
+      primary: {
         content: "Save",
         primary: true,
         disabled: !this.props.currentCampaign,
         onAction: this.buildAndAddCampaign
       },
-      primary: {
+      secondary: {
         content: "Cancel",
         destructive: true,
         onAction: this.hideForm

@@ -1,7 +1,7 @@
 {
   "name": "shopify-script-creator",
   "private": true,
-  "version": "0.21.0",
+  "version": "0.21.1",
   "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {
@@ -17,9 +17,9 @@
   "dependencies": {
     "@bugsnag/js": "^6.0.0",
     "@bugsnag/plugin-react": "^6.0.0",
-    "@shopify/polaris": "^1.9.1",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "@shopify/polaris": "^3.17.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6"
   },
   "devDependencies": {
     "babel-core": "6.26.0",

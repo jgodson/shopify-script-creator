@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card, TextField, Select, Stack } from '@shopify/polaris';
+import { ChecklistAlternateMajorMonotone } from '@shopify/polaris-icons';
 import HelpIcon from './HelpIcon';
 import styles from './ScriptOutput.css';
 
@@ -30,7 +31,7 @@ export default class ScriptOutput extends Component {
   render() {
     const copy = {
       content: "Copy",
-      icon: "duplicate",
+      icon: ChecklistAlternateMajorMonotone,
       onAction: this.copyOutputCode
     };
 

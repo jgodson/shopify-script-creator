@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Card, Stack, Button, TextStyle, Subheading, TextContainer, Badge } from '@shopify/polaris';
+import {EditMajorMonotone, DeleteMajorMonotone, DuplicateMinor, AddNoteMajorMonotone} from '@shopify/polaris-icons';
 import { splitCamelCase } from '../helpers';
 
 import styles from './CampaignsList.css';
@@ -35,9 +36,9 @@ export default class CampaignsList extends Component {
       return [messageType, campaign.inputs[stringIndex].replace(/"/g, '').trim()];
     });
     if (campaign.id) {
-      button = <Button size="slim" onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;
+      button = <Button size="slim" icon={EditMajorMonotone} onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;
     } else {
-      button = <Button size="slim" primary onClick={this.createNew}>Create new</Button>;
+      button = <Button size="slim" icon={AddNoteMajorMonotone} primary onClick={this.createNew}>Create new</Button>;
     }
     const campaignTitle = campaign.label || splitCamelCase(campaign.name)
     const badgeMarkup = campaign.id && (
@@ -49,12 +50,20 @@ export default class CampaignsList extends Component {
     );
     return (
       <Card.Section key={`campaign-${campaign.id || ''}`}>
+        <Subheading>{campaignTitle}</Subheading>
         <TextContainer spacing="tight">
           <Stack distribution="equalSpacing" alignment="center">
-            <Subheading>{campaignTitle}</Subheading>
-            {campaign.id && <Button plain onClick={() => this.props.duplicateCampaign(campaign.id)}>Duplicate</Button>}
+            {badgeMarkup}
+            {campaign.id && (
+              <Button
+                plain
+                icon={DuplicateMinor}
+                onClick={() => this.props.duplicateCampaign(campaign.id)}
+              >
+                Duplicate
+            </Button>
+            )}
           </Stack>
-          {badgeMarkup}
           {messages &&
             messages.map((message, index) => {
               if (message[1] === "") { return false; }
@@ -67,7 +76,7 @@ export default class CampaignsList extends Component {
             })
           }
           <Stack distribution="trailing">
-            {campaign.id && <Button size="slim" destructive onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
+            {campaign.id && <Button size="slim" destructive icon={DeleteMajorMonotone} onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
             {button}
           </Stack>
         </TextContainer>

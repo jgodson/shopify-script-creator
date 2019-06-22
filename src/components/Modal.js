@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from 'react';
-import { 
+import {
   Stack,
   Heading,
   Button,
@@ -8,6 +8,7 @@ import {
   Select,
   FormLayout
 } from '@shopify/polaris';
+import {MobileCancelMajorMonotone} from '@shopify/polaris-icons';
 
 import styles from './Modal.css';
 
@@ -47,7 +48,7 @@ export default class Modal extends Component {
       if (this.props.inputs[0].type === 'select') {
         document.querySelector('.Modal').querySelector('select').focus();
       }
-      
+
       this.setState(newState);
     } else {
       document.querySelector('.Modal').querySelector('button').focus();
@@ -58,21 +59,21 @@ export default class Modal extends Component {
     evt.preventDefault();
     const hasInputs = !!this.state.values.length;
     if (!hasInputs) { return this.props.onClose(true); }
-    
+
     // Validate that nothing required is blank
     const newState = this.state;
     let preventSubmission = false;
     for (let index = 0; index < this.state.values.length; index++) {
       const value = this.state.values[index];
       const isRequired = this.props.inputs[index].optional === false;
-      
+
       if (isRequired && typeof value !== 'number' && value.trim() === "") {
         newState.errors[index] = 'Must enter a value';
         preventSubmission = true;
       }
     }
 
-    if (preventSubmission) { 
+    if (preventSubmission) {
       this.setState(newState);
       return;
     }
@@ -131,7 +132,7 @@ export default class Modal extends Component {
     const hasActions = this.props.actions && this.props.actions.length > 0;
     const { isEditing } = this.state;
 
-    const title = hasInputs 
+    const title = hasInputs
       ? `${(isEditing ? 'Edit' : 'Add')} ${this.props.title.toLowerCase()}`
       : this.props.title;
 
@@ -145,7 +146,7 @@ export default class Modal extends Component {
                 <Heading>{title}</Heading>
                 <Button
                   plain
-                  icon="cancel"
+                  icon={MobileCancelMajorMonotone}
                   onClick={() => this.props.onClose(false)}
                 />
               </Stack>

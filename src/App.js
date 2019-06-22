@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Layout, Page, PageActions, EmptyState } from '@shopify/polaris';
+import {ExportMinor, ImportMinor, ChatMajorMonotone} from '@shopify/polaris-icons';
 import VersionBox from './components/VersionBox';
 import Modal from './components/Modal';
 import ScriptSelector from './components/ScriptSelector';
@@ -584,6 +585,7 @@ ${INDENT[this.IL]})`;
 
     const reportIssue = {
       content: 'Leave feedback',
+      icon: ChatMajorMonotone,
       external: true,
       plain: true,
       url: 'https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform'
@@ -593,12 +595,12 @@ ${INDENT[this.IL]})`;
       {
         content: 'Export campaigns',
         onAction: () => this.prepareAndExportTo('file'),
-        icon: 'export'
+        icon: ExportMinor,
       },
       {
         content: 'Import campaigns',
         onAction: this.uploadFile,
-        icon: 'import'
+        icon: ImportMinor,
       }
     ];
 
@@ -609,7 +611,7 @@ ${INDENT[this.IL]})`;
             heading="Add your campaigns to generate a script"
             action={{content: 'Add campaign', onAction: () => this.showForm(true)}}
           >
-            <p>Select a script type, add some campaigns and then click <strong>Generate script</strong> to generate script code to paste into your code editor. Try adding a campaign first.</p>
+            <p>Select a script type, add some campaigns and then click <strong>Generate script</strong> to generate script code to paste into the Script Editor app. Try adding a campaign first.</p>
           </EmptyState>
         );
       } else {
