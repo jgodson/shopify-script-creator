@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, TextStyle } from '@shopify/polaris';
+import {Button, TextStyle} from '@shopify/polaris';
+import {EmbedMinor, DeleteMinor} from '@shopify/polaris-icons';
 
 import styles from './CardList.css';
 
@@ -18,8 +19,10 @@ export default function CardList({ headers, items } = props) {
               <tr key={`Item_${itemIndex}`}>
                 {item.values.map((value, valueIndex) => <td key={`Item_${itemIndex}_${valueIndex}`}><TextStyle variation="subdued">{value}</TextStyle></td>)}
                 <td>
-                  <Button plain icon="embed" onClick={item.onEdit}></Button>
-                  <Button plain icon="delete" onClick={item.onRemove}></Button>
+                  <div className="CardList-buttons">
+                    <Button plain icon={EmbedMinor} onClick={item.onEdit}></Button>
+                    <Button plain icon={DeleteMinor} onClick={item.onRemove}></Button>
+                  </div>
                 </td>
               </tr>
             );

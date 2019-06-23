@@ -7,3 +7,8 @@
   background: transparent;
   cursor: pointer;
 }
+
+.draggable {
+  background: white;
+  border-radius: 10px;
+}

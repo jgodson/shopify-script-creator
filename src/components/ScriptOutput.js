@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
-import { Card, TextField, Select, Stack } from '@shopify/polaris';
-import { ChecklistAlternateMajorMonotone } from '@shopify/polaris-icons';
+import React, {Component} from 'react';
+import {Card, TextField, Select, Stack} from '@shopify/polaris';
+import {ChecklistAlternateMajorMonotone} from '@shopify/polaris-icons';
 import HelpIcon from './HelpIcon';
+
 import styles from './ScriptOutput.css';
 
 export default class ScriptOutput extends Component {
@@ -17,8 +18,14 @@ export default class ScriptOutput extends Component {
 
   copyOutputCode() {
     // Google Analytics
-    gtag('event', 'copyButtonClick', {'value': this.props.output.length});
-    this.textField.input.select();
+    gtag('event', 'copyButtonClick', {
+      value: this.props.output.length,
+      minificationLevel: this.state.minificationLevel
+    });
+
+    // Can't use ref with newer versions of Polaris, so this is a bit of a hack
+    const textField = document.getElementById('ScriptOutput');
+    textField.select();
     document.execCommand('selectAll');
     document.execCommand('copy');
   }
@@ -32,12 +39,12 @@ export default class ScriptOutput extends Component {
     const copy = {
       content: "Copy",
       icon: ChecklistAlternateMajorMonotone,
-      onAction: this.copyOutputCode
+      onAction: this.copyOutputCode,
     };
 
     const {
       currentCount,
-      maxCount
+      maxCount,
     } = this.props;
 
     const overLimit = currentCount > maxCount;
@@ -62,8 +69,7 @@ export default class ScriptOutput extends Component {
             multiline={10}
             readOnly
             value={this.props.output}
-            ref={(input) => this.textField = input}
-            helpText="Copy the code here and paste into a new script in the Script Editor App. Be sure to create the proper script based on the type that you selected."
+            helpText="Copy the code here and paste into a new script in the Script Editor app. Be sure to create the proper script based on the type that you selected."
           />
         </Stack>
       </Card>

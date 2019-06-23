@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
-import { Layout, Page, PageActions, EmptyState } from '@shopify/polaris';
+import React, {Component} from 'react';
+import {Layout, Page, PageActions, EmptyState} from '@shopify/polaris';
 import {ExportMinor, ImportMinor, ChatMajorMonotone} from '@shopify/polaris-icons';
 import VersionBox from './components/VersionBox';
 import Modal from './components/Modal';
@@ -9,8 +9,8 @@ import CampaignsList from './components/CampaignsList';
 import ScriptOutput from './components/ScriptOutput';
 import Footer from './components/Footer';
 import ChangeLogContent from './components/ChangeLogContent';
-import { minifyRuby } from './minifyRuby';
-import { MAX_SCRIPT_LENGTH } from './constants';
+import {minifyRuby} from './minifyRuby';
+import {MAX_SCRIPT_LENGTH} from './constants';
 
 import LineItemScript from './scripts/lineItem';
 import ShippingScript from './scripts/shipping';
@@ -18,7 +18,7 @@ import PaymentScript from './scripts/payment';
 import Common from './scripts/common';
 
 import Versions from './versions';
-import { meetsMinimumVersion, findIndexOf } from './helpers';
+import {meetsMinimumVersion, findIndexOf} from './helpers';
 
 export default class App extends Component {
   constructor(props) {
@@ -29,7 +29,7 @@ export default class App extends Component {
       showForm: false,
       currentCampaign: null,
       availableCampaigns: this.getCampaigns('line_item'),
-      campaigns: [{name: "Create new campaign", skip: true}],
+      campaigns: [],
       currentId: 0,
       output: '',
       currentCount: 0,
@@ -77,6 +77,7 @@ export default class App extends Component {
     this.closeModal = this.closeModal.bind(this);
     this.toggleCampaignActive = this.toggleCampaignActive.bind(this);
     this.setMinification = this.setMinification.bind(this);
+    this.handleSort = this.handleSort.bind(this);
   }
 
   componentWillMount() {
@@ -122,7 +123,7 @@ export default class App extends Component {
     // Google Analytics
     gtag('event', 'typeButtonClick');
 
-    if (this.state.campaigns.length > 1 || this.state.showForm) {
+    if (this.state.campaigns.length > 0 || this.state.showForm) {
       const response = confirm("Changing the script type will clear your current campaigns. Are you sure?");
       if (!response) { return; }
     }
@@ -153,13 +154,10 @@ export default class App extends Component {
     switch(type) {
       case 'line_item':
         return LineItemScript.campaigns;
-        break;
       case 'shipping':
         return ShippingScript.campaigns;
-        break;
       case 'payment':
         return PaymentScript.campaigns;
-        break;
       default:
       console.warn("Invalid type");
     }
@@ -218,6 +216,21 @@ export default class App extends Component {
     this.prepareAndExportTo('localStorage');
   }
 
+  handleSort(from, to) {
+    if (from === to) {
+      return;
+    }
+
+    const newState = this.state;
+    const toBeMoved = newState.campaigns.splice(from, 1);
+    newState.campaigns.splice(to, 0, ...toBeMoved);
+    newState.output = '';
+    this.setState(newState);
+
+    // Persist data in local storage
+    this.prepareAndExportTo('localStorage');
+  }
+
   removeCampaign(campaignId) {
     // Google Analytics
     gtag('event', 'removeButtonClick');
@@ -261,7 +274,7 @@ export default class App extends Component {
     if (campaign.id === null) {
       campaign.id = this.state.currentId;
       newState.currentId = ++campaign.id;
-      newState.campaigns.splice(newState.campaigns.length - 1, 0, campaign);
+      newState.campaigns.splice(newState.campaigns.length, 0, campaign);
     } else {
       const existingId = campaign.id
       const index = findIndexOf(this.state.campaigns, (campaign) => campaign.id === existingId);
@@ -335,7 +348,7 @@ export default class App extends Component {
         return code;
       }).join(',\n');
     // remove the last `,` from the campaigns string (raises syntax error)
-    campaigns = campaigns.substring(campaigns.length -1, 0);
+    campaigns = campaigns.substring(campaigns.length, 0);
 
     let output = generateClassCode(allClasses, classesUsed);
     // Remove first newline
@@ -482,7 +495,10 @@ ${INDENT[this.IL]})`;
       }
       let loadedCampaigns = data.campaigns;
       loadedCampaigns.reverse().forEach((campaign) => {
-        newState.campaigns.unshift(campaign);
+        // Ignore old placeholder campaign from prior to V0.22.0 (had no id, so will be skipped here)
+        if (campaign.id) {
+          newState.campaigns.unshift(campaign);
+        }
       });
       const newId = loadedCampaigns.sort((a, b) => b.id - a.id)[0].id + 1;
       newState.currentId = newId;
@@ -605,7 +621,7 @@ ${INDENT[this.IL]})`;
     ];
 
     const instructions = () => {
-      if (this.state.campaigns.length === 1) {
+      if (this.state.campaigns.length === 0) {
         return (
           <EmptyState
             heading="Add your campaigns to generate a script"
@@ -671,6 +687,7 @@ ${INDENT[this.IL]})`;
               toggleActive={this.toggleCampaignActive}
               removeCampaign={this.removeCampaign}
               duplicateCampaign={this.duplicateCampaign}
+              handleSort={this.handleSort}
               showForm={this.showForm}
               isEditing={!!this.state.editCampaignInfo}
             />

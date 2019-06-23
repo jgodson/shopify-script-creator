@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
-import { Card, Stack, Button, TextStyle, Subheading, TextContainer, Badge } from '@shopify/polaris';
+import React, {Component} from 'react';
+import {Card, Stack, Button, TextStyle, Subheading, TextContainer, Badge, Heading} from '@shopify/polaris';
 import {EditMajorMonotone, DeleteMajorMonotone, DuplicateMinor, AddNoteMajorMonotone} from '@shopify/polaris-icons';
-import { splitCamelCase } from '../helpers';
+import {DragDropContext, Droppable, Draggable} from 'react-beautiful-dnd';
+import {splitCamelCase} from '../helpers';
 
 import styles from './CampaignsList.css';
 
@@ -12,6 +13,7 @@ export default class CampaignsList extends Component {
     this.renderCardSection = this.renderCardSection.bind(this);
     this.createNew = this.createNew.bind(this);
     this.toggleActive = this.toggleActive.bind(this);
+    this.onDrop = this.onDrop.bind(this);
   }
 
   createNew() {
@@ -26,8 +28,17 @@ export default class CampaignsList extends Component {
     return () => this.props.toggleActive(id);
   }
 
-  renderCardSection(campaign) {
-    let button = null;
+  onDrop(result) {
+    if (!result.source || !result.destination) {
+      return;
+    }
+
+    const from = result.source.index;
+    const to = result.destination.index;
+    this.props.handleSort(from, to);
+  }
+
+  renderCardSection(campaign, index) {
     let messages = campaign.inputs && campaign.inputs.filter((input) => input.name && input.name.search(/discount(?!codes)/i) > -1);
     messages = messages && messages.map((campaign) => {
       if (!campaign.inputs) { return ["", ""] }
@@ -35,59 +46,95 @@ export default class CampaignsList extends Component {
       const messageType = campaign.name.search(/(reject|exclude)/i) > -1 ? 'Rejection message' : 'Discount message';
       return [messageType, campaign.inputs[stringIndex].replace(/"/g, '').trim()];
     });
-    if (campaign.id) {
-      button = <Button size="slim" icon={EditMajorMonotone} onClick={() => this.props.editCampaign(campaign.id)}>Edit</Button>;
-    } else {
-      button = <Button size="slim" icon={AddNoteMajorMonotone} primary onClick={this.createNew}>Create new</Button>;
-    }
+
     const campaignTitle = campaign.label || splitCamelCase(campaign.name)
-    const badgeMarkup = campaign.id && (
+    const badgeMarkup = (
       <button className="active-toggle" onClick={this.toggleActive(campaign.id)}>
         {campaign.active === false ?
           <Badge>Inactive</Badge> : <Badge status="success">Active</Badge>
         }
       </button>
     );
+
     return (
-      <Card.Section key={`campaign-${campaign.id || ''}`}>
-        <Subheading>{campaignTitle}</Subheading>
-        <TextContainer spacing="tight">
-          <Stack distribution="equalSpacing" alignment="center">
-            {badgeMarkup}
-            {campaign.id && (
-              <Button
-                plain
-                icon={DuplicateMinor}
-                onClick={() => this.props.duplicateCampaign(campaign.id)}
-              >
-                Duplicate
-            </Button>
-            )}
-          </Stack>
-          {messages &&
-            messages.map((message, index) => {
-              if (message[1] === "") { return false; }
-              return (
-                <div key={`campaign-${campaign.id}-message-${index}`} className="campaign-info">
-                  <TextStyle>{`${message[0]}: `}</TextStyle>
-                  <TextStyle variation="subdued">{message[1]}</TextStyle>
-                </div>
-              );
-            })
-          }
-          <Stack distribution="trailing">
-            {campaign.id && <Button size="slim" destructive icon={DeleteMajorMonotone} onClick={() => this.props.removeCampaign(campaign.id)}>Remove</Button>}
-            {button}
-          </Stack>
-        </TextContainer>
-      </Card.Section>
+      <Draggable key={`campaign-${campaign.id}`} draggableId={`CampaignList-${campaign.id}`} index={index}>
+        {(provided) => (
+          <div
+            className="draggable"
+            ref={provided.innerRef}
+            {...provided.draggableProps}
+            {...provided.dragHandleProps}
+          >
+            <Card.Section>
+              <Subheading>{campaignTitle}</Subheading>
+              <TextContainer spacing="tight">
+                <Stack distribution="equalSpacing" alignment="center">
+                  {badgeMarkup}
+                  <Button
+                    plain
+                    icon={DuplicateMinor}
+                    onClick={() => this.props.duplicateCampaign(campaign.id)}
+                  >
+                    Duplicate
+                  </Button>
+                </Stack>
+                {messages &&
+                  messages.map((message, index) => {
+                    if (message[1] === "") { return false; }
+                    return (
+                      <div key={`campaign-${campaign.id}-message-${index}`} className="campaign-info">
+                        <TextStyle>{`${message[0]}: `}</TextStyle>
+                        <TextStyle variation="subdued">{message[1]}</TextStyle>
+                      </div>
+                    );
+                  })
+                }
+                <Stack distribution="trailing">
+                  <Button
+                    size="slim"
+                    destructive
+                    icon={DeleteMajorMonotone}
+                    onClick={() => this.props.removeCampaign(campaign.id)}
+                  >
+                    Remove
+                  </Button>
+                  <Button
+                    size="slim"
+                    icon={EditMajorMonotone}
+                    onClick={() => this.props.editCampaign(campaign.id)}
+                  >
+                    Edit
+                  </Button>
+                </Stack>
+              </TextContainer>
+            </Card.Section>
+          </div>
+        )}
+      </Draggable>
     )
   }
 
   render() {
     return (
-      <Card title="Campaigns">
-        {this.props.campaigns.map((campaign) => this.renderCardSection(campaign))}
+      <Card>
+        <Card.Section>
+          <Stack distribution="equalSpacing">
+            <Heading>Campaigns</Heading>
+            <Button size="slim" icon={AddNoteMajorMonotone} primary onClick={this.createNew}>Create new</Button>
+          </Stack>
+          </Card.Section>
+        <DragDropContext
+          onDragEnd={this.onDrop}
+        >
+          <Droppable droppableId="CampaignList">
+            {(provided) => (
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {this.props.campaigns.map((campaign, index) => this.renderCardSection(campaign, index))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
       </Card>
     )
   }

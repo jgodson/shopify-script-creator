@@ -1,7 +1,3 @@
-.CardList .Polaris-Button--iconOnly {
-  margin: 0;
-}
-
 .CardList table {
   display: block;
   overflow-x: auto;
@@ -10,7 +6,7 @@
 }
 
 .CardList table * {
-  width: 100%;
+  width: 95%;
 }
 
 .CardList thead th {
@@ -26,13 +22,9 @@
 
 .CardList td:first-child, .CardList th:first-child {
   text-align: left;
+  max-width: 30%;
 }
 
-.CardList td:last-child {
-  text-align: right;
-  min-width: 82px;
-}
-
-.CardList td:last-child > button {
-  width: 36px;
+.CardList-buttons {
+  display: flex;
 }
