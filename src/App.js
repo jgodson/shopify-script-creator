@@ -350,18 +350,22 @@ export default class App extends Component {
     // remove the last `,` from the campaigns string (raises syntax error)
     campaigns = campaigns.substring(campaigns.length, 0);
 
+    // add in variables needed for the classesUsed (if any)
+    const variablesCode = classesUsed.map((className) => Common.variables[className]).filter((code) => code != undefined).join('\n');
+
+    // generate the output
     let output = generateClassCode(allClasses, classesUsed);
+    if (variablesCode !== '') {
+      output += '\n' + variablesCode + '\n';
+    }
     // Remove first newline
     output = output.substring(1);
-
     // Replace the default code with the campaign initialization code
     output += defaultCode.replace('|', campaigns);
+
     return output;
 
     function generateClassCode(allClasses, classesUsed) {
-      // Google Analytics
-      const used = classesUsed.filter((name) => !name.match(/^(Selector|Qualifier|Campaign)$/)).join(', ');
-
       let code = '';
       classesUsed.forEach((className) => {
         if (allClasses[className]) {

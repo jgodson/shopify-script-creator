@@ -9,7 +9,7 @@ class CartAmountQualifier < Qualifier
     total = cart.subtotal_price
     if @behaviour == :item || @behaviour == :diff_item
       total = cart.line_items.reduce(Money.zero) do |total, item|
-        total + (selector&.match?(item) ? item.line_price : Money.zero)
+        total + (selector.nil? || selector.match?(item) ? item.line_price : Money.zero)
       end
     end
     case @behaviour
@@ -19,7 +19,7 @@ class CartAmountQualifier < Qualifier
         compare_amounts(cart.subtotal_price_was - @amount, @comparison_type, total)
       when :diff_item
         original_line_total = cart.line_items.reduce(Money.zero) do |total, item|
-          total + (selector&.match?(item) ? item.original_line_price : Money.zero)
+          total + (selector.nil? || selector.match?(item) ? item.original_line_price : Money.zero)
         end
         compare_amounts(original_line_total - @amount, @comparison_type, total)
     end

@@ -82,7 +82,6 @@ class BundleDiscount < Campaign
   end
 
   def run(cart)
-    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
 
     if check_bundles(cart)
@@ -105,7 +104,6 @@ class BuyXGetX < Campaign
   end
 
   def run(cart)
-    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
     return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x
     applicable_buy_items = nil
@@ -148,6 +146,17 @@ class BuyXGetX < Campaign
   end
 end`,
 
+  CheckVariables: `
+class CheckVariables < Qualifier
+  def initialize(variables)
+    @variables = variables
+  end
+
+  def match?(cart, selector = nil)
+    @variables.all? { |var| VARIABLES[var[:name]] == var[:value] }
+  end
+end`,
+
   ConditionalDiscount: `
 class ConditionalDiscount < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, max_discounts)
@@ -158,7 +167,6 @@ class ConditionalDiscount < Campaign
   end
 
   def run(cart)
-    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
     applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
     applicable_items = applicable_items.sort_by { |item| item.variant.price }
@@ -414,19 +422,6 @@ class PercentageDiscount
   end
 end`,
 
-  PostCartAmountQualifier: `
-class PostCartAmountQualifier < Qualifier
-  def initialize(comparison_type, amount)
-    @comparison_type = comparison_type
-    @amount = Money.new(cents: amount * 100)
-  end
-
-  def match?(cart, selector = nil)
-    total = cart.subtotal_price
-    compare_amounts(total, @comparison_type, @amount)
-  end
-end`,
-
   QuantityLimit: `
 class QuantityLimit < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, limit_by, limit)
@@ -493,6 +488,33 @@ class RejectAllDiscountCodes < Campaign
 
   def run(cart)
     cart.discount_code.reject({message: @message}) unless cart.discount_code.nil?
+  end
+end`,
+
+  ResetScriptDiscounts: `
+class ResetScriptDiscounts < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, item_selector, variables)
+    super(condition, customer_qualifier, cart_qualifier, item_selector)
+    @variables = variables
+  end
+
+  def run(cart)
+    return unless qualifies?(cart)
+    cart.instance_variable_set(:@line_items, VARIABLES[:crt_itms])
+    @variables.each { |var| VARIABLES[var[:name]] = var[:value] }
+  end
+end`,
+
+  SetVariables: `
+class SetVariables < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, item_selector, variables)
+    super(condition, customer_qualifier, cart_qualifier, item_selector)
+    @variables = variables
+  end
+
+  def run(cart)
+    return unless qualifies?(cart)
+    @variables.each { |var| VARIABLES[var[:name]] = var[:value] }
   end
 end`,
 
@@ -599,35 +621,8 @@ const CART_QUALIFIERS = [
   ...Common.cartQualifiers,
   {
     value: "PostCartAmountQualifier",
-    label: "Discounted Cart Subtotal (applied by scripts)",
-    description: "Will only apply if the cart subtotal, after applying the campaign, meets conditions",
-    inputs: {
-      condition: {
-        type: "select",
-        description: "Type of comparison",
-        options: [{
-            value: "greater_than",
-            label: "Greater than"
-          },
-          {
-            value: "less_than",
-            label: "Less than"
-          },
-          {
-            value: "greater_than_or_equal",
-            label: "Greater than or equal to"
-          },
-          {
-            value: "less_than_or_equal",
-            label: "Less than or equal to"
-          },
-        ]
-      },
-      amount: {
-        type: "number",
-        description: "Amount in dollars"
-      }
-    }
+    label: "REMOVED - Discounted Cart Subtotal (applied by scripts)",
+    description: "REMOVED. You will not be able to generate your script until this is removed",
   },
   {
     value: "ExcludeDiscountCodes",
@@ -670,6 +665,19 @@ const CART_QUALIFIERS = [
         description: "Enter the discount codes that will be excepted"
       },
     }
+  },
+  {
+    value: "CheckVariables",
+    label: "Check Variables",
+    description: "Check variables within the script match the values",
+    inputs: {
+      variables: {
+        type: "objectArray",
+        description: "Check these variable names and values",
+        inputFormat: "{name:text:The name of the variable} : {value:text:The value of the variable}",
+        outputFormat: '{:name => "{text}", :value => "{number}"}'
+      }
+    },
   }
 ];
 
@@ -1150,6 +1158,64 @@ const campaigns = [{
         outputFormat: '{:type => "{select}", :qualifiers => [{array}], :quantity => "{number}"}'
       }
     }
+  },
+  {
+    value: "ResetScriptDiscounts",
+    label: "Reset Script Discounts",
+    description: "Resets all discounts that have been applied if conditions are met",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [{
+            value: "all",
+            label: "Reset if all qualify"
+          },
+          {
+            value: "any",
+            label: "Reset if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      item_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      set_variables: {
+        type: "objectArray",
+        description: "Set variable names and values if the discount is reset",
+        inputFormat: "{name:text:The name of the variable} : {value:text:The value of the variable}",
+        outputFormat: '{:name => "{text}", :value => "{number}"}'
+      }
+    }
+  },
+  {
+    value: "SetVariables",
+    label: "Set Variables",
+    description: "Set variables within the script based on conditions",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [{
+            value: "all",
+            label: "Discount if all qualify"
+          },
+          {
+            value: "any",
+            label: "Discount if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      item_qualifier: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      variables: {
+        type: "objectArray",
+        description: "Set the variable names and values",
+        inputFormat: "{name:text:The name of the variable} : {value:text:The value of the variable}",
+        outputFormat: '{:name => "{text}", :value => "{number}"}'
+      }
+    },
   },
 ];
 

@@ -78,7 +78,6 @@ class BundleDiscount < Campaign
   end
 
   def run(cart)
-    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
 
     if check_bundles(cart)

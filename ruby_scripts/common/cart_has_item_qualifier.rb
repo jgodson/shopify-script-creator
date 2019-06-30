@@ -7,7 +7,6 @@ class CartHasItemQualifier < Qualifier
   end
 
   def match?(cart, selector = nil)
-    raise "Must supply an item selector for the #{self.class}" if @item_selector.nil?
     case @quantity_or_subtotal
       when :quantity
         total = cart.line_items.reduce(0) do |total, item|

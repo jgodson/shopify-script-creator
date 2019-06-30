@@ -10,7 +10,6 @@ class BuyXGetX < Campaign
   end
 
   def run(cart)
-    raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
     return unless cart.line_items.reduce(0) {|total, item| total += item.quantity } >= @buy_x
     applicable_buy_items = nil

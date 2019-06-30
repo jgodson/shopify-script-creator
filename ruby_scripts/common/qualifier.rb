@@ -26,8 +26,6 @@ class Qualifier
         return compare <= compare_to
       when :equal_to
         return compare == compare_to
-      else
-        raise "Invalid comparison type"
     end
   end
 end

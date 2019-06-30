@@ -20,39 +20,18 @@ end`,
 class Campaign
   def initialize(condition, *qualifiers)
     @condition = (condition.to_s + '?').to_sym
-    @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact
+    @qualifiers = qualifiers.compact
     @line_item_selector = qualifiers.last unless @line_item_selector
-    qualifiers.compact.each do |qualifier|
-      is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)
-      if is_multi_select
-        qualifier.instance_variable_get(:@conditions).each do |nested_q|
-          @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)
-          @qualifiers << qualifier
-        end
-      else
-        @post_amount_qualifier = qualifier if qualifier.is_a?(PostCartAmountQualifier)
-        @qualifiers << qualifier
-      end
-    end if @qualifiers.empty?
   end
 
   def qualifies?(cart)
     return true if @qualifiers.empty?
-    @unmodified_line_items = cart.line_items.map do |item|
-      new_item = item.dup
-      new_item.instance_variables.each do |var|
-        val = item.instance_variable_get(var)
-        new_item.instance_variable_set(var, val.dup) if val.respond_to?(:dup)
-      end
-      new_item
-    end if @post_amount_qualifier
     @qualifiers.send(@condition) do |qualifier|
       is_selector = false
       if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }
         is_selector = true
       end rescue nil
       if is_selector
-        raise "Missing line item match type" if @li_match_type.nil?
         cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }
       else
         qualifier.match?(cart, @line_item_selector)
@@ -68,11 +47,6 @@ class Campaign
 
   def after_run(cart)
     @discount.apply_final_discount if @discount && @discount.respond_to?(:apply_final_discount)
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
-  end
-
-  def revert_changes(cart)
-    cart.instance_variable_set(:@line_items, @unmodified_line_items)
   end
 end`,
 
@@ -88,7 +62,7 @@ class CartAmountQualifier < Qualifier
     total = cart.subtotal_price
     if @behaviour == :item || @behaviour == :diff_item
       total = cart.line_items.reduce(Money.zero) do |total, item|
-        total + (selector&.match?(item) ? item.line_price : Money.zero)
+        total + (selector.nil? || selector.match?(item) ? item.line_price : Money.zero)
       end
     end
     case @behaviour
@@ -98,7 +72,7 @@ class CartAmountQualifier < Qualifier
         compare_amounts(cart.subtotal_price_was - @amount, @comparison_type, total)
       when :diff_item
         original_line_total = cart.line_items.reduce(Money.zero) do |total, item|
-          total + (selector&.match?(item) ? item.original_line_price : Money.zero)
+          total + (selector.nil? || selector.match?(item) ? item.original_line_price : Money.zero)
         end
         compare_amounts(original_line_total - @amount, @comparison_type, total)
     end
@@ -115,7 +89,6 @@ class CartHasItemQualifier < Qualifier
   end
 
   def match?(cart, selector = nil)
-    raise "Must supply an item selector for the #{self.class}" if @item_selector.nil?
     case @quantity_or_subtotal
       when :quantity
         total = cart.line_items.reduce(0) do |total, item|
@@ -494,8 +467,6 @@ class Qualifier
         return compare <= compare_to
       when :equal_to
         return compare == compare_to
-      else
-        raise "Invalid comparison type"
     end
   end
 end`,
@@ -637,6 +608,18 @@ class VariantSkuSelector < Selector
         return @invert ^ partial_match(@match_condition, variant_skus, @skus)
     end
   end
+end`,
+};
+
+const variables = {
+  Campaign: `VARIABLES = {}`,
+  ResetScriptDiscounts: `VARIABLES[:crt_itms] = Input.cart.line_items.map do |itm|
+  dup = itm.dup
+  dup.instance_variables.each do |var|
+    val = itm.instance_variable_get(var)
+    dup.instance_variable_set(var, val.dup) if val.respond_to?(:dup)
+  end
+  dup
 end`,
 };
 
@@ -1118,8 +1101,8 @@ const cartQualifiers = [{
   },
   {
     value: "CartAmountQualifier",
-    label: "Cart/Item subtotal",
-    description: "Will only apply if the cart or item subtotals meet the conditions",
+    label: "Cart/Item/Discount subtotal",
+    description: "Will only apply if the cart, item, or discount subtotals meet the conditions",
     inputs: {
       behaviour: {
         type: "select",
@@ -1134,11 +1117,11 @@ const cartQualifiers = [{
           },
           {
             value: "diff_cart",
-            label: "Difference from original cart subtotal (before script discounts)"
+            label: "Applied discounts (by scripts)"
           },
           {
             value: "diff_item",
-            label: "Difference from original qualified item subtotal (before script discounts)"
+            label: "Applied discounts on qualified items (by scripts)"
           },
         ]
       },
@@ -1517,6 +1500,7 @@ const cartQualifiers = [{
 
 export default {
   classes,
+  variables,
   customerQualifiers,
   cartQualifiers,
   lineItemSelectors
