@@ -7,9 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>Fixed the Copy button for copying the generated script code</li>
-        <li>Added the ability to sort the campaigns in the list</li>
-        <li>UI tweaks here and there</li>
+        <li>Updated the max script length to the new supported length (24,576 characters)</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
