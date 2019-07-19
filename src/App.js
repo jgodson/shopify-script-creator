@@ -93,7 +93,7 @@ export default class App extends Component {
     const lastVersion = localStorage.getItem('lastVersion');
     if (this.version !== lastVersion) {
       this.openModal({
-        title: `Version ${this.version} BETA release`,
+        title: `Version ${this.version} release`,
         content: <ChangeLogContent newVersion={this.version} />,
         onClose: () => localStorage.setItem('lastVersion', this.version)
       });
