@@ -302,10 +302,10 @@ class FullAddressQualifier
 
       cart.shipping_address.to_hash.all? do |key, value|
         key = key.to_sym
-        value.downcase!
-
         next true unless accepted_address[key]
         next true if accepted_address[key].length === 0
+        next false if value.nil?
+        value.downcase!
 
         match = accepted_address[key].any? do |potential_address|
           potential_address.downcase!
