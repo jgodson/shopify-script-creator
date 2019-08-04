@@ -367,6 +367,24 @@ class LineItemPropertiesSelector < Selector
   end
 end`,
 
+  LocaleQualifier: `
+class LocaleQualifier < Qualifier
+  def initialize(match_type, match_condition, locales)
+    @match_condition = match_condition
+    @invert = match_type == :does_not
+    @locales = locales
+  end
+
+  def match?(_, _ = nil)
+    locale = Input.locale.to_s
+    if @match_condition === :match
+      return @invert ^ @locales.include?(locale)
+    else
+      return @invert ^ partial_match(@match_condition, locale, @locales)
+    end
+  end
+end`,
+
   OrSelector: `
 class OrSelector
   def initialize(*conditions)
@@ -1438,6 +1456,47 @@ const cartQualifiers = [{
       amount: {
         type: "number",
         description: "Amount in dollars"
+      }
+    }
+  },
+  {
+    value: "LocaleQualifier",
+    label: "Cart Locale Qualifier",
+    description: "Will only apply if the cart locale matches the conditions",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the following condition matches",
+        options: [{
+            value: "does",
+            label: "Does"
+          },
+          {
+            value: "does_not",
+            label: "Does not"
+          }
+        ]
+      },
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [{
+            value: "match",
+            label: "Match one of"
+          },
+          {
+            value: "start_with",
+            label: "Start with one of"
+          },
+          {
+            value: "end_with",
+            label: "End with one of"
+          },
+        ]
+      },
+      locales: {
+        type: "array",
+        description: "Enter the applicable locales"
       }
     }
   },

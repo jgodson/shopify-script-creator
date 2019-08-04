@@ -7,9 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>0.22.1 - Updated the max script length to the new supported length (24,576 characters)</li>
-        <li>0.22.2 - Changed <b>Tax Discount</b> to properly account for items that were discounted in a previous campaign instead of causing a script error</li>
-        <li>0.22.3 - Fixed an issue in the <b>Full Address Qualifier</b> the was causing some script errors</li>
+        <li>0.23.0 - Added a <b>Cart Locale Qualifier</b> to the <b>Cart Qualifier</b> options.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
