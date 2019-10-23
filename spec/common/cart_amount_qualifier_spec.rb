@@ -11,7 +11,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
   describe "with :cart behaviour" do
     it "includes the price of all items in the cart" do
       expect(
-        CartAmountQualifier.new(
+        described_class.new(
           :cart,
           :equal_to,
           250,
@@ -23,7 +23,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
   describe "with :item behaviour" do
     it "only counts the price of matching items" do
       expect(
-        CartAmountQualifier.new(
+        described_class.new(
           :item,
           :equal_to,
           10,
@@ -33,7 +33,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
 
     it "does not count any items when no selector is provided" do
       expect(
-        CartAmountQualifier.new(
+        described_class.new(
           :item,
           :equal_to,
           0,
@@ -48,7 +48,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
 
       it "should equal 0" do
         expect(
-          CartAmountQualifier.new(
+          described_class.new(
             :diff_cart,
             :equal_to,
             0,
@@ -62,7 +62,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
 
       it "matches when given $10 as the comparison amount to equal" do
         expect(
-          CartAmountQualifier.new(
+          described_class.new(
             :diff_cart,
             :equal_to,
             10,
@@ -77,7 +77,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
 
     it "should equal 0 with no discounts applied" do
       expect(
-        CartAmountQualifier.new(
+        described_class.new(
           :diff_item,
           :equal_to,
           0,
@@ -93,7 +93,7 @@ RSpec.describe CartAmountQualifier, "#match?" do
 
       it "matches when given $10 as the comparison amount to equal" do
         expect(
-          CartAmountQualifier.new(
+          described_class.new(
             :diff_item,
             :equal_to,
             10,

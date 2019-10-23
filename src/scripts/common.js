@@ -385,6 +385,14 @@ class LocaleQualifier < Qualifier
   end
 end`,
 
+  NoCodeQualifier: `
+class NoCodeQualifier < Qualifier
+  def match?(cart, selector = nil)
+    return true if cart.discount_code.nil?
+    false
+  end
+end`,
+
   OrSelector: `
 class OrSelector
   def initialize(*conditions)
@@ -1362,6 +1370,11 @@ const cartQualifiers = [{
         description: "Enter the applicable codes"
       }
     }
+  },
+  {
+    value: "NoCodeQualifier",
+    label: "Cart Has No Discount Code",
+    description: "Checks if there is no discount code present",
   },
   {
     value: "CountryAndProvinceQualifier",
