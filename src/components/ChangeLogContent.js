@@ -7,7 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>0.23.0 - Added a <b>Cart Locale Qualifier</b> to the <b>Cart Qualifier</b> options.</li>
+        <li>0.24.0 - Added a <b>Cart Has No Discount Code</b> to the <b>Cart Qualifier</b> options.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
