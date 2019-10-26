@@ -101,6 +101,35 @@ class RateNameSelector < Selector
   end
 end`,
 
+  RatePriceSelector: `
+class RatePriceSelector < Selector
+  def initialize(comparison_type, amount)
+    @comparison_type = comparison_type
+    @amount = Money.new(cents: amount * 100)
+  end
+
+  def match?(shipping_rate)
+    compare_amounts(shipping_rate.price, @comparison_type, @amount)
+  end
+
+  def compare_amounts(compare, comparison_type, compare_to)
+    case comparison_type
+      when :greater_than
+        return compare > compare_to
+      when :greater_than_or_equal
+        return compare >= compare_to
+      when :less_than
+        return compare < compare_to
+      when :less_than_or_equal
+        return compare <= compare_to
+      when :equal_to
+        return compare == compare_to
+      else
+        raise "Invalid comparison type"
+    end
+  end
+end`,
+
   RateSourceSelector: `
 class RateSourceSelector < Selector
   def initialize(match_type, sources)
@@ -326,6 +355,38 @@ const RATE_SELECTORS = [
       rate_sources: {
         type: "array",
         description: "Applicable sources"
+      }
+    }
+  },
+  {
+    value: "RatePriceSelector",
+    label: "Rate Price",
+    description: "Matches shipping rates based on the price",
+    inputs: {
+      condition: {
+        type: "select",
+        description: "Type of comparison",
+        options: [{
+            value: "greater_than",
+            label: "Greater than"
+          },
+          {
+            value: "less_than",
+            label: "Less than"
+          },
+          {
+            value: "greater_than_or_equal",
+            label: "Greater than or equal to"
+          },
+          {
+            value: "less_than_or_equal",
+            label: "Less than or equal to"
+          },
+        ]
+      },
+      amount: {
+        type: "number",
+        description: "Amount in dollars"
       }
     }
   },

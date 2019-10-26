@@ -1,6 +1,7 @@
 --require spec_helper
 --require test_helper
 --require ./spec/models/money
+--require ./spec/models/adjustment
 --require ./ruby_scripts/common/campaign
 --require ./ruby_scripts/common/qualifier
 --require ./ruby_scripts/common/selector
