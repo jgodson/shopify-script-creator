@@ -8,6 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
         <li>0.24.0 - Added a <b>Cart Has No Discount Code</b> to the <b>Cart Qualifier</b> options.</li>
+        <li>0.25.0 - Added <b>Rate Price</b> to the shipping rate selector options.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
