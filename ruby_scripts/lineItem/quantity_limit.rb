@@ -21,6 +21,8 @@ class QuantityLimit < Campaign
             key = item.variant.product.id
           when :variant
             key = item.variant.id
+          when :cart
+            key = 1
         end
 
         if key

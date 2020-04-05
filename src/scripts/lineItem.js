@@ -451,6 +451,8 @@ class QuantityLimit < Campaign
             key = item.variant.product.id
           when :variant
             key = item.variant.id
+          when :cart
+            key = 1
         end
 
         if key
@@ -971,6 +973,10 @@ const campaigns = [{
           {
             value: "variant",
             label: "Limit by variant - Maximum amount of each matching variant of a product can be purchased"
+          },
+          {
+            value: "cart",
+            label: "Limit cart - Items that match will be limited for the entire cart"
           }
         ]
       },

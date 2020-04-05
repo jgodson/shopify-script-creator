@@ -9,6 +9,14 @@ class LineItem
     @line_price = @original_line_price
   end
 
+  def split(take:)
+    if take >= self.quantity
+      raise "Take cannot be greater than or equal to the current quantity"
+    end
+    self.quantity -= take
+    LineItem.new(self.variant, take)
+  end
+
   def discounted?
     @line_price < @original_line_price
   end
