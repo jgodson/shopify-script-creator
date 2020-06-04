@@ -119,6 +119,9 @@
           if (index === 0 && values[index] === "") { continue; }
 
           if (values[index] !== null) {
+            // Replace any $ with $$ so we don't replace $<#> with matches in the regex
+            values[index] = values[index].replace(/\$/g, '$$$');
+
             output = output.replace(/{\w+\??:\w+:[\w\s'.(),]+:?([\w\s|,]+)?}/, values[index]);
           }
         }
