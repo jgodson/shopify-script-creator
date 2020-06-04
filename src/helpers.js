@@ -36,25 +36,37 @@
     return temparr.length > 1 && temparr[1].split('_')[0] === temparr[temparr.length - 1].split('_')[0];
   }
 
+  function getParentCampaignInputName(inputName) {
+    const temparr = inputName.split('-');
+
+    if (isCampaignSelect(inputName)) {
+      temparr.splice(temparr.length - 1, 1);
+    } else {
+      temparr.splice(temparr.length - 2, 2);
+    }
+
+    return temparr.length ? temparr.join('-') : null;
+  }
+
   function getInputType(inputName) {
     const type = inputName.split('-');
     return type[type.length - 1].split('_')[0];
   }
 
-  function getObjectFormats(campaignName, inputs) {
+  function getObjectFormats(campaignName, inputs, parentCampaignName) {
     const keys = Object.keys(inputs);
-    // Default to the last input in the array
-    let targetInput = inputs[keys[keys.length - 1]];
+    let targetInput = searchInputs({keys, campaignName, inputs});
 
-    for (let index = 0, length = keys.length; index < length; index++) {
-      const key = keys[index];
-      if (Array.isArray(inputs[key])) {
-        const foundInput = inputs[key].filter((input) => input.value === campaignName);
-        if (foundInput.length > 0) {
-          targetInput = foundInput[0];
-          break;
-        }
+    if (!targetInput && parentCampaignName) {
+      const parentInput = searchInputs({keys, campaignName: parentCampaignName, inputs});
+      if (parentInput) {
+        targetInput = searchInputs({keys: Object.keys(parentInput.inputs), campaignName, inputs: parentInput.inputs});
       }
+    }
+
+    if (!targetInput) {
+      // Default to the last input in the array
+      targetInput = inputs[keys[keys.length - 1]];
     }
 
     let targetObjectInput = null;
@@ -64,6 +76,19 @@
       targetObjectInput = targetInput;
     }
     return [targetObjectInput.inputFormat, targetObjectInput.outputFormat];
+
+    function searchInputs({keys, campaignName, inputs}) {
+      for (let index = 0, length = keys.length; index < length; index++) {
+        const key = keys[index];
+        if (Array.isArray(inputs[key])) {
+          const foundInput = inputs[key].filter((input) => input.value === campaignName);
+
+          if (foundInput.length > 0) {
+            return foundInput[0];
+          }
+        }
+      }
+    }
   }
 
   function formatObject(inOut, value, inputFmt, outputFmt) {
@@ -157,6 +182,7 @@ export {
   splitAndCapitalize,
   splitCamelCase,
   isCampaignSelect,
+  getParentCampaignInputName,
   getInputType,
   getObjectFormats,
   formatObject,
