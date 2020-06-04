@@ -7,8 +7,8 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>0.26.0 - Added a <b>Limit cart</b> option to the <b>Limit by</b> options in the <b>Quantity Limit</b> campaign. This allows for limiting the quantity throughout the entire cart.
-        </li>
+        <li>Fixed a bug when using a combination of the "Bundle Discount" campaign, "Cart Has Items" Cart Qualifier and "Has Properties" Item Selector</li>
+        <li>Renamed “Cart/Item subtotal” <b>Cart Qualifier</b> to “Cart/Item/Discount subtotal” and re-worded options to be more clear.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

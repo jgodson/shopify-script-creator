@@ -1118,8 +1118,8 @@ const cartQualifiers = [{
   },
   {
     value: "CartAmountQualifier",
-    label: "Cart/Item subtotal",
-    description: "Will only apply if the cart or item subtotals meet the conditions",
+    label: "Cart/Item/Discount subtotal",
+    description: "Will only apply if the cart, item, or discount subtotals meet the conditions",
     inputs: {
       behaviour: {
         type: "select",
@@ -1134,11 +1134,11 @@ const cartQualifiers = [{
           },
           {
             value: "diff_cart",
-            label: "Difference from original cart subtotal (before script discounts)"
+            label: "Applied discounts (by scripts)"
           },
           {
             value: "diff_item",
-            label: "Difference from original qualified item subtotal (before script discounts)"
+            label: "Applied discounts on qualified items (by scripts)"
           },
         ]
       },

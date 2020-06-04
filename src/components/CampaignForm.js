@@ -18,8 +18,8 @@ import styles from './CampaignForm.css';
 import {
   capitalize,
   splitAndCapitalize,
-  splitCamelCase,
   isCampaignSelect,
+  getParentCampaignInputName,
   getInputType,
   getObjectFormats,
   formatObject
@@ -165,6 +165,7 @@ export default class CampaignForm extends Component {
             // Set the values
             inputMap[mainCampaignName].forEach((inputName, index) => {
               let inputCampaign = null;
+              let parentCampaign = null;
               if (inputIndex === index) {
                 if (isCampaignSelect(inputName)) {
                   let fields = inputMap[inputName];
@@ -186,8 +187,9 @@ export default class CampaignForm extends Component {
                             const value = input.inputs[fieldIndex].inputs[nestedIndex];
                             if (type === 'object' || type === 'objectArray') {
                               inputCampaign = newState.inputs.campaignSelect[fieldName];
+                              parentCampaign = newState.inputs.campaignSelect[inputName];
                             }
-                            newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs);
+                            newState.inputs[type][nestedName] = convertInput(value, type, inputCampaign, campaignInputs, parentCampaign);
                           } else {
                             const finalFields = inputMap[nestedName];
                             if (!finalFields || finalFields === 'none') { return; }
@@ -196,8 +198,9 @@ export default class CampaignForm extends Component {
                               const value = input.inputs[fieldIndex].inputs[nestedIndex].inputs[finalIndex];
                               if (type === 'object' || type === 'objectArray') {
                                 inputCampaign = newState.inputs.campaignSelect[nestedName];
+                                parentCampaign = newState.inputs.campaignSelect[fieldName];
                               }
-                              newState.inputs[type][finalName] = convertInput(value, type, inputCampaign, campaignInputs);
+                              newState.inputs[type][finalName] = convertInput(value, type, inputCampaign, campaignInputs, parentCampaign);
                             });
                           }
                         });
@@ -215,7 +218,7 @@ export default class CampaignForm extends Component {
         }
       });
 
-      function convertInput(value, type, campaignName, campaignInputs) {
+      function convertInput(value, type, campaignName, campaignInputs, parentCampaignName) {
         if (value === undefined) {
           return "";
         }
@@ -236,7 +239,7 @@ export default class CampaignForm extends Component {
             return value.substring(1);
           case 'object':
           case 'objectArray':
-            const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+            const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs, parentCampaignName);
             return formatObject('input', value, inputFormat, outputFormat);
           default:
             return value;
@@ -710,7 +713,13 @@ export default class CampaignForm extends Component {
 
   getInputValue(inputName, campaignName, campaignInputs) {
     const type = getInputType(inputName);
+    const parentCampaignInputName = getParentCampaignInputName(inputName);
     let value = this.state.inputs[type][inputName];
+    let parentCampaignName = null;
+
+    if (parentCampaignInputName && parentCampaignInputName !== 'mainCampaign') {
+      parentCampaignName = this.state.inputs.campaignSelect[parentCampaignInputName];
+    }
     // Can modify values here (like make csv's into an array)
     switch (type) {
       case 'array':
@@ -727,7 +736,7 @@ export default class CampaignForm extends Component {
       case 'object':
         if (!value) { return "{}"; }
         try {
-          const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+          const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs, parentCampaignName);
           const output = formatObject('output', value, inputFormat, outputFormat);
           return `{${output}}`;
         } catch (error) {
@@ -736,7 +745,7 @@ export default class CampaignForm extends Component {
       case 'objectArray':
         if (!value) { return "[]"; }
         try {
-          const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs);
+          const [inputFormat, outputFormat] = getObjectFormats(campaignName, campaignInputs, parentCampaignName);
           const output = formatObject('output', value, inputFormat, outputFormat);
           return `[${output}]`;
         } catch (error) {

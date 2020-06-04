@@ -359,9 +359,6 @@ export default class App extends Component {
     return output;
 
     function generateClassCode(allClasses, classesUsed) {
-      // Google Analytics
-      const used = classesUsed.filter((name) => !name.match(/^(Selector|Qualifier|Campaign)$/)).join(', ');
-
       let code = '';
       classesUsed.forEach((className) => {
         if (allClasses[className]) {
