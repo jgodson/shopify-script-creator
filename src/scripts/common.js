@@ -638,6 +638,26 @@ class VariantSkuSelector < Selector
     end
   end
 end`,
+
+  ZipCodeQualifier: `
+class ZipCodeQualifier < Qualifier
+  def initialize(match_type, match_condition, zips)
+    @match_condition = match_condition
+    @invert = match_type == :does_not
+    @zips = zips.map(&:downcase).map {|z| z.gsub(' ', '')}
+  end
+
+  def match?(cart, selector = nil)
+    return false if cart.shipping_address&.zip.nil?
+    zip_code = cart.shipping_address.zip.downcase.gsub(' ', '')
+    case @match_condition
+      when :match
+        return @invert ^ @zips.include?(zip_code)
+      else
+        return @invert ^ partial_match(@match_condition, zip_code, @zips)
+    end
+  end
+end`,
 };
 
 const customerQualifiers = [{
@@ -1428,8 +1448,53 @@ const cartQualifiers = [{
     }
   },
   {
+    value: "ZipCodeQualifier",
+    label: "Shipping Address - Zip Code Qualifier",
+    description: "Qualifies the cart based on the zip code of the shipping addresss",
+    inputs: {
+      match_type: {
+        type: "select",
+        description: "Set how the following condition matches",
+        options: [{
+            value: "does",
+            label: "Does"
+          },
+          {
+            value: "does_not",
+            label: "Does not"
+          }
+        ]
+      },
+      match_condition: {
+        type: 'select',
+        description: "Set how the zip code is matched",
+        options: [{
+            value: "match",
+            label: "Match one of"
+          },
+          {
+            value: "include",
+            label: "Contain one of"
+          },
+          {
+            value: "start_with",
+            label: "Start with one of"
+          },
+          {
+            value: "end_with",
+            label: "End with one of"
+          }
+        ]
+      },
+      zip_codes: {
+        type: "array",
+        description: "Enter the zip codes to check"
+      }
+    }
+  },
+  {
     value: "FullAddressQualifier",
-    label: "Shipping Address - Full Address Qualifier - NEW",
+    label: "Shipping Address - Full Address Qualifier",
     description: "Only qualifies if the shipping address matches one of the given addresses",
     inputs: {
       qualifing_addresses: {
