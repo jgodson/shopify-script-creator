@@ -13,10 +13,6 @@ FactoryBot.define do
       original_price { nil }
     end
 
-    trait :with_shipping_address do
-      shipping_address { create(:shipping_address) }
-    end
-
     trait :with_fixed_discount do
       cart_discount { create(:fixed_discount) }
     end
