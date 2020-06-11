@@ -7,6 +7,7 @@ class LineItem
     @grams = variant.grams * quantity
     @original_line_price = variant.price * quantity
     @line_price = @original_line_price
+    @discounts = []
   end
 
   def split(take:)
@@ -25,7 +26,9 @@ class LineItem
     @original_line_price < @line_price
   end
 
-  def change_line_price
-    raise NotImplementedError
+  def change_line_price(new_price, messageObj)
+    amount = @line_price - new_price
+    @line_price = new_price
+    @discounts << { amount: amount, message: messageObj[:message] }
   end
 end

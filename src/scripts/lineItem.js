@@ -317,6 +317,49 @@ class DiscountCodePattern < Campaign
   end
 end`,
 
+  DiscountCodePatternMatch: `
+class DiscountCodePatternMatch < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, formats)
+    super(condition, customer_qualifier, cart_qualifier)
+    @line_item_selector = line_item_selector
+    @discount = discount
+    @formats = formats
+  end
+
+  def matches_pattern(format, code)
+    expected = format.downcase.split('-')
+    parts = code.downcase.split('-')
+    return false if parts.length != expected.length
+
+    parts.each_with_index do |part, index|
+      partchars = part.split('')
+      expectchars = expected[index].split('')
+
+      return false if partchars.length != expectchars.length
+
+      expectchars.each_with_index do |c, index|
+        next if c == '*'
+        return false if partchars[index] != c
+      end
+    end
+
+    return true
+  end
+
+  def run(cart)
+    discount_code = cart.discount_code&.code
+    return unless discount_code
+    return unless qualifies?(cart)
+
+    return unless @formats.any? { |f| matches_pattern(f, discount_code) }
+
+    cart.line_items.each do |item|
+      next unless @line_item_selector.nil? || @line_item_selector.match?(item)
+      @discount.apply(item)
+    end
+  end
+end`,
+
   ExcludeDiscountCodes: `
 class ExcludeDiscountCodes < Qualifier
   def initialize(behaviour, message, match_type = :reject_except, discount_codes = [])
@@ -1123,6 +1166,34 @@ const campaigns = [{
       }
     },
     dependants: ["PercentageDiscount", "FixedTotalDiscount"]
+  },
+  {
+    value: "DiscountCodePatternMatch",
+    label: "Discount Code Pattern Match Discount",
+    description: "Apply discount if discount code matches given pattern",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [{
+            value: "all",
+            label: "Discount if all qualify"
+          },
+          {
+            value: "any",
+            label: "Discount if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      discountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discount_to_apply: [...DISCOUNTS],
+      patterns_to_match: {
+        type: "array",
+        description: "Enter the discount code patterns that will apply the discount. Use * to indicate any character (eg: ****-**** matches 1234-abcd)"
+      },
+    },
   },
   {
     value: "BundleDiscount",

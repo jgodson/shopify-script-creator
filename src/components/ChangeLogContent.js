@@ -8,6 +8,7 @@ export default function ChangeLogContent({newVersion} = props) {
 
       <ul>
         <li>Added a new <b>Zip Code Qualifier</b> to the <b>Cart Qualifiers</b></li>
+        <li>Added <b>Discount Code Pattern Match</b> <b>Campaign</b></li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

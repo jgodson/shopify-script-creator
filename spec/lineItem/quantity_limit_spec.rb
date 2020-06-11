@@ -24,7 +24,7 @@ RSpec.describe QuantityLimit, "#run" do
       0,
     ).run(cart)
 
-    expect(get_total_quantity(cart.line_items)).to eq(0)
+    expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(0)
   end
 
   describe "limit_by :product" do
@@ -43,7 +43,7 @@ RSpec.describe QuantityLimit, "#run" do
           1,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(4)
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(4)
         expect(cart.line_items[0].quantity).to eq(original_cart.line_items[0].quantity - 1)
         # Second item was removed
         expect(cart.line_items[1].quantity).to eq(original_cart.line_items[2].quantity)
@@ -63,7 +63,7 @@ RSpec.describe QuantityLimit, "#run" do
           1,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(get_total_quantity(original_cart.line_items))
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(TestHelper::Cart.get_total_quantity(original_cart.line_items))
       end
     end
   end
@@ -84,7 +84,7 @@ RSpec.describe QuantityLimit, "#run" do
           1,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(6)
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(6)
         expect(cart.line_items[0].quantity).to eq(original_cart.line_items[0].quantity - 1)
         expect(cart.line_items[1].quantity).to eq(original_cart.line_items[1].quantity)
         expect(cart.line_items[2].quantity).to eq(original_cart.line_items[2].quantity)
@@ -104,7 +104,7 @@ RSpec.describe QuantityLimit, "#run" do
           1,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(get_total_quantity(original_cart.line_items))
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(TestHelper::Cart.get_total_quantity(original_cart.line_items))
       end
     end
   end
@@ -125,7 +125,7 @@ RSpec.describe QuantityLimit, "#run" do
           2,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(5)
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(5)
         expect(cart.line_items[0].quantity).to eq(original_cart.line_items[0].quantity)
         # Second item was removed
         expect(cart.line_items[1].quantity).to eq(original_cart.line_items[2].quantity)
@@ -145,7 +145,7 @@ RSpec.describe QuantityLimit, "#run" do
           2,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(get_total_quantity(original_cart.line_items))
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(TestHelper::Cart.get_total_quantity(original_cart.line_items))
       end
     end
 
@@ -160,7 +160,7 @@ RSpec.describe QuantityLimit, "#run" do
           3,
         ).run(cart)
 
-        expect(get_total_quantity(cart.line_items)).to eq(3)
+        expect(TestHelper::Cart.get_total_quantity(cart.line_items)).to eq(3)
         expect(cart.line_items[0].quantity).to eq(original_cart.line_items[0].quantity)
         expect(cart.line_items[1].quantity).to eq(original_cart.line_items[1].quantity - 1)
         # Last item was removed
@@ -168,8 +168,4 @@ RSpec.describe QuantityLimit, "#run" do
     end
 
   end
-end
-
-def get_total_quantity(line_items)
-  line_items.reduce(0) { |tot, cur| tot + cur.quantity }
 end
