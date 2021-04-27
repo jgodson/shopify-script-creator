@@ -31,4 +31,8 @@ class LineItem
     @line_price = new_price
     @discounts << { amount: amount, message: messageObj[:message] }
   end
+
+  def selling_plan_id
+    @variant.selling_plan_id
+  end
 end

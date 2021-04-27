@@ -573,6 +573,17 @@ class Selector
   end
 end`,
 
+  SubscriptionItemSelector: `
+class SubscriptionItemSelector < Selector
+  def initialize(match_type)
+    @invert = match_type == :not
+  end
+
+  def match?(line_item)
+    @invert ^ !line_item.selling_plan_id.nil?
+  end
+end`,
+
   TotalWeightQualifier: `
 class TotalWeightQualifier < Qualifier
   def initialize(comparison_type, amount, units)
@@ -1124,6 +1135,26 @@ const lineItemSelectors = [{
           {
             value: "not",
             label: "Has not been discounted"
+          }
+        ]
+      }
+    }
+  },
+  {
+    value: "SubscriptionItemSelector",
+    label: "Subscription Item Selector",
+    description: "Selects line items if they are/are not a subscription item",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how subscription items are matched",
+        options: [{
+            value: "is",
+            label: "Is a subscription item"
+          },
+          {
+            value: "not",
+            label: "Is not a subscription item"
           }
         ]
       }
