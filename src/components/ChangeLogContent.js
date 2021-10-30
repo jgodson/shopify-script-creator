@@ -7,7 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>Added a new <b>Subscription Item Selector</b> to <b>Line Item Selectors</b></li>
+        <li>Added <b>Starts or Ends with</b> to the <i>Cart Has Discount Code</i> <b>Cart Qualifier</b></li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>

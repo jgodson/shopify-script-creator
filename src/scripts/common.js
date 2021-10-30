@@ -171,6 +171,8 @@ class CodeQualifier < Qualifier
     case @match_condition
       when :match
         return @invert ^ @codes.include?(code)
+      when :start_or_end_with
+        return @invert ^ @codes.any? { |check| code.start_with?(check) || code.end_with?(check) }
       else
         return @invert ^ partial_match(@match_condition, code, @codes)
     end
@@ -1413,6 +1415,10 @@ const cartQualifiers = [{
           {
             value: "end_with",
             label: "End with one of"
+          },
+          {
+            value: "start_or_end_with",
+            label: "Start or end with one of"
           }
         ]
       },

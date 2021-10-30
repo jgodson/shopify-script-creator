@@ -11,6 +11,8 @@ class CodeQualifier < Qualifier
     case @match_condition
       when :match
         return @invert ^ @codes.include?(code)
+      when :start_or_end_with
+        return @invert ^ @codes.any? { |check| code.start_with?(check) || code.end_with?(check) }
       else
         return @invert ^ partial_match(@match_condition, code, @codes)
     end
