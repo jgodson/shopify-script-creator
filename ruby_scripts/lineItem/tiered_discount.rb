@@ -30,6 +30,30 @@ class TieredDiscount < Campaign
       when :cart_subtotal
         cart_total = cart.subtotal_price
         qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
+      when :cart_discounted_subtotal
+        cart_total =
+          case cart.discount_code
+            when CartDiscount::Percentage
+              if cart.subtotal_price >= cart.discount_code.minimum_order_amount
+                cart_subtotal_without_gc = cart.line_items.reduce(Money.zero) do |total, item|
+                  total + (item.variant.product.gift_card? ? Money.zero : item.line_price)
+                end
+                gift_card_amount = cart.subtotal_price - cart_subtotal_without_gc
+                cart_subtotal_without_gc * ((Decimal.new(100) - cart.discount_code.percentage) / 100) + gift_card_amount
+              else
+                cart.subtotal_price
+              end
+            when CartDiscount::FixedAmount
+              if cart.subtotal_price >= cart.discount_code.minimum_order_amount
+                [cart.subtotal_price - cart.discount_code.amount, Money.zero].max
+              else
+                cart.subtotal_price
+              end
+            else
+              cart.subtotal_price
+            end
+          end
+        qualified_tiers = @discount_tiers.select { |tier| cart_total >= Money.new(cents: tier[:tier].to_i * 100) }
       when :discountable_total
         discountable_total = applicable_items.reduce(Money.zero) { |total, item| total + item.line_price }
         qualified_tiers = @discount_tiers.select { |tier| discountable_total >= Money.new(cents: tier[:tier].to_i * 100) }
