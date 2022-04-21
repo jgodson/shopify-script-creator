@@ -1,4 +1,4 @@
 export default {
-  currentVersion: "0.30.0",
+  currentVersion: "0.31.1",
   minimumVersion: "0.1.0",
 }
