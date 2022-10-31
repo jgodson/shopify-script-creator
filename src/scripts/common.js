@@ -433,6 +433,7 @@ class ProductTagSelector < Selector
   end
 
   def match?(line_item)
+    return false if line_item.nil?
     product_tags = line_item.variant.product.tags.to_a.map(&:downcase)
     case @match_condition
       when :match
