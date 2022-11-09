@@ -1,4 +1,4 @@
-const MAX_SCRIPT_LENGTH = 24576;
+const MAX_SCRIPT_LENGTH = 40960;
 
 export {
   MAX_SCRIPT_LENGTH,
