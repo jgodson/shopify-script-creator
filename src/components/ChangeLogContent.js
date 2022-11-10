@@ -7,7 +7,9 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>Reverted the last change to add cart discounted subtotal tier type option in tiered discount as there were some issues with generated scripts reported after this change</li>
+        <li>Removed <strong>Leave feedback</strong> link. The feedback form has not accepted responses for some time now.</li>
+        <li>Adjusted the script character limit indicator to the new maximum. </li>
+        <li>Added a new <strong>Grouped Tiered Discount</strong> Campaign. This can be used to group applicable items and discount them based on the quantity purchased.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
