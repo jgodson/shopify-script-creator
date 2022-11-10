@@ -28,7 +28,7 @@ export default class InfoBanner extends React.Component {
 
         onDismiss={this.dismissBanner}
       >
-        <p>Please note that this app is not developed by Shopify. Please do not contact Shopify Support for help, instead use the <strong>Leave feedback</strong> link below.</p>
+        <p>Please note that this app is not developed by Shopify. Please do not contact Shopify Support for help.</p>
       </Banner>
       </div>
     )

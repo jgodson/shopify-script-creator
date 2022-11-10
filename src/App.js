@@ -600,14 +600,6 @@ ${INDENT[this.IL]})`;
       onAction: this.reset
     };
 
-    const reportIssue = {
-      content: 'Leave feedback',
-      icon: ChatMajorMonotone,
-      external: true,
-      plain: true,
-      url: 'https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform'
-    }
-
     const secondaryActions = [
       {
         content: 'Export campaigns',
@@ -645,7 +637,7 @@ ${INDENT[this.IL]})`;
     };
 
     return (
-      <Page title="Shopify Script Creator" secondaryActions={secondaryActions} primaryAction={reportIssue}>
+      <Page title="Shopify Script Creator" secondaryActions={secondaryActions}>
         {this.state.modal.isOpen &&
           <Modal
             title={this.state.modal.title}

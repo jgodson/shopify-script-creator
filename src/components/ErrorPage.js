@@ -16,10 +16,10 @@ export default function ErrorPage() {
           <p>
             An error occured. To help fix it, let me know how it occured by
             <a
-              href="https://docs.google.com/forms/d/e/1FAIpQLSdBHeVvdU92fc8vsqRuvx5uWuYQFsW8U3Co5HDIusH8YEH_VA/viewform?usp=pp_url&entry.1591633300=Bug+Report"
+              href="https://github.com/jgodson/shopify-script-creator/issues/new"
               target="_blank"
             >
-              <span> leaving feedback</span>
+              <span> creating an issue on GitHub</span>
             </a>
             .
           </p>
