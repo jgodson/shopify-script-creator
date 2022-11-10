@@ -445,6 +445,75 @@ class FixedTotalDiscount
   end
 end`,
 
+  GroupedTieredDiscount: `
+class GroupedTieredDiscount < Campaign
+  def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount_type, group_by, group_tags, discount_tiers)
+    super(condition, customer_qualifier, cart_qualifier)
+    @line_item_selector = line_item_selector
+    @discount_type = discount_type
+    @group_by = group_by
+    @group_tags = group_tags.map(&:downcase)
+    @discount_tiers = discount_tiers.sort_by {|tier| tier[:discount].to_f }
+  end
+
+  def init_discount(amount, message)
+    case @discount_type
+      when :fixed
+        return FixedTotalDiscount.new(amount, message, :split)
+      when :percent
+        return PercentageDiscount.new(amount, message)
+      when :per_item
+        return FixedItemDiscount.new(amount, message)
+    end
+  end
+
+  def run(cart)
+    raise "Group Tags can only be used when Group By is set to Product Tag" if @group_by != :product_tag && @group_tags.length > 0
+    return unless qualifies?(cart)
+    applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
+    return unless applicable_items.length > 0
+
+    groups = {}
+
+    case @group_by
+      when :product_id
+        applicable_items.each do |item|
+          id = item.variant.product.id
+          groups[id] ? groups[id] << item : groups[id] = [item]
+        end
+      when :product_tag
+        applicable_items.each do |item|
+          product_tags = item.variant.product.tags.map(&:downcase)
+          matching_tags = product_tags & @group_tags
+          next unless matching_tags.length > 0
+          id = matching_tags.first
+          groups[id] ? groups[id] << item : groups[id] = [item]
+        end
+      when :product_vendor
+        applicable_items.each do |item|
+          id = item.variant.product.vendor
+          next if id.empty?
+          groups[id] ? groups[id] << item : groups[id] = [item]
+        end
+      when :product_type
+        applicable_items.each do |item|
+          id = item.variant.product.product_type
+          next if id.empty?
+          groups[id] ? groups[id] << item : groups[id] = [item]
+        end
+    end
+    
+    groups.each_value do |items|
+      discountable_quantity = items.reduce(0) { |total, item| total + item.quantity }
+      qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }
+      discount_amount = qualified_tiers.last[:discount].to_f
+      discount_message = qualified_tiers.last[:message]
+      discount = init_discount(discount_amount, discount_message)
+      items.each { |item| discount.apply(item) }
+    end
+  end
+end`,
+
   PercentageDiscount: `
 class PercentageDiscount
   def initialize(percent, message)
@@ -1100,6 +1169,79 @@ const campaigns = [{
         type: "objectArray",
         description: "Set the discount tiers to be applied",
         inputFormat: "{tier_condition:text:The tag, subtotal, item total, etc to qualify} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
+        outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
+      }
+    },
+    dependants: ["PercentageDiscount", "FixedTotalDiscount", "FixedItemDiscount"]
+  },
+  {
+    value: "GroupedTieredDiscount",
+    label: "Grouped Tiered Discount",
+    description: "Apply discounts based on quantities of groups of items",
+    inputs: {
+      qualifer_behaviour: {
+        type: "select",
+        description: "Set the qualifier behaviour",
+        options: [{
+            value: "all",
+            label: "Discount if all qualify"
+          },
+          {
+            value: "any",
+            label: "Discount if any qualify"
+          }
+        ]
+      },
+      customer_qualifier: [...CUSTOMER_QUALIFIERS, CUSTOMER_AND_SELECTOR, CUSTOMER_OR_SELECTOR],
+      cart_qualifier: [...CART_QUALIFIERS, CART_AND_SELECTOR, CART_OR_SELECTOR],
+      discountable_items_selector: [...LINE_ITEM_SELECTORS, LINE_ITEM_AND_SELECTOR, LINE_ITEM_OR_SELECTOR],
+      discount_type: {
+        type: "select",
+        description: "Discount groups of items by the tier amount as a percent, fixed amount, or per item amount",
+        options: [{
+            value: "percent",
+            label: "Percentage Discount"
+          },
+          {
+            value: "fixed",
+            label: "Fixed Total Discount"
+          },
+          {
+            value: "per_item",
+            label: "Fixed Per Item Discount"
+          }
+        ]
+      },
+      group_by: {
+        type: "select",
+        description: "Set what the applicable items will be grouped by",
+        options: [
+          {
+            value: "product_id",
+            label: "Product ID"
+          },
+          {
+            value: "product_tag",
+            label: "Product Tag"
+          },
+          {
+            value: "product_vendeor",
+            label: "Product Vendor"
+          },
+          {
+            value: "product_type",
+            label: "Product Type"
+          }
+        ]
+      },
+      group_tags: {
+        type: "array",
+        description: "Enter the applicable tags (only use when grouping by product tag)"
+      },
+      discount_tiers: {
+        type: "objectArray",
+        description: "Set the discount tiers to be applied",
+        inputFormat: "{tier_condition:text:Total items} : {discount_amount:number:The amount each item is discounted} : {discount_message:text:The message to display to the customer}",
         outputFormat: '{:tier => "{text}", :discount => "{number}", :message => "{text}"}'
       }
     },
