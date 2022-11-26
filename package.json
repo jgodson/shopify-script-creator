@@ -5,7 +5,8 @@
   "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "yarn dev",
+    "dev": "webpack-dev-server",
     "prebuild": "rimraf ./docs",
     "build": "webpack",
     "build:scripts": "node ruby-to-js",
