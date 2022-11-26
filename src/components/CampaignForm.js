@@ -353,6 +353,7 @@ export default class CampaignForm extends Component {
               name={input.name}
               min={0}
               type="number"
+              step={0.01}
               helpText={input.description}
               value={this.state.inputs[input.type][input.name]}
               onChange={(val) => this.handleInputChange(Math.abs(val), input.type, input.name)}
