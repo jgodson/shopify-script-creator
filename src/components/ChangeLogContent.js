@@ -7,9 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>Removed <strong>Leave feedback</strong> link. The feedback form has not accepted responses for some time now.</li>
-        <li>Adjusted the script character limit indicator to the new maximum. </li>
-        <li>Added a new <strong>Grouped Tiered Discount</strong> Campaign. This can be used to group applicable items and discount them based on the quantity purchased.</li>
+        <li>Added a new <strong>Fixed Price</strong> Discount for Shipping Scripts. This can be used to set shipping rates to always be a specific amount.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
