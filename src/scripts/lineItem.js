@@ -506,6 +506,7 @@ class GroupedTieredDiscount < Campaign
     groups.each_value do |items|
       discountable_quantity = items.reduce(0) { |total, item| total + item.quantity }
       qualified_tiers = @discount_tiers.select { |tier| discountable_quantity >= tier[:tier].to_i }
+      next if qualified_tiers.empty?
       discount_amount = qualified_tiers.last[:discount].to_f
       discount_message = qualified_tiers.last[:message]
       discount = init_discount(discount_amount, discount_message)

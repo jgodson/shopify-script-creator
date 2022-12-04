@@ -7,7 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>Added a new <strong>Fixed Price</strong> Discount for Shipping Scripts. This can be used to set shipping rates to always be a specific amount.</li>
+        <li>Important fix for the recently added <b>Grouped Tiered Discount</b> Campaign that could cause an error when no tier was applicable</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
