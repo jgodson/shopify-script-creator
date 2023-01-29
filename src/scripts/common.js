@@ -655,6 +655,18 @@ class VariantSkuSelector < Selector
   end
 end`,
 
+  VariantTitleSelector: `
+class VariantTitleSelector < Selector
+    def initialize(match_type, variant_titles)
+      @invert = match_type == :not_one
+      @variant_titles = variant_titles.map { |title| title.downcase }
+    end
+  
+    def match?(line_item)
+      @invert ^ @variant_titles.include?(line_item.variant.title.downcase)
+    end
+  end`,
+
   ZipCodeQualifier: `
 class ZipCodeQualifier < Qualifier
   def initialize(match_type, match_condition, zips)
@@ -1045,6 +1057,30 @@ const lineItemSelectors = [{
       variant_IDs: {
         type: "array",
         description: "Enter the applicable ID's"
+      }
+    }
+  },
+  {
+    value: "VariantTitleSelector",
+    label: "Variant Title",
+    description: "Selects line items by the title of the variant",
+    inputs: {
+      match_condition: {
+        type: "select",
+        description: "Set how variant titles are matched",
+        options: [{
+            value: "is_one",
+            label: "Is one of"
+          },
+          {
+            value: "not_one",
+            label: "Is not one of"
+          }
+        ]
+      },
+      variant_Titles: {
+        type: "array",
+        description: "Enter the applicable titles"
       }
     }
   },
