@@ -34,7 +34,10 @@ class Campaign
       end rescue nil
       if is_selector
         raise "Missing line item match type" if @li_match_type.nil?
-        cart.line_items.send(@li_match_type) { |item| qualifier.match?(item) }
+        cart.line_items.send(@li_match_type) do |item|
+          next false if item.nil?
+          qualifier.match?(item)
+        end
       else
         qualifier.match?(cart, @line_item_selector)
       end
