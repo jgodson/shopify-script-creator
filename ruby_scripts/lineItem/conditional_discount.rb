@@ -2,6 +2,7 @@ class ConditionalDiscount < Campaign
   def initialize(condition, customer_qualifier, cart_qualifier, line_item_selector, discount, max_discounts)
     super(condition, customer_qualifier, cart_qualifier)
     @line_item_selector = line_item_selector
+    @customer_qualifier = customer_qualifier
     @discount = discount
     @items_to_discount = max_discounts == 0 ? nil : max_discounts
   end
@@ -9,6 +10,7 @@ class ConditionalDiscount < Campaign
   def run(cart)
     raise "Campaign requires a discount" unless @discount
     return unless qualifies?(cart)
+    return unless @customer_qualifier.match?(cart)
     applicable_items = cart.line_items.select { |item| @line_item_selector.nil? || @line_item_selector.match?(item) }
     applicable_items = applicable_items.sort_by { |item| item.variant.price }
     applicable_items.each do |item|
