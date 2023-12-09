@@ -7,8 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li><a target="_blank" rel="noreferrer noopener" href="https://github.com/jgodson/shopify-script-creator/pull/66">Fix</a> for an unexpected case when the line item was nil</li>
-        <li>New <b>Variant Title</b> Selector</li>
+        <li><a target="_blank" rel="noreferrer noopener" href="https://github.com/jgodson/shopify-script-creator/pull/91">Fix</a> for an unexpected case when the variant sku was nil</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
