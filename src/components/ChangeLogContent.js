@@ -7,7 +7,7 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li><a target="_blank" rel="noreferrer noopener" href="https://github.com/jgodson/shopify-script-creator/pull/91">Fix</a> for an unexpected case when the variant sku was nil</li>
+        <li>A proper <a target="_blank" rel="noreferrer noopener" href="https://github.com/jgodson/shopify-script-creator/pull/92">fix</a> for an unexpected case when the variant sku was nil. The previous fix in v0.34.1 caused a different error.</li>
       </ul>
 
       <div style={{paddingTop: '2rem'}}>
