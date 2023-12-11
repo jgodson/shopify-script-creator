@@ -6,7 +6,7 @@ class VariantSkuSelector < Selector
   end
 
   def match?(line_item)
-    variant_skus = line_item.variant.skus.to_a.filter{ |sku| !sku.nil? }.map(&:downcase)
+    variant_skus = line_item.variant.skus.to_a.delete_if{ |sku| sku.nil? }.map(&:downcase)
     
     case @match_condition
       when :match
