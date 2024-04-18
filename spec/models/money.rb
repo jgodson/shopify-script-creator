@@ -3,7 +3,7 @@ class Money
 
   class << self
     def zero
-      self.new({cents: 0})
+      self.new(cents: 0)
     end
   end
 
