@@ -2,16 +2,17 @@ class Campaign
   def initialize(condition, *qualifiers)
     @condition = (condition.to_s + '?').to_sym
     @qualifiers = PostCartAmountQualifier ? [] : [] rescue qualifiers.compact
+    @post_amount_qualifiers = []
     @line_item_selector = qualifiers.last unless @line_item_selector
     qualifiers.compact.each do |qualifier|
       is_multi_select = qualifier.instance_variable_get(:@conditions).is_a?(Array)
       if is_multi_select
         qualifier.instance_variable_get(:@conditions).each do |nested_q|
-          @post_amount_qualifier = nested_q if nested_q.is_a?(PostCartAmountQualifier)
+          @post_amount_qualifiers << nested_q if nested_q.is_a?(PostCartAmountQualifier)
           @qualifiers << qualifier
         end
       else
-        @post_amount_qualifier = qualifier if qualifier.is_a?(PostCartAmountQualifier)
+        @post_amount_qualifiers << qualifier if qualifier.is_a?(PostCartAmountQualifier)
         @qualifiers << qualifier
       end
     end if @qualifiers.empty?
@@ -26,7 +27,7 @@ class Campaign
         new_item.instance_variable_set(var, val.dup) if val.respond_to?(:dup)
       end
       new_item
-    end if @post_amount_qualifier
+    end unless @post_amount_qualifiers.empty?
     @qualifiers.send(@condition) do |qualifier|
       is_selector = false
       if qualifier.is_a?(Selector) || qualifier.instance_variable_get(:@conditions).any? { |q| q.is_a?(Selector) }
@@ -52,7 +53,7 @@ class Campaign
 
   def after_run(cart)
     @discount.apply_final_discount if @discount && @discount.respond_to?(:apply_final_discount)
-    revert_changes(cart) unless @post_amount_qualifier.nil? || @post_amount_qualifier.match?(cart)
+    revert_changes(cart) unless @post_amount_qualifiers.empty? || @post_amount_qualifiers.all? { |q| q.match?(cart) }
   end
 
   def revert_changes(cart)
