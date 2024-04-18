@@ -6,7 +6,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image:cimg/ruby:3.3-browsers
+      - image: cimg/ruby:3.3-browsers
 
     working_directory: ~/shopify-script-creator
 
