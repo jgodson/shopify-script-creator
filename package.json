@@ -1,7 +1,7 @@
 {
   "name": "shopify-script-creator",
   "private": true,
-  "version": "0.34.3",
+  "version": "0.35.0",
   "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {

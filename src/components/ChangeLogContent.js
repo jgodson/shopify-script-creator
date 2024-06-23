@@ -7,8 +7,8 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-        <li>Fixed an <Link url="https://github.com/jgodson/shopify-script-creator/issues/96" external>issue</Link> where using multiple <b>Discounted Cart Subtotal (applied by scripts)</b> didn't work.</li>
-      </ul>
+       
+      </ul> <li><Link url="https://github.com/jgodson/shopify-script-creator/pull/108" external>Added</Link> a new <b>Discounted Cart Subtotal (applied by discount code & scripts)</b> that accounts for the discount code when checking whether the cart is eligible for the script discount.</li>
 
       <div style={{paddingTop: '2rem'}}>
         <Stack distribution="trailing">
