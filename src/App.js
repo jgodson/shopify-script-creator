@@ -364,7 +364,22 @@ export default class App extends Component {
 
     function generateClassCode(allClasses, classesUsed) {
       let code = '';
-      classesUsed.forEach((className) => {
+
+      // Qualifier and PostCartAmountQualifier need to come first since they are inherited by other classes
+      const classNameOrder = ["Campaign", "Qualifier", "PostCartAmountQualifier", "Selector"];
+      classesUsed.sort((a, b) => {
+        // Get the index of each class in classNameOrder
+        const indexA = classNameOrder.indexOf(a);
+        const indexB = classNameOrder.indexOf(b);
+      
+        // If a class is not found in classNameOrder, index will be -1
+        // Classes not in classNameOrder should come after those that are
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+      
+        // Sort based on the index in classNameOrder
+        return indexA - indexB;
+      }).forEach((className) => {
         if (allClasses[className]) {
           code += allClasses[className] + '\n';
         } else {
@@ -391,7 +406,7 @@ export default class App extends Component {
       campaign.dependants.forEach((dependant) => addUsedClass(dependant, allClasses));
     }
 
-    const inputsCode = campaign.inputs.map((input, index) => {
+    const inputsCode = campaign.inputs.map((input) => {
       if (input.inputs) {
         this.IL++;
         const code = this.generateCode(input, classesUsed, allClasses);
@@ -427,6 +442,7 @@ ${INDENT[this.IL]})`;
         if (classesUsed.indexOf(inheritsFrom) === -1) {
           classesUsed.push(inheritsFrom);
         }
+        addUsedClass(inheritsFrom, allClasses);
       }
 
       if (classesUsed.indexOf(className) === -1) {
