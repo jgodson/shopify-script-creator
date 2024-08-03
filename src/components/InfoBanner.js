@@ -6,14 +6,15 @@ export default class InfoBanner extends React.Component {
     super();
 
     this.state = {
-      dismissed: false
+      dismissed: localStorage.getItem('developedBannerDismissed') === 'true' || false
     };
 
     this.dismissBanner = this.dismissBanner.bind(this);
   }
 
   dismissBanner() {
-    this.setState({dismissed: true});
+    this.setState({ dismissed: true });
+    localStorage.setItem('developedBannerDismissed', 'true');
   }
 
   render() {
@@ -22,14 +23,15 @@ export default class InfoBanner extends React.Component {
     }
 
     return (
-      <div style={{marginRight: '80px'}} >
-      <Banner
-        status="info"
-
-        onDismiss={this.dismissBanner}
-      >
-        <p>Please note that this app is not developed by Shopify. Please do not contact Shopify Support for help.</p>
-      </Banner>
+      <div style={{ display: 'flex', justifyContent: 'center' }} >
+        <div style={{ marginRight: '80px', marginLeft: '80px', maxWidth: 'fit-content' }} >
+          <Banner
+            status="info"
+            onDismiss={this.dismissBanner}
+          >
+            <p>Please note that this app is not developed by Shopify. Please do not contact Shopify Support for help.</p>
+          </Banner>
+        </div>
       </div>
     )
   }

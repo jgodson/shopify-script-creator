@@ -5,6 +5,7 @@ import bugsnag from '@bugsnag/js'
 import bugsnagReact from '@bugsnag/plugin-react'
 import Versions from './versions';
 import InfoBanner from './components/InfoBanner';
+import WarningBanner from './components/WarningBanner';
 import ErrorPage from './components/ErrorPage'
 import App from './App';
 
@@ -23,6 +24,7 @@ ReactDOM.render(
   <AppProvider>
     <ErrorBoundary FallbackComponent={ErrorPage}>
       <InfoBanner />
+      <WarningBanner />
       <App />
     </ErrorBoundary>
   </AppProvider>,
