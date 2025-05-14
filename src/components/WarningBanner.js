@@ -29,7 +29,7 @@ export default class WarningBanner extends React.Component {
             status="warning"
             onDismiss={this.dismissBanner}
           >
-            <p>Shopify Scripts are deprecated and will be <Link external url='https://help.shopify.com/en/manual/checkout-settings/script-editor/migrating'>unavailable after August 28, 2025</Link>. Consider trying out the <Link external url='https://apps.shopify.com/checkout-blocks'>Checkout Blocks</Link> app.</p>
+            <p>Shopify Scripts are deprecated and will be <Link external url='https://help.shopify.com/en/manual/checkout-settings/script-editor/migrating'>unavailable after June 30, 2026</Link>. Consider trying out the <Link external url='https://apps.shopify.com/checkout-blocks'>Checkout Blocks</Link> app.</p>
           </Banner>
         </div>
       </div>
