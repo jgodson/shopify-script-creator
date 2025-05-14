@@ -7,8 +7,8 @@ export default function ChangeLogContent({newVersion} = props) {
       <h3 id="changelog">Change Log</h3>
 
       <ul>
-       
-      </ul> <li><Link url="https://github.com/jgodson/shopify-script-creator/pull/108" external>Added</Link> a new <b>Discounted Cart Subtotal (applied by discount code & scripts)</b> that accounts for the discount code when checking whether the cart is eligible for the script discount.</li>
+       <li>Changed the date of the Shopify Scripts deprecation in the warning banner to the new date of June 30, 2026</li>
+      </ul>
 
       <div style={{paddingTop: '2rem'}}>
         <Stack distribution="trailing">
