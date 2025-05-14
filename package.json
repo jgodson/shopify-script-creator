@@ -1,14 +1,14 @@
 {
   "name": "shopify-script-creator",
   "private": true,
-  "version": "0.35.0",
+  "version": "0.35.1",
   "description": "Shopify Script Creator",
   "main": "index.js",
   "scripts": {
     "start": "yarn dev",
-    "dev": "webpack-dev-server",
+    "dev": "NODE_OPTIONS=--openssl-legacy-provider webpack-dev-server",
     "prebuild": "rimraf ./docs",
-    "build": "webpack",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack",
     "build:scripts": "node ruby-to-js",
     "check:scripts": "node ruby-to-js --check",
     "predeploy": "node ruby-to-js --check && yarn run build",
